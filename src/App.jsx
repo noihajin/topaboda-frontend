@@ -2,6 +2,7 @@ import { useState } from "react";
 // 분리한 컴포넌트들을 임포트
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
+import MapSection from "./components/MapSection";
 
 export default function App() {
   return (
@@ -9,6 +10,8 @@ export default function App() {
       
       <Navbar />
       <HeroSection />
+
+      <MapSection />
     </div>
   );
 }
