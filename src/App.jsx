@@ -3,6 +3,7 @@ import { useState } from "react";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import MapSection from "./components/MapSection";
+import PopularHeritageSection from "./components/PopularHeritageSection";
 
 export default function App() {
   return (
@@ -11,7 +12,15 @@ export default function App() {
       <Navbar />
       <HeroSection />
 
-      <MapSection />
+      <main>
+        {/* 1. 지도 섹션 */}
+        <MapSection />
+        
+        {/* 2. 인기 유산 섹션 (지도 아래 배치) */}
+        <PopularHeritageSection />
+
+        {/* 푸터가 있다면 여기에 추가 */}
+      </main>
     </div>
   );
 }

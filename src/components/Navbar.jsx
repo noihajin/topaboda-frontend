@@ -40,11 +40,14 @@ export default function Navbar() {
           transition: background 0.3s ease, box-shadow 0.3s ease;
           font-family: "Noto Sans JP", sans-serif;
           background: transparent;
+      
         }
 
         .gnb-root.active {
           background: #ffffff;
           box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+          border-bottom: 2px solid #eee;
+          
         }
 
         /* 2. 전체 레이아웃 (패딩으로 높이를 잡아 끊김 방지) */
@@ -58,6 +61,7 @@ export default function Navbar() {
           box-sizing: border-box;
           transition: padding 0.3s ease;
           width: 100%;
+          
         }
 
         .gnb-root.active .gnb-inner {
@@ -110,6 +114,7 @@ export default function Navbar() {
           text-decoration: none;
           padding: 8px 4px;
           transition: color 0.3s ease;
+          
         }
 
         /* 메뉴 밑줄 애니메이션 */

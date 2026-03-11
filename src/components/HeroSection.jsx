@@ -31,7 +31,7 @@ export default function HeroSection() {
         >
           <h1
             style={{
-              fontSize: "clamp(40px, 5vw, 64px)",
+              fontSize: "clamp(40px, 5vw, 60px)",
               color: "#000D57",
               fontFamily: "'Noto Serif JP', serif",
               fontWeight: "500",
@@ -41,7 +41,7 @@ export default function HeroSection() {
           >
             韓国の宝を<br />隅々とトパボダ
           </h1>
-          <p
+          {/* <p
             style={{
               marginTop: "16px",
               fontSize: "18px",
@@ -52,7 +52,7 @@ export default function HeroSection() {
             }}
           >
             韓国の国家遺産を探検してみよう。
-          </p>
+          </p> */}
 
         </div>
       </section>
