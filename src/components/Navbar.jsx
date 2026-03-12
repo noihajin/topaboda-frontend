@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-// 로컬 에셋 임포트
+// 1. Link 컴포넌트 임포트 확인 (이미 되어 있다면 패스!)
+import { Link, useLocation } from "react-router-dom";
 import imgLogoWht from "../assets/logo_white.svg";
 import imgLogoBlk from "../assets/logo_black.svg";
 import imgIconGlobeWht from "../assets/icon_globe_white.svg";
@@ -7,16 +8,24 @@ import imgIconGlobeBlk from "../assets/icon_globe_black.svg";
 import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
+// 2. 경로(to)를 실제 라우터 주소와 맞춥니다.
 const NAV_LINKS = [
-  { label: "国の遺産リスト", href: "#" },
-  { label: "業績", href: "#" },
-  { label: "コミュニティー", href: "#" },
+  { label: "국가유산 목록", to: "/heritage-list" },
+  { label: "업적", to: "/achievements" },
+  { label: "커뮤니티", to: "/community" }, // 아까 App.jsx에 설정한 경로
 ];
+
+// Navbar 컴포넌트 내부
+const location = useLocation();
+const isMainHome = location.pathname === "/"; // 메인 홈인지 확인
+
+// 메인 홈이 아니거나, 스크롤 됐거나, 호버 중일 때 'active' 스타일 적용
+const isActive = !isMainHome || scrolled || isHovered;
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [activeMenu, setActiveMenu] = useState(null);
+  const location = useLocation(); // 현재 페이지 주소를 가져옵니다.
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -29,129 +38,49 @@ export default function Navbar() {
   return (
     <>
       <style>{`
-        /* 1. 기본 배경 설정 */
+        /* 기존 CSS는 그대로 유지하되, active 클래스 색상만 살짝 보강합니다 */
         .gnb-root {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 11.9rem;
-          z-index: 100;
-          transition: background 0.3s ease, box-shadow 0.3s ease;
-          font-family: "Noto Sans JP", sans-serif;
+          position: fixed; top: 0; left: 0; width: 100%; height: 11.9rem;
+          z-index: 100; transition: all 0.3s ease; font-family: "Noto Sans KR", sans-serif;
           background: transparent;
-      
         }
-
         .gnb-root.active {
-          background: #ffffff;
-          box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+          background: #ffffff; box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
           border-bottom: 2px solid #eee;
-          
         }
-
-        /* 2. 전체 레이아웃 (패딩으로 높이를 잡아 끊김 방지) */
         .gnb-inner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 30px 40px; /* 위아래 30px, 좌우 40px */
-          max-width: 1920px;
-          margin: 0 auto;
-          box-sizing: border-box;
-          transition: padding 0.3s ease;
-          width: 100%;
-          
+          display: flex; flex-direction: column; align-items: center;
+          padding: 30px 40px; max-width: 1920px; margin: 0 auto; width: 100%; transition: padding 0.3s ease;
         }
-
-        .gnb-root.active .gnb-inner {
-          padding: 20px 40px; /* 스크롤/호버 시 여백이 줄어듦 */
-        }
-
-        /* 3. 상단 영역 (로고와 버튼을 같은 줄에 배치하여 완벽하게 가로 중앙 정렬) */
-        .gnb-top-row {
-          position: relative;
-          display: flex;
-          justify-content: center; /* 로고를 중앙으로 */
-          align-items: center;     /* 세로축 중앙 정렬 */
-          width: 100%;
-          margin-bottom: 20px;     /* 메뉴와의 간격 */
-        }
-
-        .gnb-logo {
-          width: 120px;
-          transition: width 0.3s ease;
-          display: block;
-        }
-        .gnb-logo img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-        .gnb-root.active .gnb-logo {
-          width: 100px;
-        }
-
-        .gnb-actions {
-          position: absolute;
-          right: 0; /* 우측 끝에 고정 */
-          top: 50%;
-          transform: translateY(-50%); /* 로고의 정확한 수평 중앙에 맞춤 */
-          display: flex;
-          gap: 12px;
-        }
-
-        /* 4. 하단 메뉴 영역 및 밑줄 효과 */
-        .gnb-menus {
-          display: flex;
-          gap: 40px;
-        }
-
+        .gnb-root.active .gnb-inner { padding: 20px 40px; }
+        .gnb-top-row { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 20px; }
+        .gnb-logo { width: 120px; transition: width 0.3s ease; display: block; }
+        .gnb-root.active .gnb-logo { width: 100px; }
+        .gnb-actions { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 12px; }
+        .gnb-menus { display: flex; gap: 40px; }
+        
+        /* <a> 태그와 <Link> 태그 모두에 적용되도록 설정 */
         .gnb-menu-item {
           position: relative;
           color: ${isActive ? "#000000" : "#ffffff"};
-          font-weight: 500;
-          text-decoration: none;
-          padding: 8px 4px;
-          transition: color 0.3s ease;
-          
+          font-weight: 500; text-decoration: none; padding: 8px 4px; transition: color 0.3s ease;
         }
 
-        /* 메뉴 밑줄 애니메이션 */
+        /* 현재 페이지일 때 빨간 밑줄 고정 효과 */
+        .gnb-menu-item.page-active::after {
+          width: 100% !important;
+          background-color: #6E0000 !important;
+        }
+
         .gnb-menu-item::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 2px;
-          background-color: ${isActive ? "#6E0000" : "#ffffff"};
+          content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+          width: 0; height: 2px; background-color: ${isActive ? "#6E0000" : "#ffffff"};
           transition: width 0.3s ease;
         }
-
-        .gnb-menu-item:hover::after{
-          width: 100%; /* 호버 시 스르륵 길어짐 */
-        }
-
-        /* 5. 우측 버튼 디자인 */
-        .gnb-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: transparent;
-          border: 1px solid ${isActive ? "#000000" : "transparent"};
-          color: ${isActive ? "#000000" : "#ffffff"};
-          padding: 6px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.3s ease;
-        }
-
-        .gnb-btn img {
-          width: 16px;
-          height: 16px;
+        .gnb-menu-item:hover::after { width: 100%; }
+        .gnb-btn { display: flex; align-items: center; gap: 6px; background: transparent; 
+          border: 1px solid ${isActive ? "#000000" : "rgba(255,255,255,0.3)"};
+          color: ${isActive ? "#000000" : "#ffffff"}; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s ease;
         }
       `}</style>
 
@@ -161,12 +90,11 @@ export default function Navbar() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="gnb-inner">
-          
-          {/* [변경됨] 상단 줄: 로고와 액션 버튼을 하나의 div로 묶음 */}
           <div className="gnb-top-row">
-            <a href="/" className="gnb-logo">
+            {/* 로고: 클릭 시 메인홈(/)으로 이동 */}
+            <Link to="/" className="gnb-logo">
               <img src={isActive ? imgLogoBlk : imgLogoWht} alt="Logo" />
-            </a>
+            </Link>
 
             <div className="gnb-actions">
               <button className="gnb-btn">
@@ -180,20 +108,18 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* 하단 줄: 메뉴 */}
           <nav className="gnb-menus">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
-                className={`gnb-menu-item ${activeMenu === link.label ? "active" : ""}`}
-                onClick={() => setActiveMenu(link.label)}
+                to={link.to}
+                /* 현재 주소(location.pathname)와 링크 주소가 같으면 'page-active' 클래스 추가 */
+                className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
-
         </div>
       </header>
     </>

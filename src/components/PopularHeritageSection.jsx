@@ -23,16 +23,16 @@ export default function PopularHeritageSection() {
       {/* 헤더 영역 */}
       <div className="flex flex-col items-center mb-16 relative">
         <span className="bg-[#CACA00]/10 text-[#CACA00] px-5 py-1.5 rounded-full text-sm font-bold mb-4">
-          큐레이션
+        キュレーション
         </span>
         <h2 className="text-4xl font-bold text-[#000D57] font-title mb-4">
-          인기 국가유산
+        人気の国の遺産
         </h2>
-        <p className="text-gray-500 mb-8">많은 사람들이 찾는 한국의 대표 문화유산을 만나보세요</p>
+        <p className="text-gray-500 mb-8">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
         
         {/* 정렬 버튼 */}
         <div className="lg:absolute right-0 bottom-0 flex gap-3 mt-6 lg:mt-0">
-          {["인기순", "조회순"].map((type) => (
+          {["리뷰순", "조회순"].map((type) => (
             <button
               key={type}
               onClick={() => setSortType(type)}
@@ -58,7 +58,7 @@ export default function PopularHeritageSection() {
       {/* 더보기 버튼 */}
       <div className="flex justify-center">
         <button className="bg-[#000D57] text-white px-16 py-4 rounded-xl font-bold hover:bg-[#00158a] transition-all shadow-lg hover:scale-105 active:scale-95">
-          더 많은 유산 보기
+        もっと多くの遺産を見る
         </button>
       </div>
     </section>
