@@ -19,3 +19,40 @@ html, body {
 .font-title {
   font-family: 'Roboto', 'Noto Serif JP', serif;
 }
+
+/* ── 전역 스크롤바 커스터마이징 ── */
+
+/* 1. 전체 스크롤바 영역 설정 */
+::-webkit-scrollbar {
+  width: 10px;  /* 세로 스크롤바 너비 */
+  height: 10px; /* 가로 스크롤바 높이 */
+}
+
+/* 2. 스크롤바 트랙 (바탕) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* 아주 연한 회색 배경 */
+}
+
+/* 3. 스크롤바 핸들 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+  background: #bbc1e2; /* 브랜드 네이비 컬러 */
+  border-radius: 10px; /* 둥근 모서리 */
+  border: 2px solid #f1f1f1; /* 핸들과 트랙 사이에 여백 느낌을 주기 위함 */
+}
+
+/* 4. 핸들에 마우스를 올렸을 때 (Hover) */
+::-webkit-scrollbar-thumb:hover {
+  background: #CACA00; /* 마우스 올리면 브랜드 자주색으로 변경 */
+  cursor: pointer;
+}
+
+/* 스크롤바 숨기기 클래스 (기능은 작동하되 보이지 않음) */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE, Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}

@@ -41,7 +41,7 @@ export default function PopularHeritageSection() {
   ];
 
   return (
-    <motion.section 
+    <motion.section
       className="w-full bg-[#F8F9FC] py-24 px-[10%]"
       initial="hidden"
       whileInView="visible"
@@ -59,17 +59,16 @@ export default function PopularHeritageSection() {
         <motion.p variants={itemVariants} className="text-gray-500 text-lg max-w-2xl">
           多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
         </motion.p>
-        
+
         <motion.div variants={itemVariants} className="flex bg-white p-1.5 rounded-full shadow-sm border border-gray-100 mt-12">
           {["レビュー順", "閲覧順"].map((type) => (
             <button
               key={type}
               onClick={() => setSortType(type)}
-              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                sortType === type 
-                ? "bg-[#000D57] text-white shadow-md scale-105" 
-                : "text-gray-400 hover:text-[#000D57]"
-              }`}
+              className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${sortType === type
+                  ? "bg-[#000D57] text-white shadow-md scale-105"
+                  : "text-gray-400 hover:text-[#000D57]"
+                }`}
             >
               {type}
             </button>
@@ -100,23 +99,23 @@ function HeritageCard({ data }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태 추가
 
-  const badgeStyle = 
-    data.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : 
-    data.badge === "宝物" ? "bg-[#6E0000] text-white" : 
-    "bg-[#000D57] text-white";
+  const badgeStyle =
+    data.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" :
+      data.badge === "宝物" ? "bg-[#6E0000] text-white" :
+        "bg-[#000D57] text-white";
 
   return (
-    <motion.div 
+    <motion.div
       variants={itemVariants}
       className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer"
     >
       <div className="relative h-[300px] overflow-hidden">
-        <img 
-          src={data.imageUrl} 
-          alt={data.name} 
+        <img
+          src={data.imageUrl}
+          alt={data.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
         />
-        
+
         {/* 배지 */}
         <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>
           {data.badge}
@@ -125,33 +124,33 @@ function HeritageCard({ data }) {
         {/* ── 우측 상단 버튼 그룹 ── */}
         <div className="absolute top-6 right-6 flex flex-col gap-2.5 z-10">
           {/* 하트 버튼 */}
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
             className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
           >
-            <img   
-              src={imgIconHeart} 
-              alt="like" 
-              className={`w-5 h-5 transition-all duration-300 ${isLiked ? "opacity-100" : "opacity-30"}`} 
+            <img
+              src={imgIconHeart}
+              alt="like"
+              className={`w-5 h-5 transition-all duration-300 ${isLiked ? "opacity-100" : "opacity-30"}`}
               style={{
-                filter: isLiked 
-                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)" 
+                filter: isLiked
+                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)"
                   : "none"
               }}
             />
           </button>
 
           {/* 북마크 버튼 (icon_bookmark.svg 적용) */}
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setIsBookmarked(!isBookmarked); }}
             className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
           >
-            <img   
-              src={imgIconBookmark} 
-              alt="bookmark" 
-              className={`w-5 h-5 transition-all duration-300 ${isBookmarked ? "opacity-100" : "opacity-30"}`} 
+            <img
+              src={imgIconBookmark}
+              alt="bookmark"
+              className={`w-5 h-5 transition-all duration-300 ${isBookmarked ? "opacity-100" : "opacity-30"}`}
               style={{
-                filter: isBookmarked 
+                filter: isBookmarked
                   ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)" // 골드 컬러 필터
                   : "none"
               }}
@@ -162,7 +161,7 @@ function HeritageCard({ data }) {
 
       <div className="p-8">
         <h3 className="text-2xl font-black text-[#000D57] mb-3 tracking-tight">{data.name}</h3>
-        
+
         <div className="flex items-center gap-2 text-gray-400 mb-8">
           <img src={imgIconLocation} alt="" className="w-3.5 h-3.5 opacity-50" />
           <span className="text-sm font-bold">{data.location}</span>
@@ -173,7 +172,7 @@ function HeritageCard({ data }) {
             <img src={imgIconEye} alt="" className="w-4.5 h-4.5 opacity-50" />
             <span className="text-sm font-bold ml-1">{data.views.toLocaleString()} <span className="text-[10px] opacity-70 ml-1">VIEWS</span></span>
           </div>
-          
+
           <button className="text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-colors">
             VIEW DETAIL
           </button>
