@@ -1,29 +1,28 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import MainHome from "./pages/MainHome"; 
-import Community from "./pages/Community"; // 파일명을 Community로 바꾸셨다면 확인!
+import MainHome from "./pages/MainHome";
+import Community from "./pages/Community";
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col font-sans">
-        {/* 모든 페이지에서 공통으로 보이는 네비바 */}
+
+        {/* 네비바: 모든 페이지 공통, fixed라서 pt 필요 없음 */}
         <Navbar />
 
-        {/* 페이지 본문: 주소에 따라 MainHome 또는 Community가 교체되어 나타남 */}
-        <main className="flex-grow pt-[11.9rem]"> {/* 네비바 높이만큼 상단 여백 보정 */}
+        {/* ✅ pt 제거: 메인홈 히어로 이미지가 네비바 뒤까지 올라와야 투명 효과가 보임
+               서브페이지는 각자 컴포넌트 내부에서 pt를 처리함 */}
+        <main className="flex-grow">
           <Routes>
-            {/* 메인 화면: 지도와 인기유산이 들어있는 MainHome 렌더링 */}
-            <Route path="/" element={<MainHome />} /> 
-            
-            {/* 커뮤니티 화면: 게시판 리스트 렌더링 */}
+            <Route path="/"          element={<MainHome />} />
             <Route path="/community" element={<Community />} />
           </Routes>
         </main>
 
-        {/* 모든 페이지에서 공통으로 보이는 푸터 */}
         <Footer />
+
       </div>
     </Router>
   );

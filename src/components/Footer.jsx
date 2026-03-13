@@ -8,16 +8,16 @@ import icYoutube from "../assets/icon_youtube.svg";
 
 const navSections = [
   {
-    heading: "서비스",
-    links: ["국가유산 목록", "상세 보기", "커뮤니티"],
+    heading: "サービス",
+    links: ["国家遺産一覧", "詳細を見る", "コミュニティ"],
   },
   {
-    heading: "관련 사이트",
-    links: ["국가유산청", "국립중앙박물관", "한국문화재재단"],
+    heading: "関連サイト",
+    links: ["国家遺産庁", "国立中央博物館", "韓国文化財財団"],
   },
   {
-    heading: "톺아보다",
-    links: ["소개", "팀", "공지사항"],
+    heading: "TOPABODA",
+    links: ["紹介", "チーム", "お知らせ"],
   },
 ];
 
@@ -63,7 +63,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center py-6 gap-6">
           <div className="flex flex-wrap items-center gap-5 text-[#000D57]/60 text-xs">
             <span>© 2026 Topaboda. All rights reserved.</span>
-            {["개인정보처리방침", "이용약관"].map((label) => (
+            {["個人情報処理方針", "利用規約"].map((label) => (
               <a key={label} href="#" className="underline hover:text-[#000D57]">{label}</a>
             ))}
           </div>
@@ -84,7 +84,7 @@ export default function Footer() {
 
         <div className="py-6 text-center border-t border-[#000D57]/5">
           <p className="text-[#000D57]/40 text-[10px] leading-relaxed">
-            본 사이트의 국가유산 정보는 국가유산청 공공데이터를 활용하고 있습니다.
+          本サイトの国宝情報は、国宝庁の公共データを活用しています。
           </p>
         </div>
       </div>
