@@ -1,6 +1,6 @@
 import React from "react";
 
-import HeroSection from "../components/HeroSection"; 
+import HeroSection from "../components/HeroSection";
 import MapSection from "../components/MapSection";
 import PopularHeritageSection from "../components/PopularHeritageSection";
 export default function MainHome() {
@@ -19,7 +19,7 @@ export default function MainHome() {
 
       {/* 3. 인기 유산 섹션 */}
       <PopularHeritageSection />
-      
+
       {/* 푸터 등 추가... */}
     </main>
   );
