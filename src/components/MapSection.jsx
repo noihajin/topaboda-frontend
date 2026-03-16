@@ -57,7 +57,7 @@ function sendMapDebugClick(payload) {
   // 프론트 디버그 로그 (브라우저 콘솔)
   console.log("[MAP_DEBUG_CLICK]", payload);
 }
-
+// 대하진
 function parseBounds(r) {
   return {
     north: Number(r.north),
