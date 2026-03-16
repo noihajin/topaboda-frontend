@@ -1,0 +1,20 @@
+{
+  "INITIAL": { "center": { "lat": 36.5, "lng": 127.8 }, "zoom": 8 },
+  "Seoul": { "center": { "lat": 37.5665, "lng": 126.9780 }, "zoom": 12 },
+  "Busan": { "center": { "lat": 35.1796, "lng": 129.0756 }, "zoom": 12 },
+  "Daegu": { "center": { "lat": 35.8714, "lng": 128.6014 }, "zoom": 12 },
+  "Incheon": { "center": { "lat": 37.4563, "lng": 126.7052 }, "zoom": 11 },
+  "Gwangju": { "center": { "lat": 35.1595, "lng": 126.8526 }, "zoom": 12 },
+  "Daejeon": { "center": { "lat": 36.3504, "lng": 127.3845 }, "zoom": 12 },
+  "Ulsan": { "center": { "lat": 35.5389, "lng": 129.3114 }, "zoom": 12 },
+  "Sejong": { "center": { "lat": 36.4800, "lng": 127.2890 }, "zoom": 12 },
+  "Gyeonggi-do": { "center": { "lat": 37.2752, "lng": 127.0095 }, "zoom": 10 },
+  "Gangwon-do": { "center": { "lat": 37.8853, "lng": 127.7298 }, "zoom": 9 },
+  "Chungcheongbuk-do": { "center": { "lat": 36.6353, "lng": 127.4914 }, "zoom": 10 },
+  "Chungcheongnam-do": { "center": { "lat": 36.6588, "lng": 126.6728 }, "zoom": 10 },
+  "Jeollabuk-do": { "center": { "lat": 35.8204, "lng": 127.1087 }, "zoom": 10 },
+  "Jeollanam-do": { "center": { "lat": 34.8161, "lng": 126.4629 }, "zoom": 10 },
+  "Gyeongsangbuk-do": { "center": { "lat": 36.5760, "lng": 128.5058 }, "zoom": 9 },
+  "Gyeongsangnam-do": { "center": { "lat": 35.2376, "lng": 128.6919 }, "zoom": 10 },
+  "Jeju": { "center": { "lat": 33.4890, "lng": 126.4983 }, "zoom": 11 }
+}
