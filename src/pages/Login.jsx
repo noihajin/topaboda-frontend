@@ -1,30 +1,74 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 
 const C = {
-  navy: "#000d57",
-  red: "#6e0000",
-  redL: "#8e0000",
-  white: "#ffffff",
-  bg: "#f8f9fc",
-  gray1: "#333333",
-  gray2: "#4a5565",
-  gray3: "#99a1af",
-  border: "#e5e7eb",
-  divider: "#d3d3d3",
-  googleBg: "#f1f3f7",
-  xBg: "#000000",
+  navy:     "#000d57",
+  red:      "#6e0000",
+  white:    "#ffffff",
+  bg:       "#f8f9fc",
+  gray1:    "#333333",
+  gray2:    "#4a5565",
+  gray3:    "#99a1af",
+  border:   "#e2e8f0",
+  divider:  "#edf2f7",
+  lineBg:   "#06C755",
+  xBg:      "#000000",
+  googleBg: "#ffffff",
 };
 
-// 컴포넌트 내부 폰트 변수 선언 제거 (index.css 설정을 따름)
+const font = "'Roboto', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
 
-export default function Login() {
+const EyeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+  </svg>
+);
+
+const SNS_ITEMS = [
+  {
+    key: "line",
+    bg: "#06C755",
+    border: "none",
+    icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
+    lines: ["LINEで", "ログイン"],
+  },
+  {
+    key: "google",
+    bg: "#ffffff",
+    border: "1px solid #e2e8f0",
+    icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
+    lines: ["Googleで", "ログイン"],
+  },
+  {
+    key: "x",
+    bg: "#000000",
+    border: "none",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    ),
+    lines: ["Xで", "ログイン"],
+  },
+];
+
+export default function LoginPage() {
   const navigate = useNavigate();
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [saveId, setSaveId] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [loginHover, setLoginHover] = useState(false);
+  const [registerHover, setRegisterHover] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -33,288 +77,172 @@ export default function Login() {
       return;
     }
     localStorage.setItem("token", "true");
-    alert("ログインに成功しました！");
-    navigate("/community");
+    navigate("/");
   };
 
   return (
-    <div
-      style={{
-        background: C.bg,
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 20px",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          background: "rgba(255, 255, 255, 0.7)",
-          backdropFilter: "blur(20px)",
-          borderRadius: 32,
-          border: "1px solid rgba(255, 255, 255, 0.5)",
-          padding: "60px 40px",
-          boxShadow: "0 20px 60px rgba(0, 0, 87, 0.05)",
-          textAlign: "center",
-        }}
-      >
-        {/* 타이틀: Roboto의 굵직한 느낌 강조 */}
-        <div style={{ marginBottom: 40 }}>
-          <h2
-            style={{
-              color: C.navy,
-              fontSize: 36,
-              fontWeight: 900,
-              margin: 0,
-              letterSpacing: "-0.05em", // Roboto 특유의 세련된 자간
-            }}
-          >
-            TOPABODA
-          </h2>
-          <p
-            style={{
-              color: C.gray2,
-              fontSize: 15,
-              marginTop: 8,
-              fontWeight: 500,
-            }}
-          >
-            ログインしてください。
-          </p>
+    <div style={{
+      minHeight: "100vh", background: C.bg, fontFamily: font,
+      display: "flex", 
+      alignItems: "flex-start", // ✅ 중앙에서 상단 정렬로 변경
+      justifyContent: "center",
+      padding: "120px 20px 60px", // ✅ Top 마진 효과 (120px)
+    }}>
+
+      <div style={{
+        width: "100%", maxWidth: 420, // ✅ 너비 살짝 조정
+        background: C.white, borderRadius: 24, padding: "45px 40px", // ✅ 패딩 살짝 감소
+        boxShadow: "0 10px 40px rgba(0,0,0,0.03)",
+        border: `1px solid ${C.border}`, textAlign: "center",
+      }}>
+
+        {/* ロゴ・タイトル */}
+        <div style={{ marginBottom: 35, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
+          <p style={{ color: C.gray2, fontSize: 14, fontWeight: 500, margin: 0 }}>ログインしてください。</p>
         </div>
 
-        <form
-          onSubmit={handleLogin}
-          style={{ display: "flex", flexDirection: "column", gap: 16 }}
-        >
-          {/* ID/PW 입력: 영문은 Roboto, 일본어 Placeholder는 Noto Sans JP 적용 */}
-          <div style={{ textAlign: "left" }}>
-            <input
-              type="text"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              placeholder="ID入力"
-              style={{
-                width: "100%",
-                height: 60,
-                border: `1px solid ${C.border}`,
-                borderRadius: 16,
-                padding: "0 20px",
-                fontSize: 16,
-                outline: "none",
-                boxSizing: "border-box",
-                background: C.white,
-                transition: "0.2s",
-                fontWeight: 500,
-              }}
-              onFocus={(e) => (e.target.style.borderColor = C.navy)}
-              onBlur={(e) => (e.target.style.borderColor = C.border)}
-            />
-          </div>
-
-          <div style={{ position: "relative", textAlign: "left" }}>
+        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <input
+            type="text" placeholder="IDを入力" value={id} onChange={e => setId(e.target.value)}
+            style={inputStyle}
+          />
+          <div style={{ position: "relative" }}>
             <input
               type={showPw ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="パスワード入力"
-              style={{
-                width: "100%",
-                height: 60,
-                border: `1px solid ${C.border}`,
-                borderRadius: 16,
-                padding: "0 54px 0 20px",
-                fontSize: 16,
-                outline: "none",
-                boxSizing: "border-box",
-                background: C.white,
-                transition: "0.2s",
-                fontWeight: 500,
-              }}
-              onFocus={(e) => (e.target.style.borderColor = C.navy)}
-              onBlur={(e) => (e.target.style.borderColor = C.border)}
+              placeholder="パスワードを入力"
+              value={password} onChange={e => setPassword(e.target.value)}
+              style={{ ...inputStyle, paddingRight: 45 }}
             />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              style={{
-                position: "absolute",
-                right: 18,
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: C.gray3,
-              }}
-            >
-              {showPw ? "🙈" : "👁️"}
+            <button type="button" onClick={() => setShowPw(!showPw)} style={eyeBtnStyle}>
+              {showPw ? <EyeIcon /> : <EyeOffIcon />}
             </button>
           </div>
 
-          {/* 체크박스 라벨 */}
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              cursor: "pointer",
-              fontSize: 14,
-              color: C.gray2,
-              marginLeft: 4,
-              fontWeight: 600,
-            }}
-          >
-            <div
-              onClick={() => setSaveId(!saveId)}
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                border: `2px solid ${saveId ? C.navy : C.border}`,
-                background: saveId ? C.navy : C.white,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "0.2s",
-              }}
-            >
-              {saveId && (
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path
-                    d="M2 5l2.5 2.5L8 3"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </div>
+          <label style={checkboxLabelStyle}>
+            <input type="checkbox" checked={saveId} onChange={() => setSaveId(!saveId)} style={{ cursor: "pointer", width: 15, height: 15 }} />
             IDを保存
           </label>
 
           <button
             type="submit"
+            onMouseEnter={() => setLoginHover(true)}
+            onMouseLeave={() => setLoginHover(false)}
             style={{
-              width: "100%",
-              height: 60,
-              borderRadius: 18,
-              border: "none",
-              background: `linear-gradient(to bottom, ${C.red}, ${C.redL})`,
-              color: "white",
-              fontSize: 18,
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "0 8px 20px rgba(110, 0, 0, 0.2)",
-              marginTop: 10,
+              ...actionBtnBase,
+              border: `1.2px solid ${C.navy}`,
+              background: loginHover ? C.navy  : C.white,
+              color:       loginHover ? C.white : C.navy,
+              transform:   loginHover ? "translateY(-1px)" : "none",
+              boxShadow:   loginHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
+              marginTop: 8,
             }}
           >
             ログイン
           </button>
         </form>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 15,
-            margin: "30px 0",
-          }}
-        >
-          <div style={{ flex: 1, height: "1px", background: C.divider }} />
-          <span
-            style={{
-              fontSize: 12,
-              color: C.gray3,
-              fontWeight: 800,
-              letterSpacing: "0.05em",
-            }}
-          >
-            SNS LOGIN
-          </span>
-          <div style={{ flex: 1, height: "1px", background: C.divider }} />
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {/* SNS 버튼: 영문은 Roboto 볼드체로 가독성 확보 */}
-          <button
-            style={{
-              width: "100%",
-              height: 56,
-              borderRadius: 16,
-              border: `1px solid ${C.border}`,
-              background: C.white,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              cursor: "pointer",
-              fontSize: 15,
-              fontWeight: 700,
-              color: C.gray1,
-            }}
-          >
-            <img
-              src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-              alt=""
-              style={{ width: 20 }}
-            />
-            Continue with Google
-          </button>
-
-          <button
-            style={{
-              width: "100%",
-              height: 56,
-              borderRadius: 16,
-              border: "none",
-              background: C.xBg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              cursor: "pointer",
-              fontSize: 15,
-              fontWeight: 700,
-              color: C.white,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-            Continue with X
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginTop: 35,
-            display: "flex",
-            justifyContent: "center",
-            gap: 15,
-            fontSize: 14,
-            color: C.gray3,
-            fontWeight: 600,
-          }}
-        >
+        {/* ID・パスワード検索 */}
+        <div style={{ marginTop: 18, display: "flex", justifyContent: "center", gap: 10, fontSize: 13, color: C.gray3 }}>
           <span style={{ cursor: "pointer" }}>ID検索</span>
           <span style={{ color: C.divider }}>|</span>
           <span style={{ cursor: "pointer" }}>パスワード検索</span>
-          <span style={{ color: C.divider }}>|</span>
-          <Link
-            to="/register"
-            style={{ textDecoration: "none", color: C.navy, fontWeight: 800 }}
+        </div>
+
+        {/* SNS LOGIN 구분선 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "30px 0 25px" }}>
+          <div style={{ flex: 1, height: 1, background: C.divider }} />
+          <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>SNS LOGIN</span>
+          <div style={{ flex: 1, height: 1, background: C.divider }} />
+        </div>
+
+        {/* SNS 버튼 */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
+          {SNS_ITEMS.map(item => (
+            <button
+              key={item.key}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "center",
+                gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0,
+              }}
+            >
+              <div style={{
+                width: 54, height: 54, borderRadius: "50%",
+                background: item.bg, border: item.border,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                transition: "all 0.2s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+              >
+                {item.icon}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+                {item.lines.map((line, i) => (
+                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: C.gray2, fontFamily: font, lineHeight: 1.3 }}>
+                    {line}
+                  </span>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ margin: "35px 0 20px", height: 1, background: C.divider }} />
+
+        <p style={{ fontSize: 13, color: C.gray3, marginBottom: 14, fontWeight: 500 }}>
+          まだアカウントをお持ちでないですか？
+        </p>
+
+        <Link to="/register" style={{ textDecoration: "none" }}>
+          <button
+            onMouseEnter={() => setRegisterHover(true)}
+            onMouseLeave={() => setRegisterHover(false)}
+            style={{
+              ...actionBtnBase,
+              border: `1.2px solid ${C.navy}`,
+              background: registerHover ? C.navy  : C.white,
+              color:       registerHover ? C.white : C.navy,
+              transform:   registerHover ? "translateY(-1px)" : "none",
+              boxShadow:   registerHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
+            }}
           >
             会員登録
-          </Link>
-        </div>
-      </motion.div>
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
+
+/* ── 스타일 객체 (슬림화 적용) ── */
+const inputStyle = {
+  width: "100%", 
+  height: 46, // ✅ 60px -> 52px 슬림화
+  padding: "0 16px",
+  border: "1px solid #e2e8f0", borderRadius: 12,
+  fontSize: 15, fontFamily: font, outline: "none",
+  boxSizing: "border-box", background: "#ffffff",
+  transition: "border-color 0.2s",
+};
+
+const eyeBtnStyle = {
+  position: "absolute", right: 15, top: "50%", transform: "translateY(-50%)",
+  background: "none", border: "none", cursor: "pointer", color: "#b0b8c1",
+  display: "flex", alignItems: "center", justifyContent: "center",
+};
+
+const checkboxLabelStyle = {
+  display: "flex", alignItems: "center", gap: 8,
+  cursor: "pointer", fontSize: 14, color: "#4a5565",
+  marginTop: 4, fontWeight: 500, alignSelf: "flex-start",
+};
+
+const actionBtnBase = {
+  width: "100%", 
+  height: 52, // ✅ 60px -> 52px 슬림화
+  borderRadius: 12,
+  fontSize: 16, fontWeight: 700, cursor: "pointer",
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+};
