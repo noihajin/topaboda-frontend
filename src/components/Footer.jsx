@@ -33,17 +33,23 @@ export default function Footer() {
   return (
     <footer className="w-full bg-white border-t border-gray-100 font-sans">
       <div className="max-w-[1400px] mx-auto px-10 lg:px-16 pt-16">
-        
         {/* 상단: 내비게이션 + 로고 */}
         <div className="flex flex-col md:flex-row justify-between items-start pb-12 gap-10">
           <div className="flex flex-wrap gap-12 lg:gap-20">
             {navSections.map((section) => (
               <div key={section.heading} className="min-w-[120px]">
-                <h4 className="text-[#000D57] text-sm font-bold mb-5">{section.heading}</h4>
+                <h4 className="text-[#000D57] text-sm font-bold mb-5">
+                  {section.heading}
+                </h4>
                 <ul className="flex flex-col gap-3 text-[#000D57]/70 text-xs">
                   {section.links.map((link) => (
                     <li key={link}>
-                      <a href="#" className="hover:text-[#000D57] transition-colors">{link}</a>
+                      <a
+                        href="#"
+                        className="hover:text-[#000D57] transition-colors"
+                      >
+                        {link}
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -64,7 +70,13 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-5 text-[#000D57]/60 text-xs">
             <span>© 2026 Topaboda. All rights reserved.</span>
             {["個人情報処理方針", "利用規約"].map((label) => (
-              <a key={label} href="#" className="underline hover:text-[#000D57]">{label}</a>
+              <a
+                key={label}
+                href="#"
+                className="underline hover:text-[#000D57]"
+              >
+                {label}
+              </a>
             ))}
           </div>
 
@@ -84,7 +96,7 @@ export default function Footer() {
 
         <div className="py-6 text-center border-t border-[#000D57]/5">
           <p className="text-[#000D57]/40 text-[10px] leading-relaxed">
-          本サイトの国宝情報は、国宝庁の公共データを活用しています。
+            本サイトの国宝情報は、国宝庁の公共データを活用しています。
           </p>
         </div>
       </div>

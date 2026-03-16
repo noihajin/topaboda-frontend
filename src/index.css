@@ -1,21 +1,62 @@
-/* 1. 구글 폰트 import가 무조건 맨 위(1등)에 있어야 합니다! */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap');
+/* 1. 구글 폰트 import: Roboto(영문)와 Noto Sans JP(일문) 통합 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@400;700&family=Roboto:wght@100..900&display=swap');
 
-/* 2. 그 다음으로 Tailwind 명령어들이 옵니다. */
+/* 2. Tailwind 필수 명령어 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 3. 기본 여백 초기화 및 폰트 설정 */
+/* 3. 기본 여백 초기화 및 전역 폰트 설정 */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   overflow-x: hidden;
+  /* 영문/숫자는 Roboto, 일본어는 Noto Sans JP 적용 */
   font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 4. 타이틀용 폰트 클래스 */
+/* 4. 제목용 폰트 클래스 (세리프 느낌이 필요할 때 사용) */
 .font-title {
   font-family: 'Roboto', 'Noto Serif JP', serif;
+}
+
+/* ── 전역 스크롤바 커스터마이징 ── */
+
+/* 1. 전체 스크롤바 영역 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* 2. 스크롤바 트랙 (바탕) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* 3. 스크롤바 핸들 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+  background: #bbc1e2; /* 브랜드 보조 컬러 */
+  border-radius: 10px;
+  border: 2px solid #f1f1f1; /* 여백 효과 */
+}
+
+/* 4. 핸들 호버 효과 */
+::-webkit-scrollbar-thumb:hover {
+  background: #CACA00; /* 포인트 골드 컬러 */
+  cursor: pointer;
+}
+
+/* ── 유틸리티 클래스 ── */
+@layer utilities {
+  /* 스크롤바 숨기기 (기능은 유지) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE, Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
 }
