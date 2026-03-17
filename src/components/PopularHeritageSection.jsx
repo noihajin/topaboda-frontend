@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // ★ 아이콘 임포트
 import imgIconHeart from "../assets/icon_heart.svg";
@@ -153,6 +154,7 @@ export default function PopularHeritageSection() {
 
 // ─── 개별 카드 컴포넌트 ───
 function HeritageCard({ data }) {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태 추가
 
@@ -249,8 +251,12 @@ function HeritageCard({ data }) {
             </span>
           </div>
 
-          <button className="text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-colors">
-            VIEW DETAIL
+          <button
+            onClick={() => navigate(`/heritage/${data.id}`)}
+            className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn"
+          >
+            詳細を見る
+            <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
           </button>
         </div>
       </div>

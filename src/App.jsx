@@ -17,6 +17,7 @@ import WritePost from "./pages/WritePost";
 import Login from "./pages/Login";
 import RegisterSelect from "./pages/RegisterSelect"; // ★ 추가됨
 import Register from "./pages/Register"; // ★ 추가됨
+import HeritageDetail from "./pages/HeritageDetail";
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -53,7 +54,10 @@ function App() {
             {/* 5. 이메일 회원가입 상세 폼 */}
             <Route path="/register/form" element={<Register />} />
 
-            {/* 6. 커뮤니티 글쓰기 (보호된 경로) */}
+            {/* 6. 문화유산 상세보기 */}
+            <Route path="/heritage/:heritageId" element={<HeritageDetail />} />
+
+            {/* 7. 커뮤니티 글쓰기 (보호된 경로) */}
             <Route
               path="/community/write"
               element={
