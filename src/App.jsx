@@ -17,6 +17,7 @@ import WritePost from "./pages/WritePost";
 import Login from "./pages/Login";
 import RegisterSelect from "./pages/RegisterSelect"; // ★ 추가됨
 import Register from "./pages/Register"; // ★ 추가됨
+import MyPage from "./pages/Mypage"; // ★ 추가됨
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -28,6 +29,9 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
+
+// 마이페이지 편집(임시): 실제 편집 UI가 생기기 전까지 마이페이지로 되돌림
+const MyPageEditRedirect = () => <Navigate to="/mypage" replace />;
 
 function App() {
   return (
@@ -52,6 +56,10 @@ function App() {
 
             {/* 5. 이메일 회원가입 상세 폼 */}
             <Route path="/register/form" element={<Register />} />
+
+            {/* 5-1. 마이페이지 */}
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/mypage/edit" element={<MyPageEditRedirect />} />
 
             {/* 6. 커뮤니티 글쓰기 (보호된 경로) */}
             <Route
