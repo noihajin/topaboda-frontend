@@ -39,7 +39,7 @@ export default function PopularHeritageSection() {
       location: "慶州, 慶尚北道",
       views: 1234,
       badge: "国宝",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1548115184-bc6544d06a58?q=80&w=600&auto=format&fit=crop",
     },
     {
       id: 2,
@@ -47,7 +47,7 @@ export default function PopularHeritageSection() {
       location: "ソウル",
       views: 2567,
       badge: "国宝",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=600&auto=format&fit=crop",
     },
     {
       id: 3,
@@ -55,7 +55,7 @@ export default function PopularHeritageSection() {
       location: "全州, 全羅北道",
       views: 987,
       badge: "史跡",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1590603740183-980e7f6920eb?q=80&w=600&auto=format&fit=crop",
     },
     {
       id: 4,
@@ -63,7 +63,7 @@ export default function PopularHeritageSection() {
       location: "慶州, 慶尚北道",
       views: 1456,
       badge: "国宝",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1578637387939-43c525550085?q=80&w=600&auto=format&fit=crop",
     },
     {
       id: 5,
@@ -71,7 +71,7 @@ export default function PopularHeritageSection() {
       location: "国立中央博物館",
       views: 678,
       badge: "宝物",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=600&auto=format&fit=crop",
     },
     {
       id: 6,
@@ -79,7 +79,7 @@ export default function PopularHeritageSection() {
       location: "水原, 京畿道",
       views: 1823,
       badge: "史跡",
-      imageUrl: "https://via.placeholder.com/400x300",
+      imageUrl: "https://images.unsplash.com/photo-1618176729090-253077a8f948?q=80&w=600&auto=format&fit=crop",
     },
   ];
 

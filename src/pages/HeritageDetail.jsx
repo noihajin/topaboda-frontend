@@ -348,7 +348,7 @@ export default function HeritageDetail() {
       {/* ── 메인 콘텐츠 ── */}
       <div style={{
         background: "#eeeeee", padding: "60px 72px",
-        display: "flex", gap: 48, alignItems: "flex-start",
+        display: "flex", gap: 48, alignItems: "stretch",
         maxWidth: 1920, margin: "0 auto",
       }}>
 
@@ -511,7 +511,7 @@ export default function HeritageDetail() {
 
         {/* ── 오른쪽 스티키 사이드바 ── */}
         <div style={{ width: 360, flexShrink: 0 }}>
-          <div style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ position: "sticky", top: 96, display: "flex", flexDirection: "column", gap: 24, maxHeight: "calc(100vh - 116px)", overflowY: "auto", paddingRight: 2 }}>
 
             {/* 기본 정보 카드 (navy 그라디언트) */}
             <div style={{

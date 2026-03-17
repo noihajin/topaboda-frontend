@@ -7,11 +7,14 @@
 @tailwind utilities;
 
 /* 3. 기본 여백 초기화 및 전역 폰트 설정 */
+html {
+  overflow-x: hidden;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden;
   /* 영문/숫자는 Roboto, 일본어는 Noto Sans JP 적용 */
   font-family: 'Roboto', 'Noto Sans JP', sans-serif;
   -webkit-font-smoothing: antialiased;
