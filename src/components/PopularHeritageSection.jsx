@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 
 // ★ 아이콘 임포트
 import imgIconHeart from "../assets/icon_heart.svg";
-import imgIconBookmark from "../assets/icon_bookmark.svg"; // 북마크 아이콘 추가
+import imgIconBookmark from "../assets/icon_bookmark.svg";
 import imgIconLocation from "../assets/icon_location.svg";
 import imgIconEye from "../assets/icon_heart_2.svg";
 
-// ... 애니메이션 Variants (기존과 동일) ...
+// 애니메이션 Variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -31,10 +31,12 @@ const itemVariants = {
 export default function PopularHeritageSection() {
   const [sortType, setSortType] = useState("レビュー順");
 
+  // 한국어 이름(nameKr) 데이터 추가
   const MOCK_DATA = [
     {
       id: 1,
       name: "仏国寺",
+      nameKr: "불국사",
       location: "慶州, 慶尚北道",
       views: 1234,
       badge: "国宝",
@@ -43,6 +45,7 @@ export default function PopularHeritageSection() {
     {
       id: 2,
       name: "景福宮",
+      nameKr: "경복궁",
       location: "ソウル",
       views: 2567,
       badge: "国宝",
@@ -51,6 +54,7 @@ export default function PopularHeritageSection() {
     {
       id: 3,
       name: "韓屋村",
+      nameKr: "한옥마을",
       location: "全州, 全羅北道",
       views: 987,
       badge: "史跡",
@@ -59,6 +63,7 @@ export default function PopularHeritageSection() {
     {
       id: 4,
       name: "石窟庵",
+      nameKr: "석굴암",
       location: "慶州, 慶尚北道",
       views: 1456,
       badge: "国宝",
@@ -67,14 +72,16 @@ export default function PopularHeritageSection() {
     {
       id: 5,
       name: "青磁 象嵌",
+      nameKr: "청자 상감",
       location: "国立中央博物館",
       views: 678,
-      badge: "宝物",
+      badge: "宝물",
       imageUrl: "https://via.placeholder.com/400x300",
     },
     {
       id: 6,
       name: "水原華城",
+      nameKr: "수원화성",
       location: "水原, 京畿道",
       views: 1823,
       badge: "史跡",
@@ -154,7 +161,7 @@ export default function PopularHeritageSection() {
 // ─── 개별 카드 컴포넌트 ───
 function HeritageCard({ data }) {
   const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false); // 북마크 상태 추가
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const badgeStyle =
     data.badge === "国宝"
@@ -174,52 +181,51 @@ function HeritageCard({ data }) {
           alt={data.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
         />
-
-        {/* 배지 */}
         <span
           className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}
         >
           {data.badge}
         </span>
 
-        {/* ── 우측 상단 버튼 그룹 ── */}
-        <div className="absolute top-6 right-6 flex flex-col gap-2.5 z-10">
+        {/* ── 우측 상단 버튼 그룹 (가로 배치로 변경) ── */}
+        <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
           {/* 하트 버튼 */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsLiked(!isLiked);
             }}
-            className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
+            className={`w-10 h-10 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all active:scale-90 ${isLiked ? "bg-[#6E0000]" : "bg-white/80 hover:bg-white"}`}
           >
             <img
               src={imgIconHeart}
               alt="like"
-              className={`w-5 h-5 transition-all duration-300 ${isLiked ? "opacity-100" : "opacity-30"}`}
+              className="w-5 h-5 transition-all duration-300"
               style={{
+                // 클릭 시 흰색으로 채워진 느낌, 미클릭 시 연한 회색/빨간 테두리 느낌
                 filter: isLiked
-                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)"
-                  : "none",
+                  ? "brightness(0) invert(1)"
+                  : "invert(20%) sepia(10%) saturate(1000%) hue-rotate(320deg) brightness(90%) contrast(90%) opacity(0.4)",
               }}
             />
           </button>
 
-          {/* 북마크 버튼 (icon_bookmark.svg 적용) */}
+          {/* 북마크 버튼 */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsBookmarked(!isBookmarked);
             }}
-            className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
+            className={`w-10 h-10 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all active:scale-90 ${isBookmarked ? "bg-[#000D57]" : "bg-white/80 hover:bg-white"}`}
           >
             <img
               src={imgIconBookmark}
               alt="bookmark"
-              className={`w-5 h-5 transition-all duration-300 ${isBookmarked ? "opacity-100" : "opacity-30"}`}
+              className="w-5 h-5 transition-all duration-300"
               style={{
                 filter: isBookmarked
-                  ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)" // 골드 컬러 필터
-                  : "none",
+                  ? "brightness(0) invert(1)"
+                  : "invert(20%) sepia(10%) saturate(1000%) hue-rotate(200deg) brightness(90%) contrast(90%) opacity(0.4)",
               }}
             />
           </button>
@@ -227,9 +233,15 @@ function HeritageCard({ data }) {
       </div>
 
       <div className="p-8">
-        <h3 className="text-2xl font-black text-[#000D57] mb-3 tracking-tight">
-          {data.name}
-        </h3>
+        <div className="mb-4">
+          <h3 className="text-2xl font-black text-[#000D57] tracking-tight">
+            {data.name}
+          </h3>
+          <p className="text-sm font-bold text-[#A0A000] mt-1 opacity-80">
+            {data.nameKr}
+          </p>{" "}
+          {/* 한국어 이름 추가 */}
+        </div>
 
         <div className="flex items-center gap-2 text-gray-400 mb-8">
           <img
@@ -240,7 +252,7 @@ function HeritageCard({ data }) {
           <span className="text-sm font-bold">{data.location}</span>
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
           <div className="flex items-center gap-1.5 text-gray-400">
             <img src={imgIconEye} alt="" className="w-4.5 h-4.5 opacity-50" />
             <span className="text-sm font-bold ml-1">
@@ -249,8 +261,12 @@ function HeritageCard({ data }) {
             </span>
           </div>
 
-          <button className="text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-colors">
-            VIEW DETAIL
+          {/* 자세히보기 버튼 일본어 변경 */}
+          <button className="text-[#6E0000] font-black text-sm tracking-tight hover:text-[#000D57] transition-all flex items-center gap-1 group/btn">
+            詳細を見る
+            <span className="group-hover/btn:translate-x-1 transition-transform">
+              →
+            </span>
           </button>
         </div>
       </div>
