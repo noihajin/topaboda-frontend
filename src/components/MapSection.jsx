@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useJsApiLoader, GoogleMap } from "@react-google-maps/api";
-import mapFocusPreset from "../data/mapFocusPreset.json";
+// ✅ 파일을 따로 찾지 않도록 데이터를 코드 내부에 직접 정의합니다. (에러 해결 핵심)
+const mapFocusPreset = {
+  "INITIAL": { "center": { "lat": 35.95, "lng": 127.7 }, "zoom": 7 },
+  "Seoul": { "center": { "lat": 37.5665, "lng": 126.978 }, "zoom": 10 },
+  "Busan": { "center": { "lat": 35.1796, "lng": 129.0756 }, "zoom": 11 },
+  "Gyeonggi-do": { "center": { "lat": 37.4138, "lng": 127.5183 }, "zoom": 9 },
+  "Gyeongsangbuk-do": { "center": { "lat": 36.4919, "lng": 128.8889 }, "zoom": 9 },
+  "Jeju": { "center": { "lat": 33.489, "lng": 126.4983 }, "zoom": 10 }
+};
 
 const API_URL = "/api/maps/config";
 const FIT_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
