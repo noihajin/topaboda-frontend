@@ -256,25 +256,6 @@ export default function HeritageDetail() {
           background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.05) 100%)",
         }} />
 
-        {/* 뒤로 가기 버튼 */}
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            position: "absolute", top: 100, left: 44,
-            display: "flex", alignItems: "center", gap: 8,
-            background: "white", border: "none", borderRadius: 100,
-            padding: "10px 20px 10px 14px",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-            cursor: "pointer", color: C.navy,
-            fontSize: 15, fontWeight: 700, fontFamily: font,
-            transition: "transform 0.2s, box-shadow 0.2s",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.2)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.15)"; }}
-        >
-          <IconArrowLeft /> 戻る
-        </button>
-
         {/* 유산 정보 (좌하단) */}
         <div style={{ position: "absolute", bottom: 56, left: 72 }}>
           {/* 배지 */}
@@ -300,9 +281,15 @@ export default function HeritageDetail() {
           </h1>
           <p style={{
             fontSize: "clamp(16px, 2vw, 24px)", color: "rgba(255,255,255,0.88)",
-            margin: "0 0 18px", fontFamily: font, fontWeight: 400,
+            margin: "0 0 8px", fontFamily: font, fontWeight: 400,
           }}>
             {data.nameJaReading}
+          </p>
+          <p style={{
+            fontSize: 14, color: "rgba(255,255,255,0.55)",
+            margin: "0 0 18px", fontFamily: font, fontWeight: 400, letterSpacing: "0.04em",
+          }}>
+            {data.nameKo}
           </p>
           {/* 위치 */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -327,8 +314,8 @@ export default function HeritageDetail() {
               key={btn.label}
               onClick={btn.onClick}
               style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                width: 68, height: 68, borderRadius: "50%",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+                width: 72, height: 72, borderRadius: "50%",
                 background: "white", border: "none", cursor: "pointer",
                 boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
                 transition: "transform 0.2s, box-shadow 0.2s",
