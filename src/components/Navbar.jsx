@@ -21,6 +21,7 @@ export default function Navbar() {
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isAuthenticated = Boolean(localStorage.getItem("token"));
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,6 +47,11 @@ export default function Navbar() {
   const handleLoginClick = () => {
     setIsMenuOpen(false);
     navigate("/login");
+  };
+
+  const handleMyPageClick = () => {
+    setIsMenuOpen(false);
+    navigate("/mypage");
   };
 
   return (
@@ -232,9 +238,19 @@ export default function Navbar() {
                 <button className="gnb-btn">
                   <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
                 </button>
-                <button className="gnb-btn" onClick={handleLoginClick}>
-                  <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" /> Login
-                </button>
+                {isAuthenticated ? (
+                  <button className="gnb-btn" onClick={handleMyPageClick}>
+                    MyPage
+                  </button>
+                ) : (
+                  <button className="gnb-btn" onClick={handleLoginClick}>
+                    <img
+                      src={isActive ? imgIconLoginBlk : imgIconLoginWht}
+                      alt=""
+                    />{" "}
+                    Login
+                  </button>
+                )}
               </>
             ) : (
               <div className="hamburger" onClick={() => setIsMenuOpen(true)}>
@@ -264,9 +280,27 @@ export default function Navbar() {
           <button className="gnb-btn" style={{ color: '#000', padding: '12px 0', justifyContent: 'flex-start' }}>
             <img src={imgIconGlobeBlk} alt="" /> Language: JP
           </button>
-          <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
-            Login / Sign Up
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={handleMyPageClick}
+              style={{
+                background: "#000d57",
+                color: "#fff",
+                padding: "15px",
+                borderRadius: "12px",
+                border: "none",
+                fontWeight: "700",
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              MyPage
+            </button>
+          ) : (
+            <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
+              Login / Sign Up
+            </button>
+          )}
         </div>
       </div>
     </>
