@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 
@@ -61,15 +61,48 @@ export default function LoginPage() {
   const [loginHover, setLoginHover] = useState(false);
   const [registerHover, setRegisterHover] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!id.trim() || !password.trim()) {
-      alert("IDとパスワードを入力してください。");
-      return;
-    }
-    localStorage.setItem("token", "true");
-    navigate("/");
-  };
+  const handleLogin = async (e) => {
+        // 2. async 키워드 추가
+        e.preventDefault();
+
+        if (!id.trim() || !password.trim()) {
+            alert("IDとパスワードを入力してください。");
+            return;
+        }
+
+        try {
+            // 3. 실제 API 호출 (엔드포인트는 실제 서버 주소에 맞게 수정)
+            const response = await axios.post(
+                "http://localhost:9990/topaboda/api/auth/login",
+                {
+                    id: id,
+                    password: password,
+                },
+            );
+
+            if (response.data.jwt) {
+                // 4. 성공 시 토큰 저장 (예: JWT)
+                localStorage.setItem("jwt", response.data.jwt);
+
+                // ID 저장 체크박스가 활성화된 경우 로직 추가 가능
+                if (saveId) {
+                    localStorage.setItem("savedId", id);
+                } else {
+                    localStorage.removeItem("savedId");
+                }
+
+                alert("ログインに成功しました！");
+                navigate("/community");
+            }
+        } catch (error) {
+            // 5. 에러 처리 (ID/PW 불일치, 서버 에러 등)
+            console.error("Login Error:", error);
+            const message =
+                error.response?.data?.message ||
+                "로그인 중 오류가 발생했습니다.";
+            alert(message);
+        }
+    };
 
   return (
     <div style={{

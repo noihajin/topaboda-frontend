@@ -6,13 +6,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // 백엔드 주소에 맞게 수정하세요
+        target: 'http://localhost:9990/topaboda',
         changeOrigin: true,
       },
       '/img': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9990/topaboda',
         changeOrigin: true,
-      }
-    }
-  }
+      },
+    },
+  },
 })
