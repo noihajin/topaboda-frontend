@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useJsApiLoader, GoogleMap } from "@react-google-maps/api";
-import mapFocusPreset from "../data/mapFocusPreset.json";
+// ✅ 파일을 따로 찾지 않도록 데이터를 코드 내부에 직접 정의합니다. (에러 해결 핵심)
+const mapFocusPreset = {
+  "INITIAL": { "center": { "lat": 35.95, "lng": 127.7 }, "zoom": 7 },
+  "Seoul": { "center": { "lat": 37.5665, "lng": 126.978 }, "zoom": 10 },
+  "Busan": { "center": { "lat": 35.1796, "lng": 129.0756 }, "zoom": 11 },
+  "Gyeonggi-do": { "center": { "lat": 37.4138, "lng": 127.5183 }, "zoom": 9 },
+  "Gyeongsangbuk-do": { "center": { "lat": 36.4919, "lng": 128.8889 }, "zoom": 9 },
+  "Jeju": { "center": { "lat": 33.489, "lng": 126.4983 }, "zoom": 10 }
+};
 
 const API_URL = "/api/maps/config";
 const FIT_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -57,7 +65,7 @@ function sendMapDebugClick(payload) {
   // 프론트 디버그 로그 (브라우저 콘솔)
   console.log("[MAP_DEBUG_CLICK]", payload);
 }
-
+// 대하진
 function parseBounds(r) {
   return {
     north: Number(r.north),
@@ -68,7 +76,12 @@ function parseBounds(r) {
 }
 
 function unionBounds(rows) {
-  const b = { north: -Infinity, south: Infinity, east: -Infinity, west: Infinity };
+  const b = {
+    north: -Infinity,
+    south: Infinity,
+    east: -Infinity,
+    west: Infinity,
+  };
   rows.forEach((r) => {
     const x = parseBounds(r);
     if (x.north > b.north) b.north = x.north;
@@ -111,7 +124,11 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   const regionFocusRef = useRef(mapFocusPreset);
 
   const [selectedSet, setSelectedSet] = useState(new Set());
-  const [geoData, setGeoData] = useState({ bbox: null, provinces: null, municipalities: null });
+  const [geoData, setGeoData] = useState({
+    bbox: null,
+    provinces: null,
+    municipalities: null,
+  });
   const [geoError, setGeoError] = useState(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -137,7 +154,9 @@ function MapWithGoogle({ apiKey, mapConfig }) {
         setGeoError(err.message);
         console.error("[MapSection] GeoJSON 로드 실패:", err);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [mapConfig?.endpoints]);
 
   // selectedSetRef를 state와 동기화해 클릭 핸들러에서 최신 값 사용
@@ -152,21 +171,24 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   }, []);
 
   // key(region명/INITIAL) 기준 지연 포커싱
-  const scheduleFocusByRegionKey = useCallback((regionKey, fallbackZoom = DO8_SELECT_ZOOM) => {
-    if (!regionKey || !mapRef.current) return;
-    if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
-    focusTimerRef.current = setTimeout(() => {
-      const map = mapRef.current;
-      if (!map) return;
-      const focus = regionFocusRef.current?.[regionKey];
-      if (!focus?.center) {
-        console.warn("[MAP_DEBUG_CLICK] focus preset missing:", regionKey);
-        return;
-      }
-      map.panTo(focus.center);
-      map.setZoom(focus.zoom ?? fallbackZoom);
-    }, CLICK_FOCUS_DELAY_MS);
-  }, []);
+  const scheduleFocusByRegionKey = useCallback(
+    (regionKey, fallbackZoom = DO8_SELECT_ZOOM) => {
+      if (!regionKey || !mapRef.current) return;
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+      focusTimerRef.current = setTimeout(() => {
+        const map = mapRef.current;
+        if (!map) return;
+        const focus = regionFocusRef.current?.[regionKey];
+        if (!focus?.center) {
+          console.warn("[MAP_DEBUG_CLICK] focus preset missing:", regionKey);
+          return;
+        }
+        map.panTo(focus.center);
+        map.setZoom(focus.zoom ?? fallbackZoom);
+      }, CLICK_FOCUS_DELAY_MS);
+    },
+    []
+  );
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -189,8 +211,12 @@ function MapWithGoogle({ apiKey, mapConfig }) {
     if (!isLoaded || !mapReady || !mapRef.current || !geoData.bbox) return;
     const map = mapRef.current;
     const { do8 = [], metro = [], country = [] } = geoData.bbox;
-    const imagesBase = (mapConfig?.endpoints?.imagesBase || "/img/korea").replace(/\/$/, "");
-    const extraRows = country.filter((r) => INITIAL_EXTRA_REGIONS.includes(r.region_name));
+    const imagesBase = (
+      mapConfig?.endpoints?.imagesBase || "/img/korea"
+    ).replace(/\/$/, "");
+    const extraRows = country.filter((r) =>
+      INITIAL_EXTRA_REGIONS.includes(r.region_name)
+    );
     const initialRows = [...do8, ...metro, ...extraRows];
 
     overlaysRef.current.forEach((o) => o.setMap(null));
@@ -203,15 +229,28 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       const isGunwiOverlay = r.region_name === "Gunwi";
       if (!name || !/\.png$/i.test(name)) return;
       const { north, south, east, west } = parseBounds(r);
-      if (!Number.isFinite(north) || !Number.isFinite(south) || !Number.isFinite(east) || !Number.isFinite(west)) return;
+      if (
+        !Number.isFinite(north) ||
+        !Number.isFinite(south) ||
+        !Number.isFinite(east) ||
+        !Number.isFinite(west)
+      )
+        return;
       if (north <= south || east <= west) return;
-      const bounds = new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east });
-      const overlay = new google.maps.GroundOverlay(`${imagesBase}/${category}/${name}`, bounds, {
-        map,
-        opacity: 0.9,
-        clickable: false,
-        zIndex: isGunwiOverlay ? 9 : 5,
-      });
+      const bounds = new google.maps.LatLngBounds(
+        { lat: south, lng: west },
+        { lat: north, lng: east }
+      );
+      const overlay = new google.maps.GroundOverlay(
+        `${imagesBase}/${category}/${name}`,
+        bounds,
+        {
+          map,
+          opacity: 0.9,
+          clickable: false,
+          zIndex: isGunwiOverlay ? 9 : 5,
+        }
+      );
       overlay.region_name = r.region_name;
       overlaysRef.current.push(overlay);
     });
@@ -224,7 +263,8 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
   // 폴리곤 표시/숨김 + 스타일 (selectedSet 변경 시)
   useEffect(() => {
-    if (!isLoaded || !mapReady || !geoData.provinces || !geoData.municipalities) return;
+    if (!isLoaded || !mapReady || !geoData.provinces || !geoData.municipalities)
+      return;
     const map = mapRef.current;
     const selected = selectedSet;
     const noneSelected = selected.size === 0;
@@ -258,21 +298,33 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
     provincePolygonsRef.current.forEach((item) => {
       const hideProvince = coveredByMuni.has(item.rname);
-      const active = noneSelected || (selected.has(item.rname) && !hideProvince);
+      const active =
+        noneSelected || (selected.has(item.rname) && !hideProvince);
       if (hideProvince) {
         item.poly.setMap(null);
       } else {
         item.poly.setMap(map);
         item.poly.setOptions({
-          fillColor: active ? (noneSelected ? COLOR_DEFAULT : COLOR_SELECTED) : COLOR_UNSELECTED,
+          fillColor: active
+            ? noneSelected
+              ? COLOR_DEFAULT
+              : COLOR_SELECTED
+            : COLOR_UNSELECTED,
           fillOpacity: active ? (noneSelected ? 0 : 0.4) : 0.15,
-          strokeColor: active && selected.has(item.rname) ? STROKE_COLOR : "transparent",
+          strokeColor:
+            active && selected.has(item.rname) ? STROKE_COLOR : "transparent",
           strokeWeight: STROKE_WEIGHT,
           strokeOpacity: 1,
         });
       }
     });
-  }, [isLoaded, mapReady, geoData.provinces, geoData.municipalities, selectedSet]);
+  }, [
+    isLoaded,
+    mapReady,
+    geoData.provinces,
+    geoData.municipalities,
+    selectedSet,
+  ]);
 
   // province 폴리곤 생성
   useEffect(() => {
@@ -326,10 +378,14 @@ function MapWithGoogle({ apiKey, mapConfig }) {
           }
         });
         poly.addListener("mouseover", () =>
-          document.getElementById("map-container")?.style?.setProperty?.("cursor", "pointer")
+          document
+            .getElementById("map-container")
+            ?.style?.setProperty?.("cursor", "pointer")
         );
         poly.addListener("mouseout", () =>
-          document.getElementById("map-container")?.style?.setProperty?.("cursor", "")
+          document
+            .getElementById("map-container")
+            ?.style?.setProperty?.("cursor", "")
         );
         provincePolygonsRef.current.push({ poly, rname });
       });
@@ -339,11 +395,18 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       provincePolygonsRef.current.forEach((item) => item.poly.setMap(null));
       provincePolygonsRef.current = [];
     };
-  }, [isLoaded, mapReady, geoData.provinces, toggleRegionByName, scheduleFocusByRegionKey]);
+  }, [
+    isLoaded,
+    mapReady,
+    geoData.provinces,
+    toggleRegionByName,
+    scheduleFocusByRegionKey,
+  ]);
 
   // municipality 폴리곤 생성
   useEffect(() => {
-    if (!isLoaded || !mapReady || !mapRef.current || !geoData.municipalities) return;
+    if (!isLoaded || !mapReady || !mapRef.current || !geoData.municipalities)
+      return;
     const map = mapRef.current;
     const features = geoData.municipalities?.features || [];
     muniPolygonsRef.current.forEach((item) => item.poly.setMap(null));
@@ -383,7 +446,10 @@ function MapWithGoogle({ apiKey, mapConfig }) {
               focusZoom: focus?.zoom ?? DO8_SELECT_ZOOM,
             };
             sendMapDebugClick(payload);
-            scheduleFocusByRegionKey(payload.effectiveParentRegion || payload.parentRegion, DO8_SELECT_ZOOM);
+            scheduleFocusByRegionKey(
+              payload.effectiveParentRegion || payload.parentRegion,
+              DO8_SELECT_ZOOM
+            );
           } else {
             sendMapDebugClick({
               clickType: "municipality",
@@ -398,10 +464,14 @@ function MapWithGoogle({ apiKey, mapConfig }) {
           }
         });
         poly.addListener("mouseover", () =>
-          document.getElementById("map-container")?.style?.setProperty?.("cursor", "pointer")
+          document
+            .getElementById("map-container")
+            ?.style?.setProperty?.("cursor", "pointer")
         );
         poly.addListener("mouseout", () =>
-          document.getElementById("map-container")?.style?.setProperty?.("cursor", "")
+          document
+            .getElementById("map-container")
+            ?.style?.setProperty?.("cursor", "")
         );
         muniPolygonsRef.current.push({ poly, rname, parent });
       });
@@ -411,11 +481,20 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       muniPolygonsRef.current.forEach((item) => item.poly.setMap(null));
       muniPolygonsRef.current = [];
     };
-  }, [isLoaded, mapReady, geoData.municipalities, toggleRegionByName, scheduleFocusByRegionKey]);
+  }, [
+    isLoaded,
+    mapReady,
+    geoData.municipalities,
+    toggleRegionByName,
+    scheduleFocusByRegionKey,
+  ]);
 
-  useEffect(() => () => {
-    if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+    },
+    []
+  );
 
   // 초기 fitBounds — JSON 원본 bbox 그대로 사용
   useEffect(() => {
@@ -431,7 +510,8 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
   // 테스트용: mapFocusPreset 좌표를 1초마다 순환 이동
   useEffect(() => {
-    if (!TEST_AUTO_FOCUS_CYCLE || !isLoaded || !mapReady || !mapRef.current) return;
+    if (!TEST_AUTO_FOCUS_CYCLE || !isLoaded || !mapReady || !mapRef.current)
+      return;
     const map = mapRef.current;
     const targets = Object.entries(mapFocusPreset)
       .map(([region, cfg]) => ({
@@ -439,10 +519,11 @@ function MapWithGoogle({ apiKey, mapConfig }) {
         center: cfg?.center,
         zoom: cfg?.zoom,
       }))
-      .filter((x) =>
-        Number.isFinite(x?.center?.lat) &&
-        Number.isFinite(x?.center?.lng) &&
-        Number.isFinite(x?.zoom)
+      .filter(
+        (x) =>
+          Number.isFinite(x?.center?.lat) &&
+          Number.isFinite(x?.center?.lng) &&
+          Number.isFinite(x?.zoom)
       );
     if (targets.length === 0) return;
 
@@ -450,7 +531,12 @@ function MapWithGoogle({ apiKey, mapConfig }) {
     const moveTo = (target) => {
       map.panTo(target.center);
       map.setZoom(target.zoom);
-      console.log("[MAP_TEST_AUTO_FOCUS]", target.region, target.center, target.zoom);
+      console.log(
+        "[MAP_TEST_AUTO_FOCUS]",
+        target.region,
+        target.center,
+        target.zoom
+      );
     };
 
     moveTo(targets[0]);
@@ -465,9 +551,16 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (loadError) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-        <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
-        <div className="w-full bg-red-50 rounded-3xl border-2 border-red-200 flex items-center justify-center text-red-600" style={{ minHeight: 560, height: "80vh" }}>
+        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+          地域別の国宝探索
+        </h2>
+        <p className="text-gray-500 text-lg text-center mb-10">
+          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+        </p>
+        <div
+          className="w-full bg-red-50 rounded-3xl border-2 border-red-200 flex items-center justify-center text-red-600"
+          style={{ minHeight: 560, height: "80vh" }}
+        >
           Google 地図の読み込みに失敗しました
         </div>
       </section>
@@ -477,9 +570,16 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (!isLoaded) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-        <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
-        <div className="w-full bg-gray-100 rounded-3xl flex items-center justify-center text-gray-600" style={{ minHeight: 560, height: "80vh" }}>
+        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+          地域別の国宝探索
+        </h2>
+        <p className="text-gray-500 text-lg text-center mb-10">
+          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+        </p>
+        <div
+          className="w-full bg-gray-100 rounded-3xl flex items-center justify-center text-gray-600"
+          style={{ minHeight: 560, height: "80vh" }}
+        >
           Google 地図を読み込み中...
         </div>
       </section>
@@ -489,9 +589,16 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (geoError) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-        <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
-        <div className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center" style={{ minHeight: 560, height: "80vh" }}>
+        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+          地域別の国宝探索
+        </h2>
+        <p className="text-gray-500 text-lg text-center mb-10">
+          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+        </p>
+        <div
+          className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center"
+          style={{ minHeight: 560, height: "80vh" }}
+        >
           {geoError}
         </div>
       </section>
@@ -500,8 +607,12 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
   return (
     <section className={sectionClass}>
-      <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-      <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
+      <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+        地域別の国宝探索
+      </h2>
+      <p className="text-gray-500 text-lg text-center mb-10">
+        多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+      </p>
       <div
         id="map-container"
         className="w-full rounded-3xl overflow-hidden border-2 border-gray-200 shadow-lg relative"
@@ -509,7 +620,12 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
-          center={mapFocusPreset?.[INITIAL_FOCUS_KEY]?.center || { lat: 36.5, lng: 127.5 }}
+          center={
+            mapFocusPreset?.[INITIAL_FOCUS_KEY]?.center || {
+              lat: 36.5,
+              lng: 127.5,
+            }
+          }
           zoom={mapFocusPreset?.[INITIAL_FOCUS_KEY]?.zoom || INIT_ZOOM}
           options={{ backgroundColor: "#e8f4ff" }}
           onLoad={onMapLoad}
@@ -552,21 +668,32 @@ export default function MapSection() {
       })
       .catch((err) => {
         if (cancelled) return;
-        setConfigError("地図設定を取得できませんでした。バックエンドサーバーが起動しているか確認してください。");
+        setConfigError(
+          "地図設定を取得できませんでした。バックエンドサーバーが起動しているか確認してください。"
+        );
         console.error("[MapSection]", err);
       })
       .finally(() => {
         if (!cancelled) setConfigLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (configLoading) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-        <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
-        <div className="w-full bg-gray-100 rounded-3xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500" style={{ minHeight: 560, height: "80vh" }}>
+        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+          地域別の国宝探索
+        </h2>
+        <p className="text-gray-500 text-lg text-center mb-10">
+          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+        </p>
+        <div
+          className="w-full bg-gray-100 rounded-3xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500"
+          style={{ minHeight: 560, height: "80vh" }}
+        >
           地図を読み込み中...
         </div>
       </section>
@@ -576,9 +703,16 @@ export default function MapSection() {
   if (configError || !apiKey) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">地域別の国宝探索</h2>
-        <p className="text-gray-500 text-lg text-center mb-10">多くの人が訪れる韓国の代表的な文化遺産に出会いましょう</p>
-        <div className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center" style={{ minHeight: 560, height: "80vh" }}>
+        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
+          地域別の国宝探索
+        </h2>
+        <p className="text-gray-500 text-lg text-center mb-10">
+          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+        </p>
+        <div
+          className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center"
+          style={{ minHeight: 560, height: "80vh" }}
+        >
           {configError}
         </div>
       </section>
