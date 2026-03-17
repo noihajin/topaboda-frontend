@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 // ★ 아이콘 임포트
 import imgIconHeart from "../assets/icon_heart.svg";
 import imgIconBookmark from "../assets/icon_bookmark.svg";
@@ -26,7 +27,7 @@ const itemVariants = {
 };
 export default function PopularHeritageSection() {
   const [sortType, setSortType] = useState("レビュー順");
-  // ✅ nameKr(한국어 이름) 필드 추가
+  // nameKr(한국어 이름) 필드 포함
   const MOCK_DATA = [
     { id: 1, name: "仏国寺", nameKr: "불국사", location: "慶州, 慶尚北道", views: 1234, badge: "国宝", imageUrl: "https://images.unsplash.com/photo-1590603740183-980e7f6920eb?q=80&w=600" },
     { id: 2, name: "景福宮", nameKr: "경복궁", location: "ソウル", views: 2567, badge: "国宝", imageUrl: "https://images.unsplash.com/photo-1548115184-bc6544d06a58?q=80&w=600" },
@@ -86,6 +87,7 @@ export default function PopularHeritageSection() {
 }
 // ─── 개별 카드 컴포넌트 ───
 function HeritageCard({ data }) {
+  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const badgeStyle =
@@ -107,7 +109,7 @@ function HeritageCard({ data }) {
         <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>
           {data.badge}
         </span>
-        {/* ── 우측 상단 버튼 그룹 (가로 정렬 수정) ── */}
+        {/* ── 우측 상단 버튼 그룹 (가로 정렬) ── */}
         <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
           {/* 하트 버튼 */}
           <button
@@ -117,10 +119,10 @@ function HeritageCard({ data }) {
             <img
               src={imgIconHeart}
               alt="like"
-              className={`w-5 h-5 transition-all duration-300`}
+              className="w-5 h-5 transition-all duration-300"
               style={{
                 filter: isLiked
-                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)" // Red
+                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)"
                   : "grayscale(1) opacity(0.3)",
               }}
             />
@@ -133,10 +135,10 @@ function HeritageCard({ data }) {
             <img
               src={imgIconBookmark}
               alt="bookmark"
-              className={`w-5 h-5 transition-all duration-300`}
+              className="w-5 h-5 transition-all duration-300"
               style={{
                 filter: isBookmarked
-                  ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)" // Gold
+                  ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)"
                   : "grayscale(1) opacity(0.3)",
               }}
             />
@@ -159,8 +161,10 @@ function HeritageCard({ data }) {
               {data.views.toLocaleString()} <span className="text-[10px] opacity-70 ml-1">VIEWS</span>
             </span>
           </div>
-          {/* ✅ 일본어 텍스트 및 화살표 추가 */}
-          <button className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn">
+          <button
+            onClick={() => navigate(`/heritage/${data.id}`)}
+            className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn"
+          >
             詳細を見る
             <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
           </button>
