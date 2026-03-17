@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 
@@ -12,25 +12,16 @@ const C = {
   gray3:    "#99a1af",
   border:   "#e2e8f0",
   divider:  "#edf2f7",
-  lineBg:   "#06C755",
-  xBg:      "#000000",
-  googleBg: "#ffffff",
 };
 
 const font = "'Roboto', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
 
 const EyeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
 );
 
 const EyeOffIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
 );
 
 const SNS_ITEMS = [
@@ -70,29 +61,60 @@ export default function LoginPage() {
   const [loginHover, setLoginHover] = useState(false);
   const [registerHover, setRegisterHover] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!id.trim() || !password.trim()) {
-      alert("IDとパスワードを入力してください。");
-      return;
-    }
-    localStorage.setItem("token", "true");
-    navigate("/");
-  };
+  const handleLogin = async (e) => {
+        // 2. async 키워드 추가
+        e.preventDefault();
+
+        if (!id.trim() || !password.trim()) {
+            alert("IDとパスワードを入力してください。");
+            return;
+        }
+
+        try {
+            // 3. 실제 API 호출 (엔드포인트는 실제 서버 주소에 맞게 수정)
+            const response = await axios.post(
+                "http://localhost:9990/topaboda/api/auth/login",
+                {
+                    id: id,
+                    password: password,
+                },
+            );
+
+            if (response.data.jwt) {
+                // 4. 성공 시 토큰 저장 (예: JWT)
+                localStorage.setItem("jwt", response.data.jwt);
+
+                // ID 저장 체크박스가 활성화된 경우 로직 추가 가능
+                if (saveId) {
+                    localStorage.setItem("savedId", id);
+                } else {
+                    localStorage.removeItem("savedId");
+                }
+
+                alert("ログインに成功しました！");
+                navigate("/community");
+            }
+        } catch (error) {
+            // 5. 에러 처리 (ID/PW 불일치, 서버 에러 등)
+            console.error("Login Error:", error);
+            const message =
+                error.response?.data?.message ||
+                "로그인 중 오류가 발생했습니다.";
+            alert(message);
+        }
+    };
 
   return (
     <div style={{
       minHeight: "100vh", background: C.bg, fontFamily: font,
-      display: "flex", 
-      alignItems: "flex-start", // ✅ 중앙에서 상단 정렬로 변경
-      justifyContent: "center",
-      padding: "120px 20px 60px", // ✅ Top 마진 효과 (120px)
+      display: "flex", alignItems: "flex-start", justifyContent: "center",
+      padding: "120px 20px 60px", 
     }}>
 
       <div style={{
-        width: "100%", maxWidth: 420, // ✅ 너비 살짝 조정
-        background: C.white, borderRadius: 24, padding: "45px 40px", // ✅ 패딩 살짝 감소
-        boxShadow: "0 10px 40px rgba(0,0,0,0.03)",
+        width: "100%", maxWidth: 420,
+        background: C.white, borderRadius: 24, padding: "45px 40px",
+        boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
         border: `1px solid ${C.border}`, textAlign: "center",
       }}>
 
@@ -103,17 +125,9 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input
-            type="text" placeholder="IDを入力" value={id} onChange={e => setId(e.target.value)}
-            style={inputStyle}
-          />
+          <input type="text" placeholder="IDを入力" value={id} onChange={e => setId(e.target.value)} style={inputStyle} />
           <div style={{ position: "relative" }}>
-            <input
-              type={showPw ? "text" : "password"}
-              placeholder="パスワードを入力"
-              value={password} onChange={e => setPassword(e.target.value)}
-              style={{ ...inputStyle, paddingRight: 45 }}
-            />
+            <input type={showPw ? "text" : "password"} placeholder="パスワードを入力" value={password} onChange={e => setPassword(e.target.value)} style={{ ...inputStyle, paddingRight: 45 }} />
             <button type="button" onClick={() => setShowPw(!showPw)} style={eyeBtnStyle}>
               {showPw ? <EyeIcon /> : <EyeOffIcon />}
             </button>
@@ -131,10 +145,10 @@ export default function LoginPage() {
             style={{
               ...actionBtnBase,
               border: `1.2px solid ${C.navy}`,
-              background: loginHover ? C.navy  : C.white,
-              color:       loginHover ? C.white : C.navy,
-              transform:   loginHover ? "translateY(-1px)" : "none",
-              boxShadow:   loginHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
+              background: loginHover ? C.navy : C.white,
+              color: loginHover ? C.white : C.navy,
+              transform: loginHover ? "translateY(-1px)" : "none",
+              boxShadow: loginHover ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
               marginTop: 8,
             }}
           >
@@ -150,28 +164,22 @@ export default function LoginPage() {
         </div>
 
         {/* SNS LOGIN 구분선 */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "30px 0 25px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "35px 0 25px" }}>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
           <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>SNS LOGIN</span>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
         </div>
 
-        {/* SNS 버튼 */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
+        {/* ✅ SNS 버튼 - 간격 확대 (gap: 45) */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 45 }}>
           {SNS_ITEMS.map(item => (
             <button
               key={item.key}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "center",
-                gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0,
-              }}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0 }}
             >
               <div style={{
-                width: 54, height: 54, borderRadius: "50%",
-                background: item.bg, border: item.border,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                transition: "all 0.2s",
+                width: 54, height: 54, borderRadius: "50%", background: item.bg, border: item.border,
+                display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s"
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
@@ -180,20 +188,16 @@ export default function LoginPage() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
                 {item.lines.map((line, i) => (
-                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: C.gray2, fontFamily: font, lineHeight: 1.3 }}>
-                    {line}
-                  </span>
+                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: C.gray2, fontFamily: font, lineHeight: 1.3 }}>{line}</span>
                 ))}
               </div>
             </button>
           ))}
         </div>
 
-        <div style={{ margin: "35px 0 20px", height: 1, background: C.divider }} />
+        <div style={{ margin: "40px 0 20px", height: 1, background: C.divider }} />
 
-        <p style={{ fontSize: 13, color: C.gray3, marginBottom: 14, fontWeight: 500 }}>
-          まだアカウントをお持ちでないですか？
-        </p>
+        <p style={{ fontSize: 13, color: C.gray3, marginBottom: 14, fontWeight: 500 }}>まだアカウントをお持ちでないですか？</p>
 
         <Link to="/register" style={{ textDecoration: "none" }}>
           <button
@@ -202,10 +206,10 @@ export default function LoginPage() {
             style={{
               ...actionBtnBase,
               border: `1.2px solid ${C.navy}`,
-              background: registerHover ? C.navy  : C.white,
-              color:       registerHover ? C.white : C.navy,
-              transform:   registerHover ? "translateY(-1px)" : "none",
-              boxShadow:   registerHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
+              background: registerHover ? C.navy : C.white,
+              color: registerHover ? C.white : C.navy,
+              transform: registerHover ? "translateY(-1px)" : "none",
+              boxShadow: registerHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
             }}
           >
             会員登録
@@ -216,15 +220,10 @@ export default function LoginPage() {
   );
 }
 
-/* ── 스타일 객체 (슬림화 적용) ── */
+/* 스타일 객체 */
 const inputStyle = {
-  width: "100%", 
-  height: 46, // ✅ 60px -> 52px 슬림화
-  padding: "0 16px",
-  border: "1px solid #e2e8f0", borderRadius: 12,
-  fontSize: 15, fontFamily: font, outline: "none",
-  boxSizing: "border-box", background: "#ffffff",
-  transition: "border-color 0.2s",
+  width: "100%", height: 46, padding: "0 16px", border: "1px solid #e2e8f0", borderRadius: 12,
+  fontSize: 15, fontFamily: font, outline: "none", boxSizing: "border-box", background: "#ffffff",
 };
 
 const eyeBtnStyle = {
@@ -234,15 +233,9 @@ const eyeBtnStyle = {
 };
 
 const checkboxLabelStyle = {
-  display: "flex", alignItems: "center", gap: 8,
-  cursor: "pointer", fontSize: 14, color: "#4a5565",
-  marginTop: 4, fontWeight: 500, alignSelf: "flex-start",
+  display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14, color: "#4a5565", marginTop: 4, fontWeight: 500, alignSelf: "flex-start",
 };
 
 const actionBtnBase = {
-  width: "100%", 
-  height: 52, // ✅ 60px -> 52px 슬림화
-  borderRadius: 12,
-  fontSize: 16, fontWeight: 700, cursor: "pointer",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  width: "100%", height: 50, borderRadius: 12, fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
 };
