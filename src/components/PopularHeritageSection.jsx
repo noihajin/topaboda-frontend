@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-
 // ★ 아이콘 임포트
 import imgIconHeart from "../assets/icon_heart.svg";
 import imgIconBookmark from "../assets/icon_bookmark.svg";
 import imgIconLocation from "../assets/icon_location.svg";
 import imgIconEye from "../assets/icon_heart_2.svg";
-
 // 애니메이션 Variants
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -15,7 +13,6 @@ const containerVariants = {
     transition: { staggerChildren: 0.15 },
   },
 };
-
 const itemVariants = {
   hidden: { y: 30, opacity: 0 },
   visible: {
@@ -27,10 +24,8 @@ const itemVariants = {
     },
   },
 };
-
 export default function PopularHeritageSection() {
   const [sortType, setSortType] = useState("レビュー順");
-
   // ✅ nameKr(한국어 이름) 필드 추가
   const MOCK_DATA = [
     { id: 1, name: "仏国寺", nameKr: "불국사", location: "慶州, 慶尚北道", views: 1234, badge: "国宝", imageUrl: "https://images.unsplash.com/photo-1590603740183-980e7f6920eb?q=80&w=600" },
@@ -40,7 +35,6 @@ export default function PopularHeritageSection() {
     { id: 5, name: "青磁 象嵌", nameKr: "청자 상감", location: "国立中央博物館", views: 678, badge: "宝物", imageUrl: "https://images.unsplash.com/photo-1618176729090-253077a8f948?q=80&w=600" },
     { id: 6, name: "水原華城", nameKr: "수원 화성", location: "水原, 京畿道", views: 1823, badge: "史跡", imageUrl: "https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=600" },
   ];
-
   return (
     <motion.section
       className="w-full bg-[#F8F9FC] py-24 px-[10%]"
@@ -58,9 +52,8 @@ export default function PopularHeritageSection() {
           人気の国の遺産
         </motion.h2>
         <motion.p variants={itemVariants} className="text-gray-500 text-lg max-w-2xl">
-        多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+          많은 사람들이 찾는 한국의 대표적인 문화유산을 만나보세요
         </motion.p>
-
         <motion.div variants={itemVariants} className="flex bg-white p-1.5 rounded-full shadow-sm border border-gray-100 mt-12">
           {["レビュー順", "閲覧順"].map((type) => (
             <button
@@ -75,14 +68,12 @@ export default function PopularHeritageSection() {
           ))}
         </motion.div>
       </div>
-
       {/* 카드 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
         {MOCK_DATA.map((item) => (
           <HeritageCard key={item.id} data={item} />
         ))}
       </div>
-
       {/* 더보기 버튼 */}
       <motion.div variants={itemVariants} className="flex justify-center">
         <button className="group bg-white border-2 border-[#000D57] text-[#000D57] px-12 py-4 rounded-full font-bold hover:bg-[#000D57] hover:text-white transition-all duration-300 shadow-sm flex items-center gap-2">
@@ -93,17 +84,14 @@ export default function PopularHeritageSection() {
     </motion.section>
   );
 }
-
 // ─── 개별 카드 컴포넌트 ───
 function HeritageCard({ data }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-
   const badgeStyle =
-    data.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : 
-    data.badge === "宝物" ? "bg-[#6E0000] text-white" : 
+    data.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" :
+    data.badge === "宝物" ? "bg-[#6E0000] text-white" :
     "bg-[#000D57] text-white";
-
   return (
     <motion.div
       variants={itemVariants}
@@ -115,12 +103,10 @@ function HeritageCard({ data }) {
           alt={data.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
         />
-
         {/* 배지 */}
         <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>
           {data.badge}
         </span>
-
         {/* ── 우측 상단 버튼 그룹 (가로 정렬 수정) ── */}
         <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
           {/* 하트 버튼 */}
@@ -133,13 +119,12 @@ function HeritageCard({ data }) {
               alt="like"
               className={`w-5 h-5 transition-all duration-300`}
               style={{
-                filter: isLiked 
+                filter: isLiked
                   ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)" // Red
                   : "grayscale(1) opacity(0.3)",
               }}
             />
           </button>
-
           {/* 북마크 버튼 */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsBookmarked(!isBookmarked); }}
@@ -150,7 +135,7 @@ function HeritageCard({ data }) {
               alt="bookmark"
               className={`w-5 h-5 transition-all duration-300`}
               style={{
-                filter: isBookmarked 
+                filter: isBookmarked
                   ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)" // Gold
                   : "grayscale(1) opacity(0.3)",
               }}
@@ -158,18 +143,15 @@ function HeritageCard({ data }) {
           </button>
         </div>
       </div>
-
       <div className="p-8">
         <div className="flex items-baseline gap-2 mb-3">
           <h3 className="text-2xl font-black text-[#000D57] tracking-tight">{data.name}</h3>
           <span className="text-sm text-gray-400 font-medium">| {data.nameKr}</span>
         </div>
-
         <div className="flex items-center gap-2 text-gray-400 mb-8">
           <img src={imgIconLocation} alt="" className="w-3.5 h-3.5 opacity-50" />
           <span className="text-sm font-bold">{data.location}</span>
         </div>
-
         <div className="flex items-center justify-between pt-6 border-t border-gray-50">
           <div className="flex items-center gap-1.5 text-gray-400">
             <img src={imgIconEye} alt="" className="w-4.5 h-4.5 opacity-50" />
@@ -177,7 +159,6 @@ function HeritageCard({ data }) {
               {data.views.toLocaleString()} <span className="text-[10px] opacity-70 ml-1">VIEWS</span>
             </span>
           </div>
-
           {/* ✅ 일본어 텍스트 및 화살표 추가 */}
           <button className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn">
             詳細を見る
