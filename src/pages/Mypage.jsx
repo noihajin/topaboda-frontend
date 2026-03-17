@@ -40,12 +40,12 @@ const ACHIEVEMENTS = [
 ];
 
 const POSTS = [
-  { id: 1, title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, likes: 12 },
-  { id: 2, title: "仏国寺の夜景撮影チップス", desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。", date: "2024.02.10", views: 521, likes: 23 },
-  { id: 3, title: "瞻星台（チョムソンデ）訪問記", desc: "新羅時代の天文台、瞻星台に行ってきました。", date: "2024.01.28", views: 287, likes: 8 },
-  { id: 4, title: "昌徳宮・後苑（秘苑）散策コース", desc: "昌徳宮・後苑の美しい散策路を紹介します。", date: "2024.01.15", views: 456, likes: 15 },
-  { id: 5, title: "海印寺・八万大蔵経ガイド", desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, likes: 18 },
-  { id: 6, title: "水原華城の散策", desc: "城壁に沿って歩く歴史の道。", date: "2023.12.20", views: 150, likes: 5 },
+  { id: 1, title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, comments: 28, likes: 12 },
+  { id: 2, title: "仏国寺の夜景撮影チップス", desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。", date: "2024.02.10", views: 521, comments: 45, likes: 23 },
+  { id: 3, title: "瞻星台（チョムソンデ）訪問記", desc: "新羅時代の天文台、瞻星台に行ってきました。", date: "2024.01.28", views: 287, comments: 19, likes: 8 },
+  { id: 4, title: "昌徳宮・後苑（秘苑）散策コース", desc: "昌徳宮・後苑の美しい散策路を紹介します。", date: "2024.01.15", views: 456, comments: 38, likes: 15 },
+  { id: 5, title: "海印寺・八万大蔵経ガイド", desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, comments: 31, likes: 18 },
+  { id: 6, title: "水原華城の散策", desc: "城壁に沿って歩く歴史の道。", date: "2023.12.20", views: 150, comments: 7, likes: 5 },
 ];
 
 const COMMENTS = [
@@ -74,8 +74,15 @@ const EditIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="non
 const NavIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>;
 const CalendarIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.red} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-const ChevronLeft = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>;
-const ChevronRight = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>;
+const ChevronLeft = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>;
+const ChevronRight = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>;
+const BookmarkIcon = ({ active }) => <svg width="16" height="16" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>;
+const HeartIcon = ({ active }) => <svg width="16" height="16" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
+const EyeIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+const MsgIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>;
+const SmallHeartIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
+const TrashIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>;
+const PenWriteIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
 
 // ── 서브 컴포넌트: 업적/탐방로 복구 ──────────────────────────────────────
 function AchievementProgressBar({ progress }) {
@@ -116,18 +123,33 @@ function RouteCard({ route }) {
   );
 }
 
-// ── 리스트 행: 수정/삭제 버튼 유지 ───────────────────────────────────────
-function ListRow({ title, desc, meta, onEdit, onDelete }) {
+// ── 리스트 행: 카드형 (피그마 디자인) ────────────────────────────────
+function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }) {
   return (
-    <div style={{ borderBottom: `1px solid ${C.border}`, padding: "20px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <h4 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>{title}</h4>
-        {desc && <p style={{ fontSize: 14, color: C.gray2, margin: "0 0 8px", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{desc}</p>}
-        <span style={{ fontSize: 12, color: C.gray4 }}>{meta}</span>
-      </div>
-      <div style={{ display: "flex", gap: 8, marginLeft: 20 }}>
-        <button onClick={onEdit} style={{ background: C.bgLight, border: `1px solid ${C.border}`, padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>編集</button>
-        <button onClick={onDelete} style={{ background: C.redBg, border: `1px solid ${C.red}33`, color: C.red, padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>削除</button>
+    <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "20px 22px", background: C.white, marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h4 style={{ fontSize: 18, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h4>
+          {desc && <p style={{ fontSize: 14, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>{desc}</p>}
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}><CalendarIcon /> {date}</span>
+            {views !== undefined && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}><EyeIcon /> {views}</span>}
+            {comments !== undefined && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}><MsgIcon /> {comments}</span>}
+            {likes !== undefined && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}><SmallHeartIcon /> {likes}</span>}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "flex-start" }}>
+          <button onClick={onEdit}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#e5e7eb"}
+            onMouseLeave={e => e.currentTarget.style.background = "#f3f4f6"}
+          ><EditIcon /> 編集</button>
+          <button onClick={onDelete}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#ffe0e0"}
+            onMouseLeave={e => e.currentTarget.style.background = "#fff0f0"}
+          ><TrashIcon /> 削除</button>
+        </div>
       </div>
     </div>
   );
@@ -186,20 +208,24 @@ export default function MyPage() {
           <div style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><h3 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: 0 }}>私の探訪路</h3><NavIcon /></div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>{ROUTES.map(r => <RouteCard key={r.id} route={r} />)}</div>
-            <button style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer" }}>+ 新しい探訪路を作る</button>
+            <button
+              style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
+            >+ 新しい探訪路を作る</button>
           </div>
 
           {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
           <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <div style={{ display: "flex", gap: 24 }}>
-                <button onClick={() => { setHeritageTab("bookmark"); setHtPage(0); }} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "bookmark" ? `3px solid ${C.navy}` : "3px solid transparent" }}>ブックマーク</button>
-                <button onClick={() => { setHeritageTab("like"); setHtPage(0); }} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "like" ? `3px solid ${C.navy}` : "3px solid transparent" }}>いいね</button>
+                <button onClick={() => { setHeritageTab("bookmark"); setHtPage(0); }} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "bookmark" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}><BookmarkIcon active={heritageTab === "bookmark"} />ブックマーク</button>
+                <button onClick={() => { setHeritageTab("like"); setHtPage(0); }} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "like" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}><HeartIcon active={heritageTab === "like"} />いいね</button>
               </div>
               {totalHtPages > 1 && (
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button disabled={htPage === 0} onClick={() => setHtPage(p => p - 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage === 0 ? 0.3 : 1 }}><ChevronLeft /></button>
-                  <button disabled={htPage >= totalHtPages - 1} onClick={() => setHtPage(p => p + 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage >= totalHtPages - 1 ? 0.3 : 1 }}><ChevronRight /></button>
+                  <button disabled={htPage === 0} onClick={() => setHtPage(p => p - 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft /></button>
+                  <button disabled={htPage >= totalHtPages - 1} onClick={() => setHtPage(p => p + 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage >= totalHtPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight /></button>
                 </div>
               )}
             </div>
@@ -217,33 +243,71 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* ── 3. 활동 리스트 (5개 이상 시 페이지네이션) ── */}
+        {/* ── 3. 활동 리스트 ── */}
         <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <div style={{ display: "flex", gap: 16 }}>
-              {["posts", "comments", "reviews"].map(tab => (
-                <button key={tab} onClick={() => { setPostTab(tab); setActPage(0); }} style={{ background: "none", border: "none", fontSize: 16, fontWeight: 700, color: postTab === tab ? C.red : C.gray3, cursor: "pointer", paddingBottom: 8, borderBottom: postTab === tab ? `3px solid ${C.red}` : "3px solid transparent" }}>{tab === "posts" ? "投稿" : tab === "comments" ? "コメント" : "レビュー"}</button>
-              ))}
+          {/* 탭 + 새 글 작성 버튼 */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 8 }}>
+              {[
+                { key: "posts",    label: "投稿した記事", count: POSTS.length },
+                { key: "comments", label: "コメント",     count: COMMENTS.length },
+                { key: "reviews",  label: "レビュー",     count: REVIEWS.length },
+              ].map(({ key, label, count }) => {
+                const isActive = postTab === key;
+                return (
+                  <button key={key} onClick={() => { setPostTab(key); setActPage(0); }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
+                  >
+                    {label}
+                    <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
+                  </button>
+                );
+              })}
             </div>
-            <button style={{ background: C.navy, color: "white", border: "none", padding: "10px 20px", borderRadius: 10, fontWeight: 700, cursor: "pointer" }}>+ 新規投稿</button>
+            <button
+              style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: `2px solid ${C.red}`, padding: "10px 20px", borderRadius: 10, fontWeight: 500, fontSize: 15, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
+            ><PenWriteIcon /> 새 글 작성</button>
           </div>
-          <div style={{ minHeight: 450 }}>
+
+          {/* 리스트 */}
+          <div style={{ minHeight: 400 }}>
             {displayedAct.map(item => (
-              <ListRow 
-                key={item.id} 
+              <ListRow
+                key={item.id}
                 title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName}
                 desc={postTab === "posts" ? item.desc : item.content}
-                meta={postTab === "posts" ? `${item.date} · 閲覧 ${item.views} · いいね ${item.likes}` : item.date}
+                date={item.date}
+                views={postTab === "posts" ? item.views : undefined}
+                comments={postTab === "posts" ? item.comments : undefined}
+                likes={postTab === "posts" ? item.likes : undefined}
                 onEdit={() => console.log("Edit", item.id)}
                 onDelete={() => confirm("削除しますか？")}
               />
             ))}
           </div>
+
+          {/* 번호형 페이지네이션 */}
           {totalActPages > 1 && (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 24, marginTop: 32 }}>
-              <button disabled={actPage === 0} onClick={() => setActPage(p => p - 1)} style={{ background: "none", border: "none", cursor: "pointer", opacity: actPage === 0 ? 0.2 : 1 }}><ChevronLeft /></button>
-              <span style={{ fontWeight: 700, color: C.gray2 }}>{actPage + 1} / {totalActPages}</span>
-              <button disabled={actPage >= totalActPages - 1} onClick={() => setActPage(p => p + 1)} style={{ background: "none", border: "none", cursor: "pointer", opacity: actPage >= totalActPages - 1 ? 0.2 : 1 }}><ChevronRight /></button>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 24 }}>
+              <button disabled={actPage === 0} onClick={() => setActPage(p => p - 1)}
+                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
+                onMouseEnter={e => { if (actPage !== 0) e.currentTarget.style.background = "#f3f4f6"; }}
+                onMouseLeave={e => e.currentTarget.style.background = "white"}
+              ><ChevronLeft /></button>
+              {Array.from({ length: totalActPages }, (_, i) => (
+                <button key={i} onClick={() => setActPage(i)}
+                  style={{ width: 40, height: 40, borderRadius: 10, border: actPage === i ? "none" : `1.5px solid ${C.borderD}`, background: actPage === i ? C.red : "white", color: actPage === i ? "white" : C.gray1, cursor: "pointer", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
+                  onMouseEnter={e => { if (actPage !== i) e.currentTarget.style.background = "#f3f4f6"; }}
+                  onMouseLeave={e => { if (actPage !== i) e.currentTarget.style.background = "white"; }}
+                >{i + 1}</button>
+              ))}
+              <button disabled={actPage >= totalActPages - 1} onClick={() => setActPage(p => p + 1)}
+                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage >= totalActPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
+                onMouseEnter={e => { if (actPage < totalActPages - 1) e.currentTarget.style.background = "#f3f4f6"; }}
+                onMouseLeave={e => e.currentTarget.style.background = "white"}
+              ><ChevronRight /></button>
             </div>
           )}
         </div>
