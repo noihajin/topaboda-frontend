@@ -11,48 +11,48 @@ import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
 const NAV_LINKS = [
-  { label: "国の遺産リスト", to: "/heritage" },
-  { label: "業績", to: "/achievements" },
-  { label: "コミュニティー", to: "/community" },
+    { label: "国の遺産リスト", to: "/heritage" },
+    { label: "業績", to: "/achievements" },
+    { label: "コミュニティー", to: "/community" },
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAuthenticated = Boolean(localStorage.getItem("token"));
-  
-  const location = useLocation();
-  const navigate = useNavigate();
+    const [scrolled, setScrolled] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const isAuthenticated = Boolean(localStorage.getItem("token"));
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    const onResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) setIsMenuOpen(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        const onResize = () => {
+            setIsMobile(window.innerWidth < 768);
+            if (window.innerWidth >= 768) setIsMenuOpen(false);
+        };
+        window.addEventListener("scroll", onScroll);
+        window.addEventListener("resize", onResize);
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onResize);
+        };
+    }, []);
+
+    const isSubPage = location.pathname !== "/";
+    const isActive = isSubPage || scrolled || isHovered;
+    const isCompact = isSubPage || scrolled || isMobile;
+
+    const handleLoginClick = () => {
+        setIsMenuOpen(false);
+        navigate("/login");
     };
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+
+    const handleMyPageClick = () => {
+        setIsMenuOpen(false);
+        navigate("/mypage");
     };
-  }, []);
-
-  const isSubPage = location.pathname !== "/";
-  const isActive = isSubPage || scrolled || isHovered;
-  const isCompact = isSubPage || scrolled || isMobile;
-
-  const handleLoginClick = () => {
-    setIsMenuOpen(false);
-    navigate("/login");
-  };
-
-  const handleMyPageClick = () => {
-    setIsMenuOpen(false);
-    navigate("/mypage");
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -200,43 +200,54 @@ export default function Navbar() {
         }
       `}</style>
 
-      <div className="drawer-overlay" onClick={() => setIsMenuOpen(false)} />
+            <div
+                className="drawer-overlay"
+                onClick={() => setIsMenuOpen(false)}
+            />
 
-      <header
-        className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
-        }}
-      >
-        <div className="gnb-inner">
-          <div className="gnb-logo-area">
-            <Link to="/" className="gnb-logo">
-              <img
-                src={isCompact ? (isActive ? imgLogoBlkSmall : imgLogoWht) : (isActive ? imgLogoBlk : imgLogoWht)}
-                alt="Logo"
-              />
-            </Link>
-          </div>
+            <header
+                className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                    "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
+                }}
+            >
+                <div className="gnb-inner">
+                    <div className="gnb-logo-area">
+                        <Link to="/" className="gnb-logo">
+                            <img
+                                src={
+                                    isCompact
+                                        ? isActive
+                                            ? imgLogoBlkSmall
+                                            : imgLogoWht
+                                        : isActive
+                                          ? imgLogoBlk
+                                          : imgLogoWht
+                                }
+                                alt="Logo"
+                            />
+                        </Link>
+                    </div>
 
-          {!isMobile && (
-            <nav className="gnb-nav-area">
-              <div className="gnb-menus">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          )}
+                    {!isMobile && (
+                        <nav className="gnb-nav-area">
+                            <div className="gnb-menus">
+                                {NAV_LINKS.map((link) => (
+                                    <Link
+                                        key={link.label}
+                                        to={link.to}
+                                        className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </nav>
+                    )}
 
           <div className="gnb-action-area">
             {!isMobile ? (
