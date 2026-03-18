@@ -162,9 +162,17 @@ export default function MyPage() {
   const [actPage, setActPage] = useState(0);
   const [heritageTab, setHeritageTab] = useState("bookmark");
   const [htPage, setHtPage] = useState(0);
+  const [routePage, setRoutePage] = useState(0);
 
   const PAGE_SIZE = 5;
   const HT_SIZE = 3;
+  const ROUTE_SIZE = 2;
+
+  // localStorage에서 사용자 저장 루트 불러오기
+  const savedRoutes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
+  const allRoutes = [...savedRoutes, ...ROUTES];
+  const totalRoutePages = Math.ceil(allRoutes.length / ROUTE_SIZE);
+  const displayedRoutes = allRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
 
   const currentActData = postTab === "posts" ? POSTS : postTab === "comments" ? COMMENTS : REVIEWS;
   const totalActPages = Math.ceil(currentActData.length / PAGE_SIZE);
@@ -206,9 +214,28 @@ export default function MyPage() {
         <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
           {/* 나의 탐방로 */}
           <div style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><h3 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: 0 }}>私の探訪路</h3><NavIcon /></div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>{ROUTES.map(r => <RouteCard key={r.id} route={r} />)}</div>
+            {/* 헤더 + 화살표 페이지네이션 */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: 0 }}>私の探訪路</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  disabled={routePage === 0}
+                  onClick={() => setRoutePage(p => p - 1)}
+                  style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage === 0 ? "default" : "pointer", opacity: routePage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                ><ChevronLeft /></button>
+                <span style={{ fontSize: 12, color: C.gray3 }}>{routePage + 1} / {totalRoutePages}</span>
+                <button
+                  disabled={routePage >= totalRoutePages - 1}
+                  onClick={() => setRoutePage(p => p + 1)}
+                  style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage >= totalRoutePages - 1 ? "default" : "pointer", opacity: routePage >= totalRoutePages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                ><ChevronRight /></button>
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {displayedRoutes.map(r => <RouteCard key={r.id} route={r} />)}
+            </div>
             <button
+              onClick={() => navigate("/route/create")}
               style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
               onMouseEnter={e => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
