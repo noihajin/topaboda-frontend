@@ -10,6 +10,7 @@ import {
 // 컴포넌트 임포트
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 // 페이지 임포트
 import MainHome from "./pages/MainHome";
@@ -45,6 +46,8 @@ function AppLayout() {
   const hideNav = HIDE_NAV_PATHS.includes(location.pathname);
 
   return (
+    <>
+    <ScrollToTop />
     <div className="min-h-screen flex flex-col font-sans">
       {!hideNav && <Navbar />}
 
@@ -95,6 +98,7 @@ function AppLayout() {
 
       {!hideNav && <Footer />}
     </div>
+    </>
   );
 }
 
