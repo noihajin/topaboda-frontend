@@ -1,16 +1,48 @@
-# React + Vite
+# 톺아보다 (トパボダ) - Frontend 🇰🇷🇯🇵
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+한국의 국가유산을 탐색하고 업적을 쌓는 지도 기반 서비스입니다.
+韓国の国家遺産を探索し、実績을 쌓는 地図ベースのサービスです。
 
-Currently, two official plugins are available:
+## 🛠 Tech Stack (技術スタック)
+- **Framework:** React (Vite)
+- **Language:** JavaScript
+- **Library:** Axios, Google Maps API, Framer Motion
+- **State Management:** React Context API / Zustand
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Getting Started (インストールと実行)
 
-## React Compiler
+### 1. Clone the repository
+```bash
+git clone [https://github.com/noihajin/topaboda-frontend.git](https://github.com/noihajin/topaboda-frontend.git)
+cd topaboda-frontend
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+### ✨ 핵심 기능 (Key Features)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **인터랙티브 줌 & 드래그**: 
+  - `Framer Motion`을 활용한 부드러운 지도 이동 및 확대/축소 기능을 지원합니다.
+  
+- **스마트 클러스터링 (Smart Clustering)**:
+  - **축소 시**: 지역별 유산 개수를 보여주는 세련된 **네이비 & 골드 클러스터** 핀 노출.
+  - **확대 시 (1.5x 이상)**: 개별 유산의 위치를 가리키는 **정교한 마커와 이름표**로 자동 전환.
+  
+- **논블로킹(Non-blocking) 상세 사이드바**:
+  - 핀 클릭 시 우측에서 상세 정보 패널이 등장하며, 사이드바가 열린 상태에서도 지도를 실시간으로 조작할 수 있습니다.
+  - **피그마(Figma) 디자인**을 100% 반영한 국가유산 정보 카드 및 리뷰 시스템을 통합했습니다.
+
+- **미리보기 툴팁**: 
+  - 마커 호버 시 유산의 대표 이미지와 명칭을 팝업 형태로 미리 보여줍니다.
+
+### 🎮 조작 가이드 (Interaction Guide)
+
+1. **지도 이동**: 마우스를 클릭한 채 드래그하여 대한민국 전역을 탐색할 수 있습니다.
+2. **확대/축소**: 
+   - 좌측 하단의 `+`, `-` 버튼 클릭
+3. **상세 정보**: 핀을 클릭하면 우측에서 상세 설명, 위치 정보, 사용자 리뷰를 확인할 수 있습니다.
+4. **좋아요/저장**: 사이드바 및 카드 상단에서 실시간 하트와 북마크 표시가 가능합니다. (자주색 & 골드 브랜드 컬러 적용)
+
+### 🛠️ 사용 기술 (Tech Stack)
+
+- **React / Tailwind CSS**: 레이아웃 및 스타일링
+- **Framer Motion**: 드래그, 줌, 레이아웃 전환 애니메이션
+- **Lucide React / SVG**: 커스텀 마커 및 인터랙티브 아이콘

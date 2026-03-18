@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
+// 컴포넌트 임포트
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+// 페이지 임포트
+import MainHome from "./pages/MainHome";
+import Community from "./pages/Community";
+import WritePost from "./pages/WritePost";
+import Login from "./pages/Login";
+import RegisterSelect from "./pages/RegisterSelect"; // ★ 추가됨
+import Register from "./pages/Register"; // ★ 추가됨
+import MyPage from "./pages/Mypage"; // ★ 추가됨
+
+// ── [인증 가드 컴포넌트] ───────────────────────────────────────────
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem("token");
+
+  if (!isAuthenticated) {
+    alert("ログインが必要です。");
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// 마이페이지 편집(임시): 실제 편집 UI가 생기기 전까지 마이페이지로 되돌림
+const MyPageEditRedirect = () => <Navigate to="/mypage" replace />;
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen flex flex-col font-sans">
+        <Navbar />
+
+        <main className="flex-grow">
+          {/* ✅ 모든 Route는 이 Routes 태그 안에 있어야 합니다 */}
+          <Routes>
+            {/* 1. 메인 홈 */}
+            <Route path="/" element={<MainHome />} />
+
+            {/* 2. 커뮤니티 리스트 */}
+            <Route path="/community" element={<Community />} />
+
+            {/* 3. 로그인 페이지 */}
+            <Route path="/login" element={<Login />} />
+
+            {/* 4. 회원가입 선택창 (소셜 vs 이메일) */}
+            <Route path="/register" element={<RegisterSelect />} />
+
+            {/* 5. 이메일 회원가입 상세 폼 */}
+            <Route path="/register/form" element={<Register />} />
+
+            {/* 5-1. 마이페이지 */}
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/mypage/edit" element={<MyPageEditRedirect />} />
+
+            {/* 6. 커뮤니티 글쓰기 (보호된 경로) */}
+            <Route
+              path="/community/write"
+              element={
+                <ProtectedRoute>
+                  <WritePost />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+
+        <Footer />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;

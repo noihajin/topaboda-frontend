@@ -1,68 +1,62 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* 1. 구글 폰트 import: Roboto(영문)와 Noto Sans JP(일문) 통합 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@400;700&family=Roboto:wght@100..900&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* 2. Tailwind 필수 명령어 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+/* 3. 기본 여백 초기화 및 전역 폰트 설정 */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  /* 영문/숫자는 Roboto, 일본어는 Noto Sans JP 적용 */
+  font-family: 'Roboto', 'Noto Sans JP', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* 4. 제목용 폰트 클래스 (세리프 느낌이 필요할 때 사용) */
+.font-title {
+  font-family: 'Roboto', 'Noto Serif JP', serif;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+/* ── 전역 스크롤바 커스터마이징 ── */
+
+/* 1. 전체 스크롤바 영역 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* 2. 스크롤바 트랙 (바탕) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+/* 3. 스크롤바 핸들 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+  background: #bbc1e2; /* 브랜드 보조 컬러 */
+  border-radius: 10px;
+  border: 2px solid #f1f1f1; /* 여백 효과 */
+}
+
+/* 4. 핸들 호버 효과 */
+::-webkit-scrollbar-thumb:hover {
+  background: #CACA00; /* 포인트 골드 컬러 */
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* ── 유틸리티 클래스 ── */
+@layer utilities {
+  /* 스크롤바 숨기기 (기능은 유지) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE, Edge */
+    scrollbar-width: none;     /* Firefox */
   }
 }
