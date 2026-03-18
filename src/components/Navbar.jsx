@@ -54,6 +54,12 @@ export default function Navbar() {
     navigate("/mypage");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsMenuOpen(false);
+    navigate("/");
+  };
+
   return (
     <>
       <style>{`
@@ -239,9 +245,15 @@ export default function Navbar() {
                   <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
                 </button>
                 {isAuthenticated ? (
-                  <button className="gnb-btn" onClick={handleMyPageClick}>
-                    MyPage
-                  </button>
+                  <>
+                    <button className="gnb-btn" onClick={handleMyPageClick}>
+                      My Page
+                    </button>
+                    <button className="gnb-btn" onClick={handleLogout}>
+                      <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" />
+                      Logout
+                    </button>
+                  </>
                 ) : (
                   <button className="gnb-btn" onClick={handleLoginClick}>
                     <img
@@ -281,21 +293,43 @@ export default function Navbar() {
             <img src={imgIconGlobeBlk} alt="" /> Language: JP
           </button>
           {isAuthenticated ? (
-            <button
-              onClick={handleMyPageClick}
-              style={{
-                background: "#000d57",
-                color: "#fff",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "none",
-                fontWeight: "700",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
-            >
-              MyPage
-            </button>
+            <>
+              <button
+                onClick={handleMyPageClick}
+                style={{
+                  background: "#000d57",
+                  color: "#fff",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  border: "none",
+                  fontWeight: "700",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                My Page
+              </button>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  color: "#000d57",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  border: "1.5px solid #000d57",
+                  fontWeight: "700",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <img src={imgIconLoginBlk} alt="" style={{ width: 18, height: 18 }} />
+                Logout
+              </button>
+            </>
           ) : (
             <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
               Login / Sign Up
