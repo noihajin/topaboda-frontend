@@ -26,6 +26,7 @@ const itemVariants = {
   },
 };
 export default function PopularHeritageSection() {
+  const navigate = useNavigate();
   const [sortType, setSortType] = useState("レビュー順");
   // nameKr(한국어 이름) 필드 포함
   const MOCK_DATA = [
@@ -77,7 +78,10 @@ export default function PopularHeritageSection() {
       </div>
       {/* 더보기 버튼 */}
       <motion.div variants={itemVariants} className="flex justify-center">
-        <button className="group bg-white border-2 border-[#000D57] text-[#000D57] px-12 py-4 rounded-full font-bold hover:bg-[#000D57] hover:text-white transition-all duration-300 shadow-sm flex items-center gap-2">
+        <button
+          onClick={() => navigate("/heritage")}
+          className="group bg-white border-2 border-[#000D57] text-[#000D57] px-12 py-4 rounded-full font-bold hover:bg-[#000D57] hover:text-white transition-all duration-300 shadow-sm flex items-center gap-2"
+        >
           もっと多くの遺産を見る
           <span className="group-hover:translate-x-1 transition-transform">→</span>
         </button>
