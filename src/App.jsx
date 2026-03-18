@@ -20,6 +20,7 @@ import Register from "./pages/Register"; // ★ 추가됨
 import HeritageDetail from "./pages/HeritageDetail";
 import HeritageList from "./pages/HeritageList";
 import MyPage from "./pages/Mypage"; // ★ 추가됨
+import Achievement from "./pages/Achievement"; // ★ 추가됨
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -63,7 +64,10 @@ function App() {
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/edit" element={<MyPageEditRedirect />} />
 
-            {/* 6. 문화유산 목록 */}
+            {/* 6. 업적 페이지 */}
+            <Route path="/achievements" element={<Achievement />} />
+
+            {/* 7. 문화유산 목록 */}
             <Route path="/heritage" element={<HeritageList />} />
 
             {/* 7. 문화유산 상세보기 */}
