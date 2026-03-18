@@ -61,17 +61,17 @@ const SNS_ITEMS = [
   },
 ];
 
-/* ── 共通インプット ── */
+/* ── 共通インプット (Login と同じスタイル) ── */
 const FigmaInput = ({ style, ...props }) => (
   <input
     style={{
       width: "100%",
-      height: 60,
+      height: 46,
       background: C.white,
-      border: `1px solid ${C.navy}`,
-      borderRadius: 10,
+      border: `1px solid ${C.border}`,
+      borderRadius: 12,
       padding: "0 16px",
-      fontSize: 16,
+      fontSize: 15,
       fontFamily: font,
       outline: "none",
       boxSizing: "border-box",
@@ -81,7 +81,7 @@ const FigmaInput = ({ style, ...props }) => (
   />
 );
 
-/* ── ネイビーボタン ── */
+/* ── ネイビーボタン (Login スタイルに統一) ── */
 const NavyButton = ({ children, onClick, type = "button", style }) => {
   const [hover, setHover] = useState(false);
   return (
@@ -91,18 +91,19 @@ const NavyButton = ({ children, onClick, type = "button", style }) => {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        width: 340,
-        height: 64,
-        background: hover ? "#001080" : C.navy,
-        color: "#e6e6e6",
-        border: "none",
-        borderRadius: 10,
-        fontSize: 18,
-        fontWeight: 600,
+        width: "100%",
+        height: 50,
+        background: hover ? C.navy : C.white,
+        color: hover ? C.white : C.navy,
+        border: `1.2px solid ${C.navy}`,
+        borderRadius: 12,
+        fontSize: 16,
+        fontWeight: 700,
         fontFamily: font,
-        letterSpacing: "0.9px",
         cursor: "pointer",
-        transition: "background 0.2s",
+        transform: hover ? "translateY(-1px)" : "none",
+        boxShadow: hover ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         ...style,
       }}
     >
@@ -147,6 +148,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [nicknameStatus, setNicknameStatus] = useState("idle");
+  const [userIdStatus, setUserIdStatus] = useState("idle");
   const [email, setEmail] = useState("");
   const [authCode, setAuthCode] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -204,6 +206,7 @@ export default function Register() {
 
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
+    if (userIdStatus !== "available") return alert("IDの重複確認を行ってください。");
     if (nicknameStatus !== "available") return alert("ニックネームの重複確認を行ってください。");
     if (formData.password !== formData.passwordConfirm) return alert("パスワードが一致しません。");
     try {
@@ -218,6 +221,23 @@ export default function Register() {
       }
     } catch (err) {
       alert(err.response?.data?.message || "サーバーエラーが発生しました。");
+    }
+  };
+
+  const handleUserIdCheck = async () => {
+    if (!formData.userId) return alert("IDを入力してください。");
+    try {
+      setUserIdStatus("checking");
+      const res = await axios.post(
+        "http://localhost:9990/topaboda/api/auth/signUp/id",
+        { id: formData.userId }
+      );
+      if (res.status === 200) {
+        setUserIdStatus("available");
+      }
+    } catch (err) {
+      if (err.response?.status === 409) setUserIdStatus("duplicate");
+      else setUserIdStatus("error");
     }
   };
 
@@ -248,7 +268,7 @@ export default function Register() {
 
       {/* ── ホワイトカード (Step 1 / 2 / 3共通) ── */}
       <div style={{
-        width: "100%", maxWidth: step === 3 ? 560 : 420,
+        width: "100%", maxWidth: 420,
         background: C.white, borderRadius: 24,
         padding: "45px 40px",
         boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
@@ -331,13 +351,7 @@ export default function Register() {
                 </p>
               </div>
 
-              {/* グレーパネル */}
-              <div style={{
-                background: C.panel,
-                borderRadius: 14,
-                padding: "28px 24px 32px",
-              }}>
-                <form onSubmit={handleVerifyCode}>
+              <form onSubmit={handleVerifyCode}>
 
                   {/* 認証コード ラベル + インプット */}
                   <div style={{ marginBottom: 10 }}>
@@ -371,7 +385,7 @@ export default function Register() {
                   </div>
 
                   {/* 入力ボタン */}
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginTop: 8 }}>
                     <NavyButton type="submit">入力</NavyButton>
 
                     {/* 戻るリンク */}
@@ -380,7 +394,7 @@ export default function Register() {
                       onClick={() => setStep(1)}
                       style={{
                         background: "none", border: "none", cursor: "pointer",
-                        color: C.gray4, fontSize: 15, fontWeight: 500,
+                        color: C.gray3, fontSize: 13, fontWeight: 500,
                         textDecoration: "underline", fontFamily: font,
                       }}
                     >
@@ -388,7 +402,6 @@ export default function Register() {
                     </button>
                   </div>
                 </form>
-              </div>
             </motion.div>
           )}
 
@@ -396,23 +409,30 @@ export default function Register() {
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
 
-              {/* グレーパネル */}
-              <div style={{
-                background: C.panel,
-                borderRadius: 14,
-                padding: "36px 32px 40px",
-              }}>
-                <form onSubmit={handleFinalSubmit}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+              <form onSubmit={handleFinalSubmit}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
                     {/* アイディー */}
                     <FormRow label="アイディー">
-                      <FigmaInput
-                        type="text"
-                        required
-                        placeholder="IDを入力"
-                        onChange={e => setFormData({ ...formData, userId: e.target.value })}
-                      />
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <FigmaInput
+                          type="text"
+                          required
+                          placeholder="IDを入力"
+                          style={{ flex: 1 }}
+                          onChange={e => {
+                            setFormData({ ...formData, userId: e.target.value });
+                            setUserIdStatus("idle");
+                          }}
+                        />
+                        <CheckButton onClick={handleUserIdCheck} />
+                      </div>
+                      {userIdStatus === "available" && (
+                        <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>
+                      )}
+                      {userIdStatus === "duplicate" && (
+                        <p style={{ fontSize: 12, color: C.red, margin: "5px 0 0", textAlign: "left" }}>✗ すでに使用中です</p>
+                      )}
                     </FormRow>
 
                     {/* パスワード */}
@@ -463,23 +483,7 @@ export default function Register() {
                             setNicknameStatus("idle");
                           }}
                         />
-                        <button
-                          type="button"
-                          onClick={handleNicknameCheck}
-                          style={{
-                            flexShrink: 0, width: 80, height: 60,
-                            borderRadius: 10,
-                            border: `1px solid ${C.navy}`,
-                            background: C.white, color: C.navy,
-                            fontWeight: 700, fontSize: 14,
-                            cursor: "pointer", fontFamily: font,
-                            transition: "all 0.2s",
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.background = C.navy; e.currentTarget.style.color = C.white; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = C.white; e.currentTarget.style.color = C.navy; }}
-                        >
-                          確認
-                        </button>
+                        <CheckButton onClick={handleNicknameCheck} />
                       </div>
                       {nicknameStatus === "available" && (
                         <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>
@@ -492,11 +496,10 @@ export default function Register() {
                   </div>
 
                   {/* 登録するボタン */}
-                  <div style={{ display: "flex", justifyContent: "center", marginTop: 36 }}>
+                  <div style={{ marginTop: 28 }}>
                     <NavyButton type="submit">登録する</NavyButton>
                   </div>
                 </form>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -565,6 +568,31 @@ function FormRow({ label, children }) {
       </div>
       <div style={{ flex: 1 }}>{children}</div>
     </div>
+  );
+}
+
+/** 確認ボタン (ID・ニックネーム共通) */
+function CheckButton({ onClick }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        flexShrink: 0, width: 72, height: 46,
+        borderRadius: 12,
+        border: `1.2px solid ${C.navy}`,
+        background: hover ? C.navy : C.white,
+        color: hover ? C.white : C.navy,
+        fontWeight: 700, fontSize: 14,
+        cursor: "pointer", fontFamily: font,
+        transition: "all 0.2s",
+      }}
+    >
+      確認
+    </button>
   );
 }
 
