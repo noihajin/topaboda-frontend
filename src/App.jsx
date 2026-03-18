@@ -18,6 +18,7 @@ import Login from "./pages/Login";
 import RegisterSelect from "./pages/RegisterSelect"; // ★ 추가됨
 import Register from "./pages/Register"; // ★ 추가됨
 import HeritageDetail from "./pages/HeritageDetail";
+import HeritageList from "./pages/HeritageList";
 import MyPage from "./pages/Mypage"; // ★ 추가됨
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
@@ -62,7 +63,10 @@ function App() {
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/mypage/edit" element={<MyPageEditRedirect />} />
 
-            {/* 6. 문화유산 상세보기 */}
+            {/* 6. 문화유산 목록 */}
+            <Route path="/heritage" element={<HeritageList />} />
+
+            {/* 7. 문화유산 상세보기 */}
             <Route path="/heritage/:heritageId" element={<HeritageDetail />} />
 
             {/* 7. 커뮤니티 글쓰기 (보호된 경로) */}
