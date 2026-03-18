@@ -11,52 +11,52 @@ import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
 const NAV_LINKS = [
-  { label: "国の遺産リスト", to: "/heritage" },
-  { label: "業績", to: "/achievements" },
-  { label: "コミュニティー", to: "/community" },
+    { label: "国の遺産リスト", to: "/heritage" },
+    { label: "業績", to: "/achievements" },
+    { label: "コミュニティー", to: "/community" },
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAuthenticated = Boolean(localStorage.getItem("token"));
-  
-  const location = useLocation();
-  const navigate = useNavigate();
+    const [scrolled, setScrolled] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const isAuthenticated = Boolean(localStorage.getItem("token"));
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    const onResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) setIsMenuOpen(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        const onResize = () => {
+            setIsMobile(window.innerWidth < 768);
+            if (window.innerWidth >= 768) setIsMenuOpen(false);
+        };
+        window.addEventListener("scroll", onScroll);
+        window.addEventListener("resize", onResize);
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onResize);
+        };
+    }, []);
+
+    const isSubPage = location.pathname !== "/";
+    const isActive = isSubPage || scrolled || isHovered;
+    const isCompact = isSubPage || scrolled || isMobile;
+
+    const handleLoginClick = () => {
+        setIsMenuOpen(false);
+        navigate("/login");
     };
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+
+    const handleMyPageClick = () => {
+        setIsMenuOpen(false);
+        navigate("/mypage");
     };
-  }, []);
 
-  const isSubPage = location.pathname !== "/";
-  const isActive = isSubPage || scrolled || isHovered;
-  const isCompact = isSubPage || scrolled || isMobile;
-
-  const handleLoginClick = () => {
-    setIsMenuOpen(false);
-    navigate("/login");
-  };
-
-  const handleMyPageClick = () => {
-    setIsMenuOpen(false);
-    navigate("/mypage");
-  };
-
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         .gnb-root {
           position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -194,115 +194,218 @@ export default function Navbar() {
         }
       `}</style>
 
-      <div className="drawer-overlay" onClick={() => setIsMenuOpen(false)} />
+            <div
+                className="drawer-overlay"
+                onClick={() => setIsMenuOpen(false)}
+            />
 
-      <header
-        className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
-        }}
-      >
-        <div className="gnb-inner">
-          <div className="gnb-logo-area">
-            <Link to="/" className="gnb-logo">
-              <img
-                src={isCompact ? (isActive ? imgLogoBlkSmall : imgLogoWht) : (isActive ? imgLogoBlk : imgLogoWht)}
-                alt="Logo"
-              />
-            </Link>
-          </div>
-
-          {!isMobile && (
-            <nav className="gnb-nav-area">
-              <div className="gnb-menus">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          )}
-
-          <div className="gnb-action-area">
-            {!isMobile ? (
-              <>
-                <button className="gnb-btn">
-                  <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
-                </button>
-                {isAuthenticated ? (
-                  <button className="gnb-btn" onClick={handleMyPageClick}>
-                    MyPage
-                  </button>
-                ) : (
-                  <button className="gnb-btn" onClick={handleLoginClick}>
-                    <img
-                      src={isActive ? imgIconLoginBlk : imgIconLoginWht}
-                      alt=""
-                    />{" "}
-                    Login
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="hamburger" onClick={() => setIsMenuOpen(true)}>
-                <span /><span /><span />
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* 모바일 드로어 */}
-      <div className="mobile-drawer">
-        <button className="drawer-close-btn" onClick={() => setIsMenuOpen(false)}>
-          <div className="close-icon">
-            <span style={{ position: 'absolute', top: '11px', left: 0, width: '24px', height: '2px', background: '#000d57', transform: "rotate(45deg)" }}></span>
-            <span style={{ position: 'absolute', top: '11px', left: 0, width: '24px', height: '2px', background: '#000d57', transform: "rotate(-45deg)" }}></span>
-          </div>
-        </button>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '40px' }}>
-          {NAV_LINKS.map(link => (
-            <Link key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)} style={{ fontSize: '20px', fontWeight: '700', textDecoration: 'none', color: location.pathname === link.to ? '#6E0000' : '#000d57' }}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button className="gnb-btn" style={{ color: '#000', padding: '12px 0', justifyContent: 'flex-start' }}>
-            <img src={imgIconGlobeBlk} alt="" /> Language: JP
-          </button>
-          {isAuthenticated ? (
-            <button
-              onClick={handleMyPageClick}
-              style={{
-                background: "#000d57",
-                color: "#fff",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "none",
-                fontWeight: "700",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
+            <header
+                className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                    "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
+                }}
             >
-              MyPage
-            </button>
-          ) : (
-            <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
-              Login / Sign Up
-            </button>
-          )}
-        </div>
-      </div>
-    </>
-  );
+                <div className="gnb-inner">
+                    <div className="gnb-logo-area">
+                        <Link to="/" className="gnb-logo">
+                            <img
+                                src={
+                                    isCompact
+                                        ? isActive
+                                            ? imgLogoBlkSmall
+                                            : imgLogoWht
+                                        : isActive
+                                          ? imgLogoBlk
+                                          : imgLogoWht
+                                }
+                                alt="Logo"
+                            />
+                        </Link>
+                    </div>
+
+                    {!isMobile && (
+                        <nav className="gnb-nav-area">
+                            <div className="gnb-menus">
+                                {NAV_LINKS.map((link) => (
+                                    <Link
+                                        key={link.label}
+                                        to={link.to}
+                                        className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </nav>
+                    )}
+
+                    <div className="gnb-action-area">
+                        {!isMobile ? (
+                            <>
+                                <button className="gnb-btn">
+                                    <img
+                                        src={
+                                            isActive
+                                                ? imgIconGlobeBlk
+                                                : imgIconGlobeWht
+                                        }
+                                        alt=""
+                                    />{" "}
+                                    JP
+                                </button>
+                                {isAuthenticated ? (
+                                    <button
+                                        className="gnb-btn"
+                                        onClick={handleMyPageClick}
+                                    >
+                                        MyPage
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="gnb-btn"
+                                        onClick={handleLoginClick}
+                                    >
+                                        <img
+                                            src={
+                                                isActive
+                                                    ? imgIconLoginBlk
+                                                    : imgIconLoginWht
+                                            }
+                                            alt=""
+                                        />{" "}
+                                        Login
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            <div
+                                className="hamburger"
+                                onClick={() => setIsMenuOpen(true)}
+                            >
+                                <span />
+                                <span />
+                                <span />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </header>
+
+            {/* 모바일 드로어 */}
+            <div className="mobile-drawer">
+                <button
+                    className="drawer-close-btn"
+                    onClick={() => setIsMenuOpen(false)}
+                >
+                    <div className="close-icon">
+                        <span
+                            style={{
+                                position: "absolute",
+                                top: "11px",
+                                left: 0,
+                                width: "24px",
+                                height: "2px",
+                                background: "#000d57",
+                                transform: "rotate(45deg)",
+                            }}
+                        ></span>
+                        <span
+                            style={{
+                                position: "absolute",
+                                top: "11px",
+                                left: 0,
+                                width: "24px",
+                                height: "2px",
+                                background: "#000d57",
+                                transform: "rotate(-45deg)",
+                            }}
+                        ></span>
+                    </div>
+                </button>
+                <nav
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "24px",
+                        marginTop: "40px",
+                    }}
+                >
+                    {NAV_LINKS.map((link) => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setIsMenuOpen(false)}
+                            style={{
+                                fontSize: "20px",
+                                fontWeight: "700",
+                                textDecoration: "none",
+                                color:
+                                    location.pathname === link.to
+                                        ? "#6E0000"
+                                        : "#000d57",
+                            }}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+                <div
+                    style={{
+                        marginTop: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                    }}
+                >
+                    <button
+                        className="gnb-btn"
+                        style={{
+                            color: "#000",
+                            padding: "12px 0",
+                            justifyContent: "flex-start",
+                        }}
+                    >
+                        <img src={imgIconGlobeBlk} alt="" /> Language: JP
+                    </button>
+                    {isAuthenticated ? (
+                        <button
+                            onClick={handleMyPageClick}
+                            style={{
+                                background: "#000d57",
+                                color: "#fff",
+                                padding: "15px",
+                                borderRadius: "12px",
+                                border: "none",
+                                fontWeight: "700",
+                                fontSize: "16px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            MyPage
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleLoginClick}
+                            style={{
+                                background: "#6E0000",
+                                color: "#fff",
+                                padding: "15px",
+                                borderRadius: "12px",
+                                border: "none",
+                                fontWeight: "700",
+                                fontSize: "16px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            Login / Sign Up
+                        </button>
+                    )}
+                </div>
+            </div>
+        </>
+    );
 }

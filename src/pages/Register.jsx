@@ -124,7 +124,7 @@ export default function Register() {
             if (response.status === 200) {
                 alert("회원가입 성공");
                 setShowSuccessModal(true);
-                localStorage.setItem("jwt", response.data.jwt);
+                localStorage.setItem("token", response.data.jwt);
                 localStorage.setItem("userName", formData.nickname);
                 setShowSuccessModal(true);
             }
