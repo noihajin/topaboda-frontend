@@ -11,7 +11,7 @@ import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
 const NAV_LINKS = [
-  { label: "国の遺産リスト", to: "/heritage-list" },
+  { label: "国の遺産リスト", to: "/heritage" },
   { label: "業績", to: "/achievements" },
   { label: "コミュニティー", to: "/community" },
 ];
