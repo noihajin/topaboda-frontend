@@ -21,6 +21,8 @@ export default function Register() {
     const [step, setStep] = useState(1);
     const [showSuccessModal, setShowSuccessModal] = useState(false); // 가입 성공 모달 상태
 
+    const [nicknameStatus, setNicknameStatus] = useState("idle");
+
     const [email, setEmail] = useState("");
     const [authCode, setAuthCode] = useState("");
     const [formData, setFormData] = useState({
@@ -99,18 +101,78 @@ export default function Register() {
     };
 
     // 3단계: 최종 가입 처리 (자동 로그인 포함)
-    const handleFinalSubmit = (e) => {
+    const handleFinalSubmit = async (e) => {
         e.preventDefault();
+
+        if (nicknameStatus !== "available")
+            return alert("닉네임 중복 확인을 해주세요.");
+
         if (formData.password !== formData.passwordConfirm)
             return alert("パスワードが一致しません。");
 
-        // ── [자동 로그인 시뮬레이션] ──────────────────────────────────
-        // 실제 백엔드 연동 시에는 가입 응답으로 토큰을 받아 저장합니다.
-        localStorage.setItem("token", "test-auth-token-1234");
-        localStorage.setItem("userName", formData.nickname);
+        try {
+            const response = await axios.post(
+                "http://localhost:9990/topaboda/api/auth/signUp",
+                {
+                    id: formData.userId,
+                    email: email,
+                    password: formData.password,
+                    nickname: formData.nickname,
+                },
+            );
 
-        // 성공 모달 띄우기
-        setShowSuccessModal(true);
+            if (response.status === 200) {
+                alert("회원가입 성공");
+                setShowSuccessModal(true);
+                localStorage.setItem("jwt", response.data.jwt);
+                localStorage.setItem("userName", formData.nickname);
+                setShowSuccessModal(true);
+            }
+        } catch (error) {
+            console.error("회원가입 실패");
+            // 서버에서 보내주는 에러 메시지가 있다면 출력
+            const errorMsg =
+                error.response?.data?.message ||
+                "서버 통신 중 오류가 발생했습니다.";
+            alert(errorMsg);
+
+            // 404가 뜬다면 URL 주소 문제, 500이 뜬다면 백엔드 로직 문제입니다.
+            if (error.response?.status === 404) {
+                console.error(
+                    "URL 주소를 찾을 수 없습니다. 백엔드 엔드포인트를 확인하세요.",
+                );
+            }
+            setStep(1);
+        }
+    };
+
+    const handleNicknameCheck = async () => {
+        if (!formData.nickname)
+            return alert("ニックネームを入力してください。");
+
+        try {
+            setNicknameStatus("checking");
+
+            const response = await axios.post(
+                "http://localhost:9990/topaboda/api/auth/signUp/nickname",
+                {
+                    nickname: formData.nickname,
+                },
+            );
+
+            if (response.status === 200) {
+                alert("사용 가능한 닉네임입니다.");
+                setNicknameStatus("available");
+            }
+        } catch (error) {
+            if (error.response?.status === 409) {
+                alert("이미 사용 중인 닉네임입니다.");
+                setNicknameStatus("duplicate");
+            } else {
+                alert("서버 오류");
+                setNicknameStatus("error");
+            }
+        }
     };
 
     return (
@@ -276,16 +338,17 @@ export default function Register() {
                                         placeholder="Nickname"
                                         required
                                         style={{ ...inputStyle, flex: 1 }}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                             setFormData({
                                                 ...formData,
                                                 nickname: e.target.value,
-                                            })
-                                        }
+                                            });
+                                            setNicknameStatus("idle");
+                                        }}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => alert("Available!")}
+                                        onClick={handleNicknameCheck}
                                         style={{
                                             width: 100,
                                             background: C.navy,
