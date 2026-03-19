@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // 에셋 임포트
 import imgLogoWht from "../assets/logo_white.svg";
