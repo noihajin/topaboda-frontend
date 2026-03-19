@@ -8,10 +8,14 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:9990/topaboda',
         changeOrigin: true,
+        timeout: 3000,
+        proxyTimeout: 3000,
       },
       '/img': {
         target: 'http://localhost:9990/topaboda',
         changeOrigin: true,
+        timeout: 3000,
+        proxyTimeout: 3000,
       },
     },
   },

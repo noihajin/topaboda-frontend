@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // 에셋 임포트
 import imgLogoWht from "../assets/logo_white.svg";
@@ -11,47 +12,53 @@ import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
 const NAV_LINKS = [
-  { label: "国の遺産リスト", to: "/heritage-list" },
-  { label: "業績", to: "/achievements" },
-  { label: "コミュニティー", to: "/community" },
+    { label: "国の遺産リスト", to: "/heritage" },
+    { label: "業績", to: "/achievements" },
+    { label: "コミュニティー", to: "/community" },
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAuthenticated = Boolean(localStorage.getItem("token"));
-  
-  const location = useLocation();
-  const navigate = useNavigate();
+    const [scrolled, setScrolled] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const isAuthenticated = Boolean(localStorage.getItem("token"));
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    const onResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) setIsMenuOpen(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        const onResize = () => {
+            setIsMobile(window.innerWidth < 768);
+            if (window.innerWidth >= 768) setIsMenuOpen(false);
+        };
+        window.addEventListener("scroll", onScroll);
+        window.addEventListener("resize", onResize);
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onResize);
+        };
+    }, []);
+
+    const isSubPage = location.pathname !== "/";
+    const isActive = isSubPage || scrolled || isHovered;
+    const isCompact = isSubPage || scrolled || isMobile;
+
+    const handleLoginClick = () => {
+        setIsMenuOpen(false);
+        navigate("/login");
     };
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+
+    const handleMyPageClick = () => {
+        setIsMenuOpen(false);
+        navigate("/mypage");
     };
-  }, []);
 
-  const isSubPage = location.pathname !== "/";
-  const isActive = isSubPage || scrolled || isHovered;
-  const isCompact = isSubPage || scrolled || isMobile;
-
-  const handleLoginClick = () => {
+  const handleLogout = () => {
+    localStorage.removeItem("token");
     setIsMenuOpen(false);
-    navigate("/login");
-  };
-
-  const handleMyPageClick = () => {
-    setIsMenuOpen(false);
-    navigate("/mypage");
+    navigate("/");
   };
 
   return (
@@ -194,43 +201,54 @@ export default function Navbar() {
         }
       `}</style>
 
-      <div className="drawer-overlay" onClick={() => setIsMenuOpen(false)} />
+            <div
+                className="drawer-overlay"
+                onClick={() => setIsMenuOpen(false)}
+            />
 
-      <header
-        className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
-          "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
-        }}
-      >
-        <div className="gnb-inner">
-          <div className="gnb-logo-area">
-            <Link to="/" className="gnb-logo">
-              <img
-                src={isCompact ? (isActive ? imgLogoBlkSmall : imgLogoWht) : (isActive ? imgLogoBlk : imgLogoWht)}
-                alt="Logo"
-              />
-            </Link>
-          </div>
+            <header
+                className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                    "--gnb-menu-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-btn-color": isActive ? "#000000" : "#ffffff",
+                    "--gnb-underline-color": isActive ? "#6E0000" : "#ffffff",
+                }}
+            >
+                <div className="gnb-inner">
+                    <div className="gnb-logo-area">
+                        <Link to="/" className="gnb-logo">
+                            <img
+                                src={
+                                    isCompact
+                                        ? isActive
+                                            ? imgLogoBlkSmall
+                                            : imgLogoWht
+                                        : isActive
+                                          ? imgLogoBlk
+                                          : imgLogoWht
+                                }
+                                alt="Logo"
+                            />
+                        </Link>
+                    </div>
 
-          {!isMobile && (
-            <nav className="gnb-nav-area">
-              <div className="gnb-menus">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          )}
+                    {!isMobile && (
+                        <nav className="gnb-nav-area">
+                            <div className="gnb-menus">
+                                {NAV_LINKS.map((link) => (
+                                    <Link
+                                        key={link.label}
+                                        to={link.to}
+                                        className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </nav>
+                    )}
 
           <div className="gnb-action-area">
             {!isMobile ? (
@@ -239,9 +257,15 @@ export default function Navbar() {
                   <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
                 </button>
                 {isAuthenticated ? (
-                  <button className="gnb-btn" onClick={handleMyPageClick}>
-                    MyPage
-                  </button>
+                  <>
+                    <button className="gnb-btn" onClick={handleMyPageClick}>
+                      My Page
+                    </button>
+                    <button className="gnb-btn" onClick={handleLogout}>
+                      <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" />
+                      Logout
+                    </button>
+                  </>
                 ) : (
                   <button className="gnb-btn" onClick={handleLoginClick}>
                     <img
@@ -281,21 +305,43 @@ export default function Navbar() {
             <img src={imgIconGlobeBlk} alt="" /> Language: JP
           </button>
           {isAuthenticated ? (
-            <button
-              onClick={handleMyPageClick}
-              style={{
-                background: "#000d57",
-                color: "#fff",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "none",
-                fontWeight: "700",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
-            >
-              MyPage
-            </button>
+            <>
+              <button
+                onClick={handleMyPageClick}
+                style={{
+                  background: "#000d57",
+                  color: "#fff",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  border: "none",
+                  fontWeight: "700",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                My Page
+              </button>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  color: "#000d57",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  border: "1.5px solid #000d57",
+                  fontWeight: "700",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                <img src={imgIconLoginBlk} alt="" style={{ width: 18, height: 18 }} />
+                Logout
+              </button>
+            </>
           ) : (
             <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
               Login / Sign Up
