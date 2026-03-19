@@ -12,6 +12,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import SectionNavButton from "./components/SectionNavButton";
 
 // 페이지 임포트
 import MainHome from "./pages/MainHome";
@@ -98,6 +99,7 @@ function AppLayout() {
       </main>
 
       {!hideNav && <Footer />}
+      <SectionNavButton />
       <ScrollToTopButton />
     </div>
     </>
