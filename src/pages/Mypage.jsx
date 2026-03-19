@@ -251,6 +251,20 @@ export default function MyPage() {
         visitCount: 0,
     });
 
+    const [heritageBookmark, setHeritageBookmark] = useState({
+        name: "",
+        region: "",
+        image: "",
+    });
+    const [htBkPage, setHtBkPage] = useState(0);
+
+    const [heritageLike, setHeritageLike] = useState({
+        name: "",
+        region: "",
+        image: "",
+    });
+    const [htLkPage, setHtLkPage] = useState(0);
+
     const PAGE_SIZE = 5;
     const HT_SIZE = 3;
     const ROUTE_SIZE = 2;
@@ -294,6 +308,10 @@ export default function MyPage() {
                 console.error("데이터 로드 실패:", error);
             }
         };
+
+        const fetchHeritageBookmarkData = async () => {};
+
+        const fetchHeritageLikeData = async () => {};
 
         fetchUserData();
     }, []);
