@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
+import axios from "axios";
 
 const C = {
     navy: "#000d57",
@@ -17,32 +18,14 @@ const C = {
 const font = "'Roboto', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
 
 const EyeIcon = () => (
-    <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
         <circle cx="12" cy="12" r="3" />
     </svg>
 );
 
 const EyeOffIcon = () => (
-    <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
         <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
@@ -53,26 +36,14 @@ const SNS_ITEMS = [
         key: "line",
         bg: "#06C755",
         border: "none",
-        icon: (
-            <img
-                src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg"
-                alt="LINE"
-                style={{ width: 24 }}
-            />
-        ),
+        icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
         lines: ["LINEで", "ログイン"],
     },
     {
         key: "google",
         bg: "#ffffff",
         border: "1px solid #e2e8f0",
-        icon: (
-            <img
-                src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-                alt="Google"
-                style={{ width: 22 }}
-            />
-        ),
+        icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
         lines: ["Googleで", "ログイン"],
     },
     {
@@ -108,17 +79,15 @@ export default function LoginPage() {
 
         try {
             // 3. 실제 API 호출 (엔드포인트는 실제 서버 주소에 맞게 수정)
-            const response = await axios.post(
-                "http://localhost:9990/topaboda/api/auth/login",
-                {
-                    id: id,
-                    password: password,
-                },
-            );
+            const response = await axios.post("http://localhost:9990/topaboda/api/auth/login", {
+                id: id,
+                password: password,
+            });
 
             if (response.data.jwt) {
                 // 4. 성공 시 토큰 저장 (예: JWT)
                 localStorage.setItem("token", response.data.jwt);
+                localStorage.setItem("id", response.data.id);
 
                 // ID 저장 체크박스가 활성화된 경우 로직 추가 가능
                 if (saveId) {
@@ -133,9 +102,7 @@ export default function LoginPage() {
         } catch (error) {
             // 5. 에러 처리 (ID/PW 불일치, 서버 에러 등)
             console.error("Login Error:", error);
-            const message =
-                error.response?.data?.message ||
-                "로그인 중 오류가 발생했습니다.";
+            const message = error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
             alert(message);
         }
     };
@@ -173,11 +140,7 @@ export default function LoginPage() {
                         alignItems: "center",
                     }}
                 >
-                    <img
-                        src={imgLogoBlkSmall}
-                        alt="TOPABODA"
-                        style={{ height: 48, marginBottom: 12 }}
-                    />
+                    <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
                     <p
                         style={{
                             color: C.gray2,
@@ -198,37 +161,16 @@ export default function LoginPage() {
                         gap: 12,
                     }}
                 >
-                    <input
-                        type="text"
-                        placeholder="IDを入力"
-                        value={id}
-                        onChange={(e) => setId(e.target.value)}
-                        style={inputStyle}
-                    />
+                    <input type="text" placeholder="IDを入力" value={id} onChange={(e) => setId(e.target.value)} style={inputStyle} />
                     <div style={{ position: "relative" }}>
-                        <input
-                            type={showPw ? "text" : "password"}
-                            placeholder="パスワードを入力"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ ...inputStyle, paddingRight: 45 }}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPw(!showPw)}
-                            style={eyeBtnStyle}
-                        >
+                        <input type={showPw ? "text" : "password"} placeholder="パスワードを入力" value={password} onChange={(e) => setPassword(e.target.value)} style={{ ...inputStyle, paddingRight: 45 }} />
+                        <button type="button" onClick={() => setShowPw(!showPw)} style={eyeBtnStyle}>
                             {showPw ? <EyeIcon /> : <EyeOffIcon />}
                         </button>
                     </div>
 
                     <label style={checkboxLabelStyle}>
-                        <input
-                            type="checkbox"
-                            checked={saveId}
-                            onChange={() => setSaveId(!saveId)}
-                            style={{ cursor: "pointer", width: 15, height: 15 }}
-                        />
+                        <input type="checkbox" checked={saveId} onChange={() => setSaveId(!saveId)} style={{ cursor: "pointer", width: 15, height: 15 }} />
                         IDを保存
                     </label>
 
@@ -242,9 +184,7 @@ export default function LoginPage() {
                             background: loginHover ? C.navy : C.white,
                             color: loginHover ? C.white : C.navy,
                             transform: loginHover ? "translateY(-1px)" : "none",
-                            boxShadow: loginHover
-                                ? "0 4px 12px rgba(0,13,87,0.12)"
-                                : "none",
+                            boxShadow: loginHover ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
                             marginTop: 8,
                         }}
                     >
@@ -277,9 +217,7 @@ export default function LoginPage() {
                         margin: "35px 0 25px",
                     }}
                 >
-                    <div
-                        style={{ flex: 1, height: 1, background: C.divider }}
-                    />
+                    <div style={{ flex: 1, height: 1, background: C.divider }} />
                     <span
                         style={{
                             fontSize: 10,
@@ -290,9 +228,7 @@ export default function LoginPage() {
                     >
                         SNS LOGIN
                     </span>
-                    <div
-                        style={{ flex: 1, height: 1, background: C.divider }}
-                    />
+                    <div style={{ flex: 1, height: 1, background: C.divider }} />
                 </div>
 
                 {/* ✅ SNS 버튼 - 간격 확대 (gap: 45) */}
@@ -331,8 +267,7 @@ export default function LoginPage() {
                                     transition: "all 0.2s",
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform =
-                                        "translateY(-2px)";
+                                    e.currentTarget.style.transform = "translateY(-2px)";
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.transform = "none";
@@ -395,12 +330,8 @@ export default function LoginPage() {
                             border: `1.2px solid ${C.navy}`,
                             background: registerHover ? C.navy : C.white,
                             color: registerHover ? C.white : C.navy,
-                            transform: registerHover
-                                ? "translateY(-1px)"
-                                : "none",
-                            boxShadow: registerHover
-                                ? "0 4px 12px rgba(0,13,87,0.1)"
-                                : "none",
+                            transform: registerHover ? "translateY(-1px)" : "none",
+                            boxShadow: registerHover ? "0 4px 12px rgba(0,13,87,0.1)" : "none",
                         }}
                     >
                         会員登録
