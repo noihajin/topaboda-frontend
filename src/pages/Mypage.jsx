@@ -32,36 +32,36 @@ const ROUTES = [
 ];
 
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
-const MEDAL_GOLD   = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
+const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
 const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
 const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
 
 const ACHIEVEMENTS = [
-    { id:  1, title: "国宝探訪者",        grade: "金", medal: MEDAL_GOLD,   achieved: true  },
-    { id:  2, title: "遺産の守護者",      grade: "金", medal: MEDAL_GOLD,   achieved: true  },
-    { id:  3, title: "文化探求者",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
-    { id:  4, title: "首都の歴史人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
-    { id:  5, title: "慶州の旅人",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
-    { id:  6, title: "自然の守り人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
-    { id:  7, title: "朝鮮王朝の探検家",  grade: "銀", medal: MEDAL_SILVER, achieved: true  },
-    { id:  8, title: "初めての一歩",      grade: "銅", medal: MEDAL_BRONZE, achieved: true  },
-    { id:  9, title: "無形文化の継承者",  grade: "金", medal: MEDAL_GOLD,   achieved: false },
-    { id: 10, title: "全国制覇の旅人",    grade: "金", medal: MEDAL_GOLD,   achieved: false },
+    { id: 1, title: "国宝探訪者", grade: "金", medal: MEDAL_GOLD, achieved: true },
+    { id: 2, title: "遺産の守護者", grade: "金", medal: MEDAL_GOLD, achieved: true },
+    { id: 3, title: "文化探求者", grade: "銀", medal: MEDAL_SILVER, achieved: true },
+    { id: 4, title: "首都の歴史人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
+    { id: 5, title: "慶州の旅人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
+    { id: 6, title: "自然の守り人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
+    { id: 7, title: "朝鮮王朝の探検家", grade: "銀", medal: MEDAL_SILVER, achieved: true },
+    { id: 8, title: "初めての一歩", grade: "銅", medal: MEDAL_BRONZE, achieved: true },
+    { id: 9, title: "無形文化の継承者", grade: "金", medal: MEDAL_GOLD, achieved: false },
+    { id: 10, title: "全国制覇の旅人", grade: "金", medal: MEDAL_GOLD, achieved: false },
     { id: 11, title: "コミュニティリーダー", grade: "金", medal: MEDAL_GOLD, achieved: false },
-    { id: 12, title: "民俗文化の探求者",  grade: "銀", medal: MEDAL_SILVER, achieved: false },
-    { id: 13, title: "史跡踏破者",        grade: "銀", medal: MEDAL_SILVER, achieved: false },
-    { id: 14, title: "週末の冒険家",      grade: "銅", medal: MEDAL_BRONZE, achieved: false },
-    { id: 15, title: "写真記録者",        grade: "銅", medal: MEDAL_BRONZE, achieved: false },
-    { id: 16, title: "レビュー貢献者",    grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 12, title: "民俗文化の探求者", grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 13, title: "史跡踏破者", grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 14, title: "週末の冒険家", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 15, title: "写真記録者", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 16, title: "レビュー貢献者", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
 ];
 
 const POSTS = [
-    { id: 1, category: "レビュー",     title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, likes: 12 },
-    { id: 2, category: "ヒント",       title: "仏国寺の夜景撮影チップス",   desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。",         date: "2024.02.10", views: 521, likes: 23 },
-    { id: 3, category: "レビュー",     title: "瞻星台（チョムソンデ）訪問記",desc: "新羅時代の天文台、瞻星台に行ってきました。",                           date: "2024.01.28", views: 287, likes: 8  },
-    { id: 4, category: "フリートーク", title: "昌徳宮・後苑（秘苑）散策コース",desc: "昌徳宮・後苑の美しい散策路を紹介します。",                           date: "2024.01.15", views: 456, likes: 15 },
-    { id: 5, category: "質問",         title: "海印寺・八万大蔵経ガイド",   desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, likes: 18 },
-    { id: 6, category: "レビュー",     title: "水原華城の散策",             desc: "城壁に沿って歩く歴史の道。",                                             date: "2023.12.20", views: 150, likes: 5  },
+    { id: 1, category: "レビュー", title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, likes: 12 },
+    { id: 2, category: "ヒント", title: "仏国寺の夜景撮影チップス", desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。", date: "2024.02.10", views: 521, likes: 23 },
+    { id: 3, category: "レビュー", title: "瞻星台（チョムソンデ）訪問記", desc: "新羅時代の天文台、瞻星台に行ってきました。", date: "2024.01.28", views: 287, likes: 8 },
+    { id: 4, category: "フリートーク", title: "昌徳宮・後苑（秘苑）散策コース", desc: "昌徳宮・後苑の美しい散策路を紹介します。", date: "2024.01.15", views: 456, likes: 15 },
+    { id: 5, category: "質問", title: "海印寺・八万大蔵経ガイド", desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, likes: 18 },
+    { id: 6, category: "レビュー", title: "水原華城の散策", desc: "城壁に沿って歩く歴史の道。", date: "2023.12.20", views: 150, likes: 5 },
 ];
 
 const COMMENTS = [
@@ -208,10 +208,10 @@ function RouteCard({ route }) {
 
 // ── 카테고리 컬러 ─────────────────────────────────────────────────
 const CAT_COLORS = {
-    "レビュー":     { bg: "#dbeafe", color: "#1447e6" },
-    "ヒント":       { bg: "#ffedd4", color: "#ca3500" },
-    "フリートーク": { bg: "#f3e8ff", color: "#8200db" },
-    "質問":         { bg: "#dcfce7", color: "#008236" },
+    レビュー: { bg: "#dbeafe", color: "#1447e6" },
+    ヒント: { bg: "#ffedd4", color: "#ca3500" },
+    フリートーク: { bg: "#f3e8ff", color: "#8200db" },
+    質問: { bg: "#dcfce7", color: "#008236" },
 };
 
 // ── 리스트 행: 카드형 ─────────────────────────────────────────────
@@ -222,11 +222,7 @@ function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete }
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     {/* 카테고리 배지 */}
-                    {cat && (
-                        <span style={{ display: "inline-block", background: cat.bg, color: cat.color, padding: "3px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, marginBottom: 8, fontFamily: font }}>
-                            {category}
-                        </span>
-                    )}
+                    {cat && <span style={{ display: "inline-block", background: cat.bg, color: cat.color, padding: "3px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, marginBottom: 8, fontFamily: font }}>{category}</span>}
                     <h4 style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: font }}>{title}</h4>
                     {desc && <p style={{ fontSize: 13, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", fontFamily: font }}>{desc}</p>}
                     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -282,6 +278,9 @@ export default function MyPage() {
     const [heritageLike, setHeritageLike] = useState([]);
     const [htLkPage, setHtLkPage] = useState(0);
 
+    const [htLkTotalPages, setHtLkTotalPages] = useState(0);
+    const [htBkTotalPages, setHtBkTotalPages] = useState(0);
+
     const PAGE_SIZE = 5;
     const HT_SIZE = 3;
     const ROUTE_SIZE = 2;
@@ -297,8 +296,8 @@ export default function MyPage() {
     const displayedAct = currentActData.slice(actPage * PAGE_SIZE, (actPage + 1) * PAGE_SIZE);
 
     const currentHtData = heritageTab === "bookmark" ? heritageBookmark : heritageLike;
-    const totalHtPages = Math.ceil(currentHtData.length / HT_SIZE); // 최대 페이지 수 인듯
-    const displayedHt = currentHtData.slice(htPage * HT_SIZE, (htPage + 1) * HT_SIZE);
+    const totalHtPages = heritageTab === "bookmark" ? htBkTotalPages : htLkTotalPages;
+    const displayedHt = currentHtData;
 
     // 페이지 로드 시 데이터 요청
     useEffect(() => {
@@ -349,6 +348,7 @@ export default function MyPage() {
                 });
 
                 setHeritageLike(response.data.contents);
+                setHtLkTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error("데이터 로드 실패:", error);
             }
@@ -446,7 +446,7 @@ export default function MyPage() {
                                 <button
                                     onClick={() => {
                                         setHeritageTab("bookmark");
-                                        setHtPage(0);
+                                        setHtBkPage(0);
                                     }}
                                     style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "bookmark" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}
                                 >
@@ -456,7 +456,7 @@ export default function MyPage() {
                                 <button
                                     onClick={() => {
                                         setHeritageTab("like");
-                                        setHtPage(0);
+                                        setHtLkPage(0);
                                     }}
                                     style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "like" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}
                                 >
@@ -466,10 +466,31 @@ export default function MyPage() {
                             </div>
                             {totalHtPages > 1 && (
                                 <div style={{ display: "flex", gap: 8 }}>
-                                    <button disabled={htPage === 0} onClick={() => setHtPage((p) => p - 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    {/* 이전 */}
+                                    <button
+                                        disabled={heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0}
+                                        onClick={() => {
+                                            if (heritageTab === "bookmark") {
+                                                setHtBkPage((p) => p - 1);
+                                            } else {
+                                                setHtLkPage((p) => p - 1);
+                                            }
+                                        }}
+                                    >
                                         <ChevronLeft />
                                     </button>
-                                    <button disabled={htPage >= totalHtPages - 1} onClick={() => setHtPage((p) => p + 1)} style={{ width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: "pointer", opacity: htPage >= totalHtPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+                                    {/* 다음 */}
+                                    <button
+                                        disabled={heritageTab === "bookmark" ? htBkPage >= htBkTotalPages - 1 : htLkPage >= htLkTotalPages - 1}
+                                        onClick={() => {
+                                            if (heritageTab === "bookmark") {
+                                                setHtBkPage((p) => p + 1);
+                                            } else {
+                                                setHtLkPage((p) => p + 1);
+                                            }
+                                        }}
+                                    >
                                         <ChevronRight />
                                     </button>
                                 </div>
@@ -515,12 +536,7 @@ export default function MyPage() {
                                 );
                             })}
                         </div>
-                        <button
-                            onClick={() => navigate("/community/write")}
-                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-                        >
+                        <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
                             <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
                         </button>
                     </div>
@@ -528,28 +544,12 @@ export default function MyPage() {
                     {/* 리스트 */}
                     <div style={{ minHeight: 400 }}>
                         {displayedAct.map((item) => (
-                            <ListRow
-                                key={item.id}
-                                category={postTab === "posts" ? item.category : undefined}
-                                title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName}
-                                desc={postTab === "posts" ? item.desc : item.content}
-                                date={item.date}
-                                views={postTab === "posts" ? item.views : undefined}
-                                likes={postTab === "posts" ? item.likes : undefined}
-                                onEdit={() => navigate("/community/write", { state: { post: item, isEdit: true } })}
-                                onDelete={() => confirm("削除しますか？")}
-                            />
+                            <ListRow key={item.id} category={postTab === "posts" ? item.category : undefined} title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName} desc={postTab === "posts" ? item.desc : item.content} date={item.date} views={postTab === "posts" ? item.views : undefined} likes={postTab === "posts" ? item.likes : undefined} onEdit={() => navigate("/community/write", { state: { post: item, isEdit: true } })} onDelete={() => confirm("削除しますか？")} />
                         ))}
                     </div>
 
                     {/* 공용 페이지네이션 */}
-                    {totalActPages > 1 && (
-                        <Pagination
-                            currentPage={actPage + 1}
-                            totalPages={totalActPages}
-                            onPageChange={(p) => setActPage(p - 1)}
-                        />
-                    )}
+                    {totalActPages > 1 && <Pagination currentPage={actPage + 1} totalPages={totalActPages} onPageChange={(p) => setActPage(p - 1)} />}
                 </div>
 
                 {/* ── 4. 업적 갤러리 ── */}
@@ -569,7 +569,7 @@ export default function MyPage() {
 
                     {/* 피그마 1767-2214 하단 바 */}
                     {(() => {
-                        const achievedCount  = ACHIEVEMENTS.filter((a) => a.achieved).length;
+                        const achievedCount = ACHIEVEMENTS.filter((a) => a.achieved).length;
                         const inProgressCount = ACHIEVEMENTS.filter((a) => !a.achieved && a.progress > 0).length;
                         const notStartedCount = ACHIEVEMENTS.filter((a) => !a.achieved && !a.progress).length;
                         return (
@@ -597,7 +597,9 @@ export default function MyPage() {
                                 <button
                                     onClick={() => navigate("/achievements")}
                                     style={{
-                                        display: "flex", alignItems: "center", gap: 8,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 8,
                                         padding: "12px 28px",
                                         borderRadius: 12,
                                         border: "none",
