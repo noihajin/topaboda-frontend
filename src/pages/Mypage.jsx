@@ -30,15 +30,28 @@ const ROUTES = [
     { id: 3, title: "扶余の百済遺跡", region: "忠清南道", date: "2024.02.15", spots: 6 },
 ];
 
+// ── 피그마 메달 이미지 ────────────────────────────────────────────
+const MEDAL_GOLD   = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
+const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
+const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
+
 const ACHIEVEMENTS = [
-    { id: 1, title: "最初の一歩", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: true, progress: 100 },
-    { id: 2, title: "国宝征服者", medal: "https://www.figma.com/api/mcp/asset/3b7b88af-7e3e-455e-8742-548cee70092d", achieved: true, progress: 100 },
-    { id: 3, title: "朝鮮王朝探検家", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: true, progress: 100 },
-    { id: 8, title: "百済文化の道", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 67 },
-    { id: 9, title: "ユネスコマスター", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: false, progress: 53 },
-    { id: 10, title: "レビューマスター", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 68 },
-    { id: 11, title: "連続訪問者", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 42 },
-    { id: 12, title: "コミュニティリーダー", medal: "https://www.figma.com/api/mcp/asset/3b7b88af-7e3e-455e-8742-548cee70092d", achieved: false, progress: 32 },
+    { id:  1, title: "国宝探訪者",        grade: "金", medal: MEDAL_GOLD,   achieved: true  },
+    { id:  2, title: "遺産の守護者",      grade: "金", medal: MEDAL_GOLD,   achieved: true  },
+    { id:  3, title: "文化探求者",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  4, title: "首都の歴史人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  5, title: "慶州の旅人",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  6, title: "自然の守り人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  7, title: "朝鮮王朝の探検家",  grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  8, title: "初めての一歩",      grade: "銅", medal: MEDAL_BRONZE, achieved: true  },
+    { id:  9, title: "無形文化の継承者",  grade: "金", medal: MEDAL_GOLD,   achieved: false },
+    { id: 10, title: "全国制覇の旅人",    grade: "金", medal: MEDAL_GOLD,   achieved: false },
+    { id: 11, title: "コミュニティリーダー", grade: "金", medal: MEDAL_GOLD, achieved: false },
+    { id: 12, title: "民俗文化の探求者",  grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 13, title: "史跡踏破者",        grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 14, title: "週末の冒険家",      grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 15, title: "写真記録者",        grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 16, title: "レビュー貢献者",    grade: "銅", medal: MEDAL_BRONZE, achieved: false },
 ];
 
 const POSTS = [
@@ -520,34 +533,76 @@ export default function MyPage() {
                     )}
                 </div>
 
-                {/* ── 4. 업적 갤러리 (도넛 차트 포함) ── */}
+                {/* ── 4. 업적 갤러리 ── */}
                 <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 40 }}>
-                        <div>
-                            <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
-                            <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                            <div style={{ position: "relative", width: 100, height: 100 }}>
-                                <svg width="100" height="100" viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)" }}>
-                                    <circle cx="50" cy="50" r="42" fill="none" stroke={C.border} strokeWidth="8" />
-                                    <circle cx="50" cy="50" r="42" fill="none" stroke={C.red} strokeWidth="8" strokeDasharray={`${2 * Math.PI * 42 * 0.69} ${2 * Math.PI * 42 * 0.31}`} strokeLinecap="round" />
-                                </svg>
-                                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: C.red, fontSize: 20 }}>69%</div>
-                            </div>
-                            <div style={{ textAlign: "right" }}>
-                                <div style={{ fontSize: 24, fontWeight: 900, color: C.red }}>
-                                    7 <span style={{ fontSize: 14, color: C.gray4 }}>/ 16</span>
-                                </div>
-                                <p style={{ fontSize: 12, color: C.gray3, marginTop: 4 }}>達成済み</p>
-                            </div>
-                        </div>
+                    {/* 헤더 */}
+                    <div style={{ marginBottom: 32 }}>
+                        <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
+                        <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "24px" }}>
+
+                    {/* 16개 메달 그리드 */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px" }}>
                         {ACHIEVEMENTS.map((item) => (
                             <AchievementCard key={item.id} item={item} />
                         ))}
                     </div>
+
+                    {/* 피그마 1767-2214 하단 바 */}
+                    {(() => {
+                        const achievedCount  = ACHIEVEMENTS.filter((a) => a.achieved).length;
+                        const inProgressCount = ACHIEVEMENTS.filter((a) => !a.achieved && a.progress > 0).length;
+                        const notStartedCount = ACHIEVEMENTS.filter((a) => !a.achieved && !a.progress).length;
+                        return (
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                                {/* 범례 */}
+                                <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: `linear-gradient(135deg, ${C.gold}, ${C.red})`, flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>達成した実績</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.navy }}>{achievedCount}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#d1d5dc", flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>進行中</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.gray1 }}>{inProgressCount}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#e5e7eb", border: `1px solid ${C.border}`, flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>未開始</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.gray3 }}>{notStartedCount}</span>
+                                    </div>
+                                </div>
+
+                                {/* 実績ページへ → ボタン */}
+                                <button
+                                    onClick={() => navigate("/achievements")}
+                                    style={{
+                                        display: "flex", alignItems: "center", gap: 8,
+                                        padding: "12px 28px",
+                                        borderRadius: 12,
+                                        border: "none",
+                                        background: `linear-gradient(135deg, ${C.red}, ${C.navy})`,
+                                        color: "white",
+                                        fontWeight: 700,
+                                        fontSize: 15,
+                                        cursor: "pointer",
+                                        fontFamily: font,
+                                        transition: "opacity 0.2s, transform 0.2s",
+                                        flexShrink: 0,
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1";    e.currentTarget.style.transform = "translateY(0)";  }}
+                                >
+                                    実績ページへ
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
+                                    </svg>
+                                </button>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
         </div>
