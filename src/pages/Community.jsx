@@ -212,8 +212,9 @@ export default function Community() {
 }
 
 function PopularCard({ post, rank }) {
+  const navigate = useNavigate();
   return (
-    <motion.div whileHover={{ y: -8 }} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
+    <motion.div whileHover={{ y: -8 }} onClick={() => navigate(`/community/${post.id}`)} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
       <div style={{ height: 160, background: "#f1f3f7", position: "relative" }}>
         <div style={{ position: "absolute", top: 16, left: 16, width: 36, height: 36, borderRadius: 12, background: `linear-gradient(135deg, ${C.gold}, ${C.goldD})`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, color: C.navy, letterSpacing: "-0.05em" }}>{rank}</div>
       </div>
