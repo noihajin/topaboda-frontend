@@ -113,18 +113,29 @@ const CommentIcon = () => (
   </svg>
 );
 
+/* ── 본문 공통 텍스트 스타일 ── */
+const contentText = {
+  fontFamily: "'Noto Sans JP', sans-serif",
+  fontSize: "1.4rem",
+  color: "#333",
+  fontStyle: "normal",
+  fontWeight: 400,
+  lineHeight: 1.9,
+  margin: "6px 0",
+};
+
 /* ── 마크다운 간소화 렌더러 ── */
 function renderContent(text) {
   return text.split("\n").map((line, i) => {
     if (line.startsWith("## "))
-      return <h2 key={i} style={{ fontSize: 18, fontWeight: 800, color: C.navy, margin: "28px 0 10px", fontFamily: font }}>{line.slice(3)}</h2>;
+      return <p key={i} style={{ ...contentText, fontWeight: 700, margin: "28px 0 10px" }}>{line.slice(3)}</p>;
     if (line.startsWith("### "))
-      return <h3 key={i} style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "20px 0 8px", fontFamily: font }}>{line.slice(4)}</h3>;
+      return <p key={i} style={{ ...contentText, fontWeight: 600, margin: "20px 0 8px" }}>{line.slice(4)}</p>;
     if (line.startsWith("- ") || line.match(/^\d+\. /))
-      return <p key={i} style={{ fontSize: 15, lineHeight: 1.8, color: C.gray1, margin: "4px 0 4px 16px", fontFamily: font }}>{line}</p>;
+      return <p key={i} style={{ ...contentText, margin: "4px 0 4px 16px" }}>{line}</p>;
     if (line === "")
       return <div key={i} style={{ height: 8 }} />;
-    return <p key={i} style={{ fontSize: 15, lineHeight: 1.9, color: C.gray1, margin: "6px 0", fontFamily: font }}>{line}</p>;
+    return <p key={i} style={contentText}>{line}</p>;
   });
 }
 
@@ -142,7 +153,6 @@ export default function PostDetail() {
   const [bookmarked,  setBookmarked]  = useState(false);
   const [comments,    setComments]    = useState(INIT_COMMENTS);
   const [commentText, setCommentText] = useState("");
-  const [backHover,   setBackHover]   = useState(false);
   const [submitHover, setSubmitHover] = useState(false);
 
   const handleLike = () => { setLiked(v => !v); setLikeCount(v => liked ? v - 1 : v + 1); };
@@ -160,32 +170,6 @@ export default function PostDetail() {
   return (
     <div style={{ background: C.bg, minHeight: "100vh", paddingTop: "11.9rem", paddingBottom: "8rem" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
-
-        {/* ── 뒤로가기 버튼 ── */}
-        <button
-          onClick={() => navigate(-1)}
-          onMouseEnter={() => setBackHover(true)}
-          onMouseLeave={() => setBackHover(false)}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "10px 22px 10px 16px", borderRadius: 99,
-            border: `1.5px solid ${C.navy}`,
-            background: backHover ? C.navy : C.white,
-            color: backHover ? C.white : C.navy,
-            fontWeight: 700, fontSize: 14, cursor: "pointer",
-            transition: "background 0.2s, color 0.2s",
-            marginBottom: 28, fontFamily: font,
-            boxShadow: "0 2px 8px rgba(0,13,87,0.08)",
-          }}
-        >
-          <span style={{
-            display: "inline-block",
-            transform: backHover ? "translateX(-4px)" : "translateX(0)",
-            transition: "transform 0.22s ease",
-            fontSize: 16, lineHeight: 1,
-          }}>←</span>
-          一覧に戻る
-        </button>
 
         {/* ── 메인 카드 ── */}
         <div style={{
@@ -238,7 +222,7 @@ export default function PostDetail() {
           </div>
 
           {/* 이미지 영역 */}
-          <div style={{ display: "flex", gap: 0, height: 380 }}>
+          <div style={{ display: "flex", gap: 10, height: 380 }}>
             <div style={{ flex: "0 0 41%", overflow: "hidden", background: C.border }}>
               <img
                 src={`https://picsum.photos/seed/heritage${post.id}a/800/600`}
@@ -289,8 +273,8 @@ export default function PostDetail() {
           {/* 댓글 헤더 */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
             <CommentIcon />
-            <span style={{ fontSize: 20, fontWeight: 900, color: C.navy, fontFamily: fontBold }}>コメント</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: C.red, fontFamily: fontBold }}>{comments.length}</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: C.navy, fontFamily: "'Noto Sans JP', sans-serif" }}>コメント</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: C.red, fontFamily: "'Noto Sans JP', sans-serif" }}>{comments.length}</span>
           </div>
 
           {/* 댓글 작성 폼 */}
