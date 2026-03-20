@@ -1,11 +1,44 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-// ★ 아이콘 임포트
-import imgIconHeart from "../assets/icon_heart.svg";
-import imgIconBookmark from "../assets/icon_bookmark.svg";
+// ★ 아이콘 임포트 (위치/조회수만 img 유지, 하트·북마크는 인라인 SVG로 교체)
 import imgIconLocation from "../assets/icon_location.svg";
 import imgIconEye from "../assets/icon_heart_2.svg";
+
+/* 인라인 SVG: 클릭 시 브랜드 컬러로 fill 제어 */
+function HeartIcon({ filled }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12.55 9.83333C13.5185 8.86 14.5 7.69333 14.5 6.16667C14.5 5.19421 14.1233 4.26158 13.4529 3.57394C12.7825 2.88631 11.8731 2.5 10.925 2.5C9.781 2.5 8.975 2.83333 8 3.83333C7.025 2.83333 6.219 2.5 5.075 2.5C4.12685 2.5 3.21754 2.88631 2.54709 3.57394C1.87665 4.26158 1.5 5.19421 1.5 6.16667C1.5 7.7 2.475 8.86667 3.45 9.83333L8 14.5L12.55 9.83333Z"
+        fill={filled ? "#6E0000" : "none"}
+        stroke={filled ? "#6E0000" : "#000D57"}
+        strokeOpacity={filled ? 1 : 0.35}
+        strokeWidth="1.47215"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ transition: "fill 0.2s, stroke 0.2s" }}
+      />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ filled }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M14.2505 15.75L9.00049 12.75L3.75049 15.75V3.75C3.75049 3.35218 3.90852 2.97064 4.18983 2.68934C4.47113 2.40804 4.85266 2.25 5.25049 2.25H12.7505C13.1483 2.25 13.5298 2.40804 13.8111 2.68934C14.0925 2.97064 14.2505 3.35218 14.2505 3.75V15.75Z"
+        fill={filled ? "#000D57" : "none"}
+        stroke={filled ? "#000D57" : "#6E0000"}
+        strokeOpacity={filled ? 1 : 0.35}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ transition: "fill 0.2s, stroke 0.2s" }}
+      />
+    </svg>
+  );
+}
 // 애니메이션 Variants
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -118,7 +151,7 @@ export default function PopularHeritageSection() {
           variants={itemVariants}
           className="text-gray-500 text-lg max-w-2xl"
         >
-          많은 사람들이 찾는 한국의 대표적인 문화유산을 만나보세요
+          多くの人々に愛される、韓国を代表する文化遺産をご紹介します
         </motion.p>
         <motion.div
           variants={itemVariants}
@@ -198,16 +231,7 @@ function HeritageCard({ data }) {
             }}
             className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
           >
-            <img
-              src={imgIconHeart}
-              alt="like"
-              className="w-5 h-5 transition-all duration-300"
-              style={{
-                filter: isLiked
-                  ? "invert(11%) sepia(82%) saturate(3945%) hue-rotate(346deg) brightness(85%) contrast(110%)"
-                  : "grayscale(1) opacity(0.3)",
-              }}
-            />
+            <HeartIcon filled={isLiked} />
           </button>
           {/* 북마크 버튼 */}
           <button
@@ -217,16 +241,7 @@ function HeritageCard({ data }) {
             }}
             className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
           >
-            <img
-              src={imgIconBookmark}
-              alt="bookmark"
-              className="w-5 h-5 transition-all duration-300"
-              style={{
-                filter: isBookmarked
-                  ? "invert(76%) sepia(85%) saturate(442%) hue-rotate(12deg) brightness(95%) contrast(89%)"
-                  : "grayscale(1) opacity(0.3)",
-              }}
-            />
+            <BookmarkIcon filled={isBookmarked} />
           </button>
         </div>
       </div>
