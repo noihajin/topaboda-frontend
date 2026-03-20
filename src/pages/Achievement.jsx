@@ -440,7 +440,7 @@ export default function Achievement() {
       </div>
 
       {/* ── コンテンツ ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 40px 80px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 40px 80px" }}>
 
         {/* ── サマリーカード ── */}
         <div style={{

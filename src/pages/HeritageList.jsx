@@ -262,7 +262,7 @@ export default function HeritageList() {
       </div>
 
       {/* ── 5. 카드 그리드 ── */}
-      <div style={{ padding: "40px 6% 60px", maxWidth: 1400, margin: "0 auto" }}>
+      <div style={{ padding: "40px 6% 60px", maxWidth: 1280, margin: "0 auto" }}>
         <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, marginBottom: 24, fontFamily: font }}>
           {filtered.length}<span style={{ fontWeight: 400, color: C.textSub }}>件の遺産</span>
         </p>

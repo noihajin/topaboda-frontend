@@ -97,7 +97,7 @@ export default function Community() {
   return (
     /* index.css의 Roboto + Noto Sans JP가 자동 적용됨 */
     <div style={{ background: C.bg, minHeight: "100vh", paddingTop: isMobile ? "8rem" : "11.9rem", paddingBottom: "10rem" }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
 
         <div style={{ marginBottom: isMobile ? 40 : 80, textAlign: "center" }}>
           {/* 영문/숫자는 Roboto, 일문은 Noto Sans JP로 자동 렌더링 */}
