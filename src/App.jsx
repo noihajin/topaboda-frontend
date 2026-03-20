@@ -26,6 +26,7 @@ import HeritageList from "./pages/HeritageList";
 import MyPage from "./pages/Mypage";
 import Achievement from "./pages/Achievement";
 import RouteCreate from "./pages/RouteCreate";
+import PostDetail from "./pages/PostDetail";
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -60,6 +61,9 @@ function AppLayout() {
 
           {/* 2. 커뮤니티 리스트 */}
           <Route path="/community" element={<Community />} />
+
+          {/* 2-1. 커뮤니티 게시글 상세 */}
+          <Route path="/community/:postId" element={<PostDetail />} />
 
           {/* 3. 로그인 */}
           <Route path="/login" element={<Login />} />

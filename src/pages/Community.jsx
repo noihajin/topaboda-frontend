@@ -234,9 +234,14 @@ function PopularCard({ post, rank }) {
 }
 
 function BoardRow({ post, displayNo }) {
+  const navigate = useNavigate();
   const cat = CAT_COLORS[post.category] || { bg: "#eee", color: "#555" };
   return (
-    <tr className="hover:bg-white/30" style={{ borderBottom: "1px solid rgba(0,0,0,0.03)", transition: "0.2s" }}>
+    <tr
+      className="hover:bg-white/30"
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.03)", transition: "background 0.2s", cursor: "pointer" }}
+      onClick={() => navigate(`/community/${post.id}`)}
+    >
       {/* 데이터(숫자/날짜)는 Roboto의 깔끔함이 강조되도록 세팅 */}
       <td style={{ padding: "18px", textAlign: "center", color: C.gray3, fontSize: 13, fontWeight: 600 }}>{displayNo}</td>
       <td style={{ padding: "18px" }}><span style={{ background: cat.bg, color: cat.color, borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 900, whiteSpace: "nowrap" }}>{post.category}</span></td>
