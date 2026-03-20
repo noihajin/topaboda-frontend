@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 // ── 디자인 토큰 ──────────────────────────────────────────────────────
 const C = {
@@ -276,39 +277,11 @@ export default function HeritageList() {
         )}
 
         {/* ── 페이지네이션 ── */}
-        {totalPages > 1 && (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 48 }}>
-            <button
-              disabled={currentPage === 0}
-              onClick={() => setCurrentPage(p => p - 1)}
-              style={{ width: 44, height: 44, borderRadius: 12, border: `2px solid ${C.border}`, background: C.white, cursor: currentPage === 0 ? "default" : "pointer", opacity: currentPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-              onMouseEnter={e => { if (currentPage !== 0) e.currentTarget.style.background = C.bg; }}
-              onMouseLeave={e => e.currentTarget.style.background = C.white}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i)}
-                style={{ width: 44, height: 44, borderRadius: 12, border: currentPage === i ? "none" : `2px solid ${C.border}`, background: currentPage === i ? C.navy : C.white, color: currentPage === i ? "white" : C.navy, cursor: "pointer", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", fontFamily: font }}
-                onMouseEnter={e => { if (currentPage !== i) e.currentTarget.style.background = C.bg; }}
-                onMouseLeave={e => { if (currentPage !== i) e.currentTarget.style.background = C.white; }}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setCurrentPage(p => p + 1)}
-              style={{ width: 44, height: 44, borderRadius: 12, border: `2px solid ${C.border}`, background: C.white, cursor: currentPage >= totalPages - 1 ? "default" : "pointer", opacity: currentPage >= totalPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-              onMouseEnter={e => { if (currentPage < totalPages - 1) e.currentTarget.style.background = C.bg; }}
-              onMouseLeave={e => e.currentTarget.style.background = C.white}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          onPageChange={(p) => setCurrentPage(p - 1)}
+        />
       </div>
     </div>
   );

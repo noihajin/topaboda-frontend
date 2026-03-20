@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 // 아이콘 임포트 (기존과 동일)
 import icTrending  from "../assets/community/icon_trending_c.svg";
@@ -190,13 +191,11 @@ export default function Community() {
         </div>
 
         {/* 페이지네이션 */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 40 }}>
-          <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === 1 ? 0.3 : 1 }}><img src={icChevLeft} style={{ width: 24 }} alt="" /></button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setCurrentPage(i + 1)} style={{ width: 36, height: 36, borderRadius: 10, border: "none", cursor: "pointer", background: currentPage === i + 1 ? C.navy : "transparent", color: currentPage === i + 1 ? "white" : C.gray2, fontWeight: 800, fontSize: 14 }}>{i + 1}</button>
-          ))}
-          <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === totalPages ? 0.3 : 1 }}><img src={icChevRight} style={{ width: 24 }} alt="" /></button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
