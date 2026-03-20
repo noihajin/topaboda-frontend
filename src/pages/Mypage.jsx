@@ -494,11 +494,11 @@ export default function MyPage() {
                         </div>
                         <button
                             onClick={() => navigate("/community/write")}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: C.red, color: "white", border: "none", borderRadius: 9999, height: 44, padding: "0 28px", fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap", transition: "0.2s" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = C.red;     e.currentTarget.style.transform = "translateY(0)"; }}
+                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
                         >
-                            <img src={icPen} alt="" style={{ width: 20 }} /> 投稿する
+                            <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
                         </button>
                     </div>
 
