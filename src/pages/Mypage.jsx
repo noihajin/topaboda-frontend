@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "../components/Pagination";
+import icPen from "../assets/community/icon_pen_c.svg";
 
 // ── 디자인 토큰 ────────────────────────────────────────────────────
 const C = {
@@ -492,11 +493,12 @@ export default function MyPage() {
                             })}
                         </div>
                         <button
-                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: `2px solid ${C.red}`, padding: "10px 20px", borderRadius: 10, fontWeight: 500, fontSize: 15, cursor: "pointer", transition: "0.2s" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                            onClick={() => navigate("/community/write")}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: C.red, color: "white", border: "none", borderRadius: 9999, height: 44, padding: "0 28px", fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap", transition: "0.2s" }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = C.red;     e.currentTarget.style.transform = "translateY(0)"; }}
                         >
-                            <PenWriteIcon /> 新しい記事を書く
+                            <img src={icPen} alt="" style={{ width: 20 }} /> 投稿する
                         </button>
                     </div>
 
