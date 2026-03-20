@@ -122,10 +122,11 @@ export default function Community() {
 
         {/* 필터 및 검색 바 */}
         <div style={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: 16, marginBottom: 20 }}>
+          {/* 카테고리 드롭다운 - 완전 타원 */}
           <div style={{ position: "relative", zIndex: 50 }}>
-            <div onClick={() => setIsCatOpen(!isCatOpen)} style={{ 
-              width: isTablet ? "100%" : 220, 
-              height: 56, background: "white", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: `1px solid ${C.border}`, boxSizing: "border-box"
+            <div onClick={() => setIsCatOpen(!isCatOpen)} style={{
+              width: isTablet ? "100%" : 220,
+              height: 56, background: "#f3f4f6", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: "none", boxSizing: "border-box"
             }}>
               <span style={{ fontWeight: 800, color: C.navy, whiteSpace: "nowrap", fontSize: 14 }}>{selectedCategory}</span>
               <img src={icFilter} alt="" style={{ width: 16, transform: isCatOpen ? "rotate(180deg)" : "none", transition: "0.3s" }} />
@@ -141,22 +142,31 @@ export default function Community() {
             </AnimatePresence>
           </div>
 
+          {/* 검색바 - 완전 타원 + 호버 레드 */}
           <div style={{ flex: 1, position: "relative" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 24px", border: "none", borderRadius: 16, background: "white", fontSize: 15, outline: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.03)", boxSizing: "border-box", fontWeight: 500 }} />
-            <button style={{ position: "absolute", right: 8, top: 8, bottom: 8, width: 48, background: C.navy, border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <img src={icSearch} alt="Search" style={{ width: 20, filter: "brightness(0) invert(1)" }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: "none", borderRadius: 9999, background: "#f3f4f6", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
+            <button
+              style={{ position: "absolute", right: 6, top: 6, bottom: 6, width: 44, background: C.navy, border: "none", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
+              onMouseLeave={e => e.currentTarget.style.background = C.navy}
+            >
+              <img src={icSearch} alt="Search" style={{ width: 18, filter: "brightness(0) invert(1)" }} />
             </button>
           </div>
 
-          <button 
+          {/* 투고 버튼 - 그라데이션 제거 + 완전 타원 */}
+          <button
             onClick={() => navigate("/community/write")}
-            style={{ 
-              background: `linear-gradient(to bottom, ${C.red}, ${C.redL})`, 
-              color: C.white, border: "none", borderRadius: 16, 
-              height: 56, padding: "0 32px", 
-              display: "flex", alignItems: "center", justifyContent: "center", 
-              gap: 10, fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap" 
+            style={{
+              background: C.red,
+              color: C.white, border: "none", borderRadius: 9999,
+              height: 56, padding: "0 32px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 10, fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap",
+              transition: "background 0.2s",
             }}
+            onMouseEnter={e => e.currentTarget.style.background = "#8e0000"}
+            onMouseLeave={e => e.currentTarget.style.background = C.red}
           >
             <img src={icPen} alt="" style={{ width: 20 }} /> 投稿する
           </button>
