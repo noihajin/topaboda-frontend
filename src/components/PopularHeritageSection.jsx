@@ -126,7 +126,7 @@ export default function PopularHeritageSection() {
   ];
   return (
     <motion.section
-      className="w-full bg-[#F8F9FC] py-24 px-[10%]"
+      className="w-full bg-[#F8F9FC] pt-36 pb-24 px-[10%]"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
