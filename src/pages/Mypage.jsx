@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Pagination from "../components/Pagination";
 
 // ── 디자인 토큰 ────────────────────────────────────────────────────
 const C = {
@@ -41,12 +42,12 @@ const ACHIEVEMENTS = [
 ];
 
 const POSTS = [
-    { id: 1, title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, comments: 28, likes: 12 },
-    { id: 2, title: "仏国寺の夜景撮影チップス", desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。", date: "2024.02.10", views: 521, comments: 45, likes: 23 },
-    { id: 3, title: "瞻星台（チョムソンデ）訪問記", desc: "新羅時代の天文台、瞻星台に行ってきました。", date: "2024.01.28", views: 287, comments: 19, likes: 8 },
-    { id: 4, title: "昌徳宮・後苑（秘苑）散策コース", desc: "昌徳宮・後苑の美しい散策路を紹介します。", date: "2024.01.15", views: 456, comments: 38, likes: 15 },
-    { id: 5, title: "海印寺・八万大蔵経ガイド", desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, comments: 31, likes: 18 },
-    { id: 6, title: "水原華城の散策", desc: "城壁に沿って歩く歴史の道。", date: "2023.12.20", views: 150, comments: 7, likes: 5 },
+    { id: 1, category: "レビュー",     title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, likes: 12 },
+    { id: 2, category: "ヒント",       title: "仏国寺の夜景撮影チップス",   desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。",         date: "2024.02.10", views: 521, likes: 23 },
+    { id: 3, category: "レビュー",     title: "瞻星台（チョムソンデ）訪問記",desc: "新羅時代の天文台、瞻星台に行ってきました。",                           date: "2024.01.28", views: 287, likes: 8  },
+    { id: 4, category: "フリートーク", title: "昌徳宮・後苑（秘苑）散策コース",desc: "昌徳宮・後苑の美しい散策路を紹介します。",                           date: "2024.01.15", views: 456, likes: 15 },
+    { id: 5, category: "質問",         title: "海印寺・八万大蔵経ガイド",   desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, likes: 18 },
+    { id: 6, category: "レビュー",     title: "水原華城の散策",             desc: "城壁に沿って歩く歴史の道。",                                             date: "2023.12.20", views: 150, likes: 5  },
 ];
 
 const COMMENTS = [
@@ -191,14 +192,29 @@ function RouteCard({ route }) {
     );
 }
 
-// ── 리스트 행: 카드형 (피그마 디자인) ────────────────────────────────
-function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }) {
+// ── 카테고리 컬러 ─────────────────────────────────────────────────
+const CAT_COLORS = {
+    "レビュー":     { bg: "#dbeafe", color: "#1447e6" },
+    "ヒント":       { bg: "#ffedd4", color: "#ca3500" },
+    "フリートーク": { bg: "#f3e8ff", color: "#8200db" },
+    "質問":         { bg: "#dcfce7", color: "#008236" },
+};
+
+// ── 리스트 행: 카드형 ─────────────────────────────────────────────
+function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete }) {
+    const cat = CAT_COLORS[category];
     return (
         <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "20px 22px", background: C.white, marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontSize: 18, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h4>
-                    {desc && <p style={{ fontSize: 14, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>{desc}</p>}
+                    {/* 카테고리 배지 */}
+                    {cat && (
+                        <span style={{ display: "inline-block", background: cat.bg, color: cat.color, padding: "3px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, marginBottom: 8, fontFamily: font }}>
+                            {category}
+                        </span>
+                    )}
+                    <h4 style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: font }}>{title}</h4>
+                    {desc && <p style={{ fontSize: 13, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", fontFamily: font }}>{desc}</p>}
                     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
                             <CalendarIcon /> {date}
@@ -206,11 +222,6 @@ function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }
                         {views !== undefined && (
                             <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
                                 <EyeIcon /> {views}
-                            </span>
-                        )}
-                        {comments !== undefined && (
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
-                                <MsgIcon /> {comments}
                             </span>
                         )}
                         {likes !== undefined && (
@@ -221,10 +232,10 @@ function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }
                     </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "flex-start" }}>
-                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
+                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
                         <EditIcon /> 編集
                     </button>
-                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
+                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
                         <TrashIcon /> 削除
                     </button>
                 </div>
@@ -478,58 +489,34 @@ export default function MyPage() {
                                 e.currentTarget.style.color = "white";
                             }}
                         >
-                            <PenWriteIcon /> 새 글 작성
+                            <PenWriteIcon /> 新しい記事を書く
                         </button>
                     </div>
 
                     {/* 리스트 */}
                     <div style={{ minHeight: 400 }}>
                         {displayedAct.map((item) => (
-                            <ListRow key={item.id} title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName} desc={postTab === "posts" ? item.desc : item.content} date={item.date} views={postTab === "posts" ? item.views : undefined} comments={postTab === "posts" ? item.comments : undefined} likes={postTab === "posts" ? item.likes : undefined} onEdit={() => console.log("Edit", item.id)} onDelete={() => confirm("削除しますか？")} />
+                            <ListRow
+                                key={item.id}
+                                category={postTab === "posts" ? item.category : undefined}
+                                title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName}
+                                desc={postTab === "posts" ? item.desc : item.content}
+                                date={item.date}
+                                views={postTab === "posts" ? item.views : undefined}
+                                likes={postTab === "posts" ? item.likes : undefined}
+                                onEdit={() => navigate("/community/write", { state: { post: item, isEdit: true } })}
+                                onDelete={() => confirm("削除しますか？")}
+                            />
                         ))}
                     </div>
 
-                    {/* 번호형 페이지네이션 */}
+                    {/* 공용 페이지네이션 */}
                     {totalActPages > 1 && (
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 24 }}>
-                            <button
-                                disabled={actPage === 0}
-                                onClick={() => setActPage((p) => p - 1)}
-                                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-                                onMouseEnter={(e) => {
-                                    if (actPage !== 0) e.currentTarget.style.background = "#f3f4f6";
-                                }}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
-                            >
-                                <ChevronLeft />
-                            </button>
-                            {Array.from({ length: totalActPages }, (_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActPage(i)}
-                                    style={{ width: 40, height: 40, borderRadius: 10, border: actPage === i ? "none" : `1.5px solid ${C.borderD}`, background: actPage === i ? C.red : "white", color: actPage === i ? "white" : C.gray1, cursor: "pointer", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
-                                    onMouseEnter={(e) => {
-                                        if (actPage !== i) e.currentTarget.style.background = "#f3f4f6";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (actPage !== i) e.currentTarget.style.background = "white";
-                                    }}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                disabled={actPage >= totalActPages - 1}
-                                onClick={() => setActPage((p) => p + 1)}
-                                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage >= totalActPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-                                onMouseEnter={(e) => {
-                                    if (actPage < totalActPages - 1) e.currentTarget.style.background = "#f3f4f6";
-                                }}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
-                            >
-                                <ChevronRight />
-                            </button>
-                        </div>
+                        <Pagination
+                            currentPage={actPage + 1}
+                            totalPages={totalActPages}
+                            onPageChange={(p) => setActPage(p - 1)}
+                        />
                     )}
                 </div>
 

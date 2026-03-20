@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── Design Tokens ─────────────────────────────────────────────
@@ -24,11 +24,14 @@ const CATEGORIES = ["レビュー", "ヒント", "フリートーク", "質問"]
 
 export default function WritePost() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editPost  = location.state?.post   ?? null;
+  const isEdit    = location.state?.isEdit ?? false;
 
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(editPost?.category ?? "");
   const [catOpen, setCatOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState(editPost?.title ?? "");
+  const [content, setContent] = useState(editPost?.desc ?? "");
   const [images, setImages] = useState([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
@@ -130,7 +133,7 @@ export default function WritePost() {
               letterSpacing: "-0.02em",
             }}
           >
-            記事を作成
+            {isEdit ? "記事を編集" : "記事を作成"}
           </h1>
 
           {/* ── 카테고리 ── */}
