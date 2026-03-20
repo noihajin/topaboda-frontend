@@ -199,24 +199,24 @@ export default function HeritageList() {
               onKeyDown={handleKeyDown}
               placeholder="国家遺産の検索 (例: 景福宮、石窟庵、瞻星台)"
               style={{
-                width: "100%", height: 56, padding: "0 70px 0 24px",
-                border: "none", borderRadius: 16, background: "white",
+                width: "100%", height: 56, padding: "0 70px 0 28px",
+                border: "none", borderRadius: 9999, background: "#f3f4f6",
                 fontSize: 15, outline: "none", fontFamily: font, fontWeight: 500,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.06)", boxSizing: "border-box",
+                boxShadow: "none", boxSizing: "border-box",
               }}
             />
             <button
               onClick={handleSearch}
               style={{
-                position: "absolute", right: 8, top: 8, bottom: 8, width: 48,
-                background: C.navy, border: "none", borderRadius: 12,
+                position: "absolute", right: 6, top: 6, bottom: 6, width: 44,
+                background: C.navy, border: "none", borderRadius: 9999,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", transition: "opacity 0.2s",
+                cursor: "pointer", transition: "background 0.2s",
               }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-              onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+              onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
+              onMouseLeave={e => e.currentTarget.style.background = C.navy}
             >
-              <img src={imgIconSearchWht} alt="検索" style={{ width: 20 }} />
+              <img src={imgIconSearchWht} alt="検索" style={{ width: 18 }} />
             </button>
           </div>
         </div>
