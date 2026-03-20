@@ -492,15 +492,9 @@ export default function MyPage() {
                             })}
                         </div>
                         <button
-                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: `2px solid ${C.red}`, padding: "10px 20px", borderRadius: 10, fontWeight: 500, fontSize: 15, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "white";
-                                e.currentTarget.style.color = C.red;
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = C.red;
-                                e.currentTarget.style.color = "white";
-                            }}
+                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: `2px solid ${C.red}`, padding: "10px 20px", borderRadius: 10, fontWeight: 500, fontSize: 15, cursor: "pointer", transition: "0.2s" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
                         >
                             <PenWriteIcon /> 新しい記事を書く
                         </button>
@@ -588,11 +582,11 @@ export default function MyPage() {
                                         fontSize: 15,
                                         cursor: "pointer",
                                         fontFamily: font,
-                                        transition: "opacity 0.2s, transform 0.2s",
+                                        transition: "0.2s",
                                         flexShrink: 0,
                                     }}
-                                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1";    e.currentTarget.style.transform = "translateY(0)";  }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
                                 >
                                     実績ページへ
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
