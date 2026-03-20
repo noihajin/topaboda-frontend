@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
+import imgIconSearchWht from "../assets/icon_search_white.svg";
 
 // ── 디자인 토큰 ──────────────────────────────────────────────────────
 const C = {
@@ -191,28 +192,31 @@ export default function HeritageList() {
       {/* ── 2. 검색 바 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "16px 0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center", maxWidth: 720, margin: "0 auto" }}>
-            <div style={{
-              flex: 1, position: "relative", background: C.bg, borderRadius: 14,
-              border: `2px solid ${C.border}`, display: "flex", alignItems: "center",
-              padding: "0 16px", height: 50,
-            }}>
-              <SearchIcon />
-              <input
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="国家遺産の検索 (例: 景福宮、石窟庵、瞻星台)"
-                style={{ flex: 1, border: "none", background: "transparent", fontSize: 14, color: "#333", outline: "none", marginLeft: 10, fontFamily: font }}
-              />
-            </div>
+          <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
+            <input
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="国家遺産の検索 (例: 景福宮、石窟庵、瞻星台)"
+              style={{
+                width: "100%", height: 56, padding: "0 70px 0 24px",
+                border: "none", borderRadius: 16, background: "white",
+                fontSize: 15, outline: "none", fontFamily: font, fontWeight: 500,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.06)", boxSizing: "border-box",
+              }}
+            />
             <button
               onClick={handleSearch}
-              style={{ background: C.red, color: "white", border: "none", borderRadius: 14, padding: "0 24px", height: 50, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: font, transition: "opacity 0.2s", flexShrink: 0 }}
+              style={{
+                position: "absolute", right: 8, top: 8, bottom: 8, width: 48,
+                background: C.navy, border: "none", borderRadius: 12,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "opacity 0.2s",
+              }}
               onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
               onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
-              検索
+              <img src={imgIconSearchWht} alt="検索" style={{ width: 20 }} />
             </button>
           </div>
         </div>
