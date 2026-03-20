@@ -251,18 +251,10 @@ export default function MyPage() {
         visitCount: 0,
     });
 
-    const [heritageBookmark, setHeritageBookmark] = useState({
-        name: "",
-        region: "",
-        image: "",
-    });
+    const [heritageBookmark, setHeritageBookmark] = useState([]);
     const [htBkPage, setHtBkPage] = useState(0);
 
-    const [heritageLike, setHeritageLike] = useState({
-        name: "",
-        region: "",
-        image: "",
-    });
+    const [heritageLike, setHeritageLike] = useState([]);
     const [htLkPage, setHtLkPage] = useState(0);
 
     const PAGE_SIZE = 5;
@@ -279,42 +271,73 @@ export default function MyPage() {
     const totalActPages = Math.ceil(currentActData.length / PAGE_SIZE);
     const displayedAct = currentActData.slice(actPage * PAGE_SIZE, (actPage + 1) * PAGE_SIZE);
 
-    const currentHtData = heritageTab === "bookmark" ? BOOKMARK_DATA : LIKE_DATA;
-    const totalHtPages = Math.ceil(currentHtData.length / HT_SIZE);
+    const currentHtData = heritageTab === "bookmark" ? heritageBookmark : heritageLike;
+    const totalHtPages = Math.ceil(currentHtData.length / HT_SIZE); // 최대 페이지 수 인듯
     const displayedHt = currentHtData.slice(htPage * HT_SIZE, (htPage + 1) * HT_SIZE);
 
     // 페이지 로드 시 데이터 요청
     useEffect(() => {
-        const fetchUserData = async () => {
-            // 1. localStorage에서 ID를 직접 가져옵니다. (state에 저장하고 기다리면 늦음)
-            const id = localStorage.getItem("id");
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
 
+        const fetchUserData = async () => {
             if (!id) {
                 console.error("저장된 ID가 없습니다.");
                 return;
             }
 
             try {
-                // 2. axios는 프로토콜(http://)을 반드시 붙여야 합니다.
-                // 3. axios는 response.json() 과정이 필요 없습니다. (response.data에 이미 들어있음)
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`);
+                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-                if (response.status === 200) {
-                    // response.data가 바로 백엔드에서 보낸 JSON 객체입니다.
-                    setUser(response.data);
-                    console.log("유저 데이터 로드 성공:", response.data);
-                }
+                setUser(response.data);
             } catch (error) {
                 console.error("데이터 로드 실패:", error);
             }
         };
 
-        const fetchHeritageBookmarkData = async () => {};
-
-        const fetchHeritageLikeData = async () => {};
-
         fetchUserData();
     }, []);
+
+    useEffect(() => {
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        const fetchHeritageLikeData = async () => {
+            if (!id) {
+                console.error("저장된 ID가 없습니다.");
+                return;
+            }
+
+            try {
+                const response = await axios.get(`http://localhost:9990/topaboda/api/heritages/likes/snippet`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    params: {
+                        page: htLkPage,
+                        size: HT_SIZE,
+                    },
+                });
+
+                setHeritageLike(response.data.contents);
+            } catch (error) {
+                console.error("데이터 로드 실패:", error);
+            }
+        };
+        fetchHeritageLikeData();
+    }, [htLkPage]);
+
+    useEffect(() => {
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        const fetchHeritageBookmarkData = async () => {};
+        fetchHeritageBookmarkData();
+    }, [htBkPage]);
 
     return (
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
@@ -429,10 +452,10 @@ export default function MyPage() {
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                             {displayedHt.map((item) => (
-                                <div key={item.id} className="ht-card" style={{ position: "relative", borderRadius: 16, overflow: "hidden", height: 140, cursor: "pointer" }}>
-                                    <img src={item.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <div key={item.heritageId} className="ht-card" style={{ position: "relative", borderRadius: 16, overflow: "hidden", height: 140, cursor: "pointer" }}>
+                                    <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     <div className="overlay" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", color: "white", textAlign: "center", padding: "10px" }}>
-                                        <p style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{item.name}</p>
+                                        <p style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{item.heritageName}</p>
                                         <p style={{ fontSize: 12, opacity: 0.8 }}>{item.region}</p>
                                     </div>
                                 </div>
