@@ -151,7 +151,7 @@ export default function HeritageList() {
           pointerEvents: "none",
         }} />
         {/* 1280px 중앙정렬 래퍼 */}
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px", textAlign: "center" }}>
           <span style={{
             display: "inline-block",
             background: `${C.gold}20`, color: C.gold,
@@ -168,7 +168,7 @@ export default function HeritageList() {
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.6)", margin: "0 0 40px" }}>
             国宝、宝物、史跡など、韓国の文化遺産を一箇所でご覧いただけます。
           </p>
-          <div style={{ display: "flex", gap: 40, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 40, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
             {[
               { num: "349",    label: "国宝" },
               { num: "2,220",  label: "宝物" },
@@ -191,7 +191,7 @@ export default function HeritageList() {
       {/* ── 2. 검색 바 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "16px 0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", maxWidth: 720, margin: "0 auto" }}>
             <div style={{
               flex: 1, position: "relative", background: C.bg, borderRadius: 14,
               border: `2px solid ${C.border}`, display: "flex", alignItems: "center",
@@ -221,7 +221,7 @@ export default function HeritageList() {
       {/* ── 3. 카테고리 탭 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}` }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ display: "flex", overflowX: "auto", scrollbarWidth: "none" }}>
+          <div style={{ display: "flex", overflowX: "auto", scrollbarWidth: "none", justifyContent: "center" }}>
             {CATEGORIES.map(cat => {
               const isActive = activeCategory === cat;
               return (
@@ -248,7 +248,7 @@ export default function HeritageList() {
       {/* ── 4. 지역 필터 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "12px 0" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             {REGIONS.map(reg => {
               const isActive = activeRegion === reg;
               return (
