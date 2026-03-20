@@ -116,7 +116,7 @@ const CommentIcon = () => (
 /* ── 본문 공통 텍스트 스타일 ── */
 const contentText = {
   fontFamily: "'Noto Sans JP', sans-serif",
-  fontSize: "1.4rem",
+  fontSize: 15,
   color: "#333",
   fontStyle: "normal",
   fontWeight: 400,
@@ -124,17 +124,17 @@ const contentText = {
   margin: "6px 0",
 };
 
-/* ── 마크다운 간소화 렌더러 ── */
+/* ── 마크다운 간소화 렌더러 (굵기/크기 차이 없이 완전 통일) ── */
 function renderContent(text) {
   return text.split("\n").map((line, i) => {
     if (line.startsWith("## "))
-      return <p key={i} style={{ ...contentText, fontWeight: 700, margin: "28px 0 10px" }}>{line.slice(3)}</p>;
+      return <p key={i} style={{ ...contentText, margin: "20px 0 6px" }}>{line.slice(3)}</p>;
     if (line.startsWith("### "))
-      return <p key={i} style={{ ...contentText, fontWeight: 600, margin: "20px 0 8px" }}>{line.slice(4)}</p>;
+      return <p key={i} style={{ ...contentText, margin: "14px 0 4px" }}>{line.slice(4)}</p>;
     if (line.startsWith("- ") || line.match(/^\d+\. /))
       return <p key={i} style={{ ...contentText, margin: "4px 0 4px 16px" }}>{line}</p>;
     if (line === "")
-      return <div key={i} style={{ height: 8 }} />;
+      return <div key={i} style={{ height: 6 }} />;
     return <p key={i} style={contentText}>{line}</p>;
   });
 }
