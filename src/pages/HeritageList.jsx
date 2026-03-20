@@ -152,14 +152,16 @@ export default function HeritageList() {
         }} />
         {/* 1280px 중앙정렬 래퍼 */}
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            border: "1.5px solid rgba(202,202,0,0.35)", background: "rgba(202,202,0,0.12)",
-            borderRadius: 999, padding: "6px 14px", marginBottom: 20,
+          <span style={{
+            display: "inline-block",
+            background: `${C.gold}20`, color: C.gold,
+            padding: "6px 20px", borderRadius: 99,
+            fontSize: 11, fontWeight: 900, letterSpacing: 2,
+            textTransform: "uppercase", marginBottom: 18,
+            border: `1px solid ${C.gold}40`,
           }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: C.gold, flexShrink: 0 }} />
-            <span style={{ color: C.gold, fontSize: 13, fontWeight: 500 }}>Archive</span>
-          </div>
+            ARCHIVE
+          </span>
           <h1 style={{ fontFamily: fontSerif, fontSize: 42, fontWeight: 700, color: "white", margin: "0 0 14px", lineHeight: 1.2 }}>
             国家遺産リスト
           </h1>
