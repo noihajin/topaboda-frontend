@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 // 아이콘 임포트 (기존과 동일)
 import icTrending  from "../assets/community/icon_trending_c.svg";
@@ -96,7 +97,7 @@ export default function Community() {
   return (
     /* index.css의 Roboto + Noto Sans JP가 자동 적용됨 */
     <div style={{ background: C.bg, minHeight: "100vh", paddingTop: isMobile ? "8rem" : "11.9rem", paddingBottom: "10rem" }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
 
         <div style={{ marginBottom: isMobile ? 40 : 80, textAlign: "center" }}>
           {/* 영문/숫자는 Roboto, 일문은 Noto Sans JP로 자동 렌더링 */}
@@ -121,10 +122,11 @@ export default function Community() {
 
         {/* 필터 및 검색 바 */}
         <div style={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: 16, marginBottom: 20 }}>
+          {/* 카테고리 드롭다운 - 완전 타원 */}
           <div style={{ position: "relative", zIndex: 50 }}>
-            <div onClick={() => setIsCatOpen(!isCatOpen)} style={{ 
-              width: isTablet ? "100%" : 220, 
-              height: 56, background: "white", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: `1px solid ${C.border}`, boxSizing: "border-box"
+            <div onClick={() => setIsCatOpen(!isCatOpen)} style={{
+              width: isTablet ? "100%" : 220,
+              height: 56, background: "#ffffff", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: `1px solid ${C.border}`, boxSizing: "border-box"
             }}>
               <span style={{ fontWeight: 800, color: C.navy, whiteSpace: "nowrap", fontSize: 14 }}>{selectedCategory}</span>
               <img src={icFilter} alt="" style={{ width: 16, transform: isCatOpen ? "rotate(180deg)" : "none", transition: "0.3s" }} />
@@ -140,22 +142,31 @@ export default function Community() {
             </AnimatePresence>
           </div>
 
+          {/* 검색바 - 완전 타원 + 호버 레드 */}
           <div style={{ flex: 1, position: "relative" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 24px", border: "none", borderRadius: 16, background: "white", fontSize: 15, outline: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.03)", boxSizing: "border-box", fontWeight: 500 }} />
-            <button style={{ position: "absolute", right: 8, top: 8, bottom: 8, width: 48, background: C.navy, border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <img src={icSearch} alt="Search" style={{ width: 20, filter: "brightness(0) invert(1)" }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
+            <button
+              style={{ position: "absolute", right: 6, top: 6, bottom: 6, width: 44, background: C.navy, border: "none", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
+              onMouseLeave={e => e.currentTarget.style.background = C.navy}
+            >
+              <img src={icSearch} alt="Search" style={{ width: 18, filter: "brightness(0) invert(1)" }} />
             </button>
           </div>
 
-          <button 
+          {/* 투고 버튼 - 그라데이션 제거 + 완전 타원 */}
+          <button
             onClick={() => navigate("/community/write")}
-            style={{ 
-              background: `linear-gradient(to bottom, ${C.red}, ${C.redL})`, 
-              color: C.white, border: "none", borderRadius: 16, 
-              height: 56, padding: "0 32px", 
-              display: "flex", alignItems: "center", justifyContent: "center", 
-              gap: 10, fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap" 
+            style={{
+              background: C.red,
+              color: C.white, border: "none", borderRadius: 9999,
+              height: 56, padding: "0 32px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 10, fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap",
+              transition: "background 0.2s",
             }}
+            onMouseEnter={e => e.currentTarget.style.background = "#8e0000"}
+            onMouseLeave={e => e.currentTarget.style.background = C.red}
           >
             <img src={icPen} alt="" style={{ width: 20 }} /> 投稿する
           </button>
@@ -172,7 +183,7 @@ export default function Community() {
         <div className="no-scrollbar" style={{ background: "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderRadius: isMobile ? 20 : 32, border: "1px solid rgba(255, 255, 255, 0.4)", overflowX: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.04)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: isMobile ? 700 : "auto" }}>
             <thead>
-              <tr style={{ borderBottom: `2px solid rgba(0,0,0,0.05)`, background: "rgba(0, 13, 87, 0.04)" }}>
+              <tr style={{ borderBottom: `2px solid rgba(0,0,0,0.08)`, background: "#e9eaf0" }}>
                 <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 80, textAlign: "center" }}>No</th>
                 <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 140 }}>カテゴリ</th>
                 <th style={{ padding: "24px", color: C.navy, fontSize: 14, fontWeight: 900, textAlign: "left" }}>タイトル</th>
@@ -190,21 +201,20 @@ export default function Community() {
         </div>
 
         {/* 페이지네이션 */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 40 }}>
-          <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === 1 ? 0.3 : 1 }}><img src={icChevLeft} style={{ width: 24 }} alt="" /></button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setCurrentPage(i + 1)} style={{ width: 36, height: 36, borderRadius: 10, border: "none", cursor: "pointer", background: currentPage === i + 1 ? C.navy : "transparent", color: currentPage === i + 1 ? "white" : C.gray2, fontWeight: 800, fontSize: 14 }}>{i + 1}</button>
-          ))}
-          <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === totalPages ? 0.3 : 1 }}><img src={icChevRight} style={{ width: 24 }} alt="" /></button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
 }
 
 function PopularCard({ post, rank }) {
+  const navigate = useNavigate();
   return (
-    <motion.div whileHover={{ y: -8 }} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
+    <motion.div whileHover={{ y: -8 }} onClick={() => navigate(`/community/${post.id}`)} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
       <div style={{ height: 160, background: "#f1f3f7", position: "relative" }}>
         <div style={{ position: "absolute", top: 16, left: 16, width: 36, height: 36, borderRadius: 12, background: `linear-gradient(135deg, ${C.gold}, ${C.goldD})`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, color: C.navy, letterSpacing: "-0.05em" }}>{rank}</div>
       </div>
@@ -225,9 +235,14 @@ function PopularCard({ post, rank }) {
 }
 
 function BoardRow({ post, displayNo }) {
+  const navigate = useNavigate();
   const cat = CAT_COLORS[post.category] || { bg: "#eee", color: "#555" };
   return (
-    <tr className="hover:bg-white/30" style={{ borderBottom: "1px solid rgba(0,0,0,0.03)", transition: "0.2s" }}>
+    <tr
+      className="hover:bg-white/30"
+      style={{ borderBottom: "1px solid rgba(0,0,0,0.03)", transition: "background 0.2s", cursor: "pointer" }}
+      onClick={() => navigate(`/community/${post.id}`)}
+    >
       {/* 데이터(숫자/날짜)는 Roboto의 깔끔함이 강조되도록 세팅 */}
       <td style={{ padding: "18px", textAlign: "center", color: C.gray3, fontSize: 13, fontWeight: 600 }}>{displayNo}</td>
       <td style={{ padding: "18px" }}><span style={{ background: cat.bg, color: cat.color, borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 900, whiteSpace: "nowrap" }}>{post.category}</span></td>

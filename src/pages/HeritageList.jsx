@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
+import imgIconSearchWht from "../assets/icon_search_white.svg";
 
 // ── 디자인 토큰 ──────────────────────────────────────────────────────
 const C = {
@@ -141,7 +143,7 @@ export default function HeritageList() {
       {/* ── 1. 히어로 ── */}
       <div style={{
         background: "linear-gradient(180deg, #000d57 0%, #061470 50%, #0d1f8a 100%)",
-        paddingTop: 120, paddingBottom: 60, paddingLeft: "6%", paddingRight: "6%",
+        paddingTop: 120, paddingBottom: 60,
         position: "relative", overflow: "hidden",
       }}>
         <div style={{
@@ -149,119 +151,133 @@ export default function HeritageList() {
           background: "radial-gradient(ellipse at 80% 50%, rgba(202,202,0,0.15) 0%, transparent 60%)",
           pointerEvents: "none",
         }} />
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 8,
-          border: "1.5px solid rgba(202,202,0,0.35)", background: "rgba(202,202,0,0.12)",
-          borderRadius: 999, padding: "8px 18px", marginBottom: 24,
-        }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.gold, flexShrink: 0 }} />
-          <span style={{ color: C.gold, fontSize: 16, fontWeight: 500 }}>国家遺産アーカイブ</span>
-        </div>
-        <h1 style={{ fontFamily: fontSerif, fontSize: "clamp(32px, 4vw, 60px)", fontWeight: 700, color: "white", margin: "0 0 16px", lineHeight: 1.2 }}>
-          大韓民国の貴重な国家遺産
-        </h1>
-        <p style={{ fontSize: "clamp(14px, 1.8vw, 22px)", color: "rgba(255,255,255,0.6)", margin: "0 0 48px" }}>
-          国宝、宝物、史跡など、韓国の文化遺産を一箇所でご覧いただけます。
-        </p>
-        <div style={{ display: "flex", gap: 48, alignItems: "center", flexWrap: "wrap" }}>
-          {[
-            { num: "349",    label: "国宝" },
-            { num: "2,220",  label: "宝物" },
-            { num: "536",    label: "史跡" },
-            { num: "473",    label: "天然記念物" },
-            { num: "4,000+", label: "全遺産" },
-          ].map((s, i) => (
-            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 48 }}>
-              {i > 0 && <div style={{ width: 1, height: 60, background: "rgba(255,255,255,0.12)" }} />}
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontFamily: fontSerif, fontSize: "clamp(28px, 3vw, 48px)", fontWeight: 700, color: "white", margin: 0, lineHeight: 1 }}>{s.num}</p>
-                <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", margin: "6px 0 0" }}>{s.label}</p>
+        {/* 1280px 중앙정렬 래퍼 */}
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px", textAlign: "center" }}>
+          <span style={{
+            display: "inline-block",
+            background: `${C.gold}20`, color: C.gold,
+            padding: "6px 20px", borderRadius: 99,
+            fontSize: 11, fontWeight: 900, letterSpacing: 2,
+            textTransform: "uppercase", marginBottom: 18,
+            border: `1px solid ${C.gold}40`,
+          }}>
+            ARCHIVE
+          </span>
+          <h1 style={{ fontFamily: fontSerif, fontSize: 42, fontWeight: 700, color: "white", margin: "0 0 14px", lineHeight: 1.2 }}>
+            国家遺産リスト
+          </h1>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.6)", margin: "0 0 40px" }}>
+            国宝、宝物、史跡など、韓国の文化遺産を一箇所でご覧いただけます。
+          </p>
+          <div style={{ display: "flex", gap: 40, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+            {[
+              { num: "349",    label: "国宝" },
+              { num: "2,220",  label: "宝物" },
+              { num: "536",    label: "史跡" },
+              { num: "473",    label: "天然記念物" },
+              { num: "4,000+", label: "全遺産" },
+            ].map((s, i) => (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 40 }}>
+                {i > 0 && <div style={{ width: 1, height: 44, background: "rgba(255,255,255,0.12)" }} />}
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontFamily: fontSerif, fontSize: 28, fontWeight: 700, color: "white", margin: 0, lineHeight: 1 }}>{s.num}</p>
+                  <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "5px 0 0" }}>{s.label}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       {/* ── 2. 검색 바 ── */}
-      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "20px 6%" }}>
-        <div style={{ display: "flex", gap: 12, alignItems: "center", maxWidth: 900 }}>
-          <div style={{
-            flex: 1, position: "relative", background: C.bg, borderRadius: 14,
-            border: `2px solid ${C.border}`, display: "flex", alignItems: "center",
-            padding: "0 16px", height: 52,
-          }}>
-            <SearchIcon />
+      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "16px 0" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+          <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
             <input
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="国家遺産の検索 (例: 景福宮、石窟庵、瞻星台)"
-              style={{ flex: 1, border: "none", background: "transparent", fontSize: 15, color: "#333", outline: "none", marginLeft: 10, fontFamily: font }}
+              style={{
+                width: "100%", height: 56, padding: "0 70px 0 28px",
+                border: "none", borderRadius: 9999, background: "#f3f4f6",
+                fontSize: 15, outline: "none", fontFamily: font, fontWeight: 500,
+                boxShadow: "none", boxSizing: "border-box",
+              }}
             />
+            <button
+              onClick={handleSearch}
+              style={{
+                position: "absolute", right: 6, top: 6, bottom: 6, width: 44,
+                background: C.navy, border: "none", borderRadius: 9999,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "background 0.2s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
+              onMouseLeave={e => e.currentTarget.style.background = C.navy}
+            >
+              <img src={imgIconSearchWht} alt="検索" style={{ width: 18 }} />
+            </button>
           </div>
-          <button
-            onClick={handleSearch}
-            style={{ background: C.red, color: "white", border: "none", borderRadius: 14, padding: "0 28px", height: 52, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: font, transition: "opacity 0.2s", flexShrink: 0 }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >
-            検索
-          </button>
         </div>
       </div>
 
       {/* ── 3. 카테고리 탭 ── */}
-      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "0 6%" }}>
-        <div style={{ display: "flex", overflowX: "auto", scrollbarWidth: "none" }}>
-          {CATEGORIES.map(cat => {
-            const isActive = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => { setActiveCategory(cat); setCurrentPage(0); }}
-                style={{
-                  background: "none", border: "none",
-                  borderBottom: isActive ? `3px solid ${C.navy}` : "3px solid transparent",
-                  color: isActive ? C.navy : C.textSub,
-                  fontSize: 16, fontWeight: isActive ? 700 : 500,
-                  padding: "18px 24px", cursor: "pointer", fontFamily: font, whiteSpace: "nowrap",
-                  transition: "color 0.2s",
-                }}
-              >
-                {cat}
-              </button>
-            );
-          })}
+      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+          <div style={{ display: "flex", overflowX: "auto", scrollbarWidth: "none", justifyContent: "center" }}>
+            {CATEGORIES.map(cat => {
+              const isActive = activeCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => { setActiveCategory(cat); setCurrentPage(0); }}
+                  style={{
+                    background: "none", border: "none",
+                    borderBottom: isActive ? `3px solid ${C.navy}` : "3px solid transparent",
+                    color: isActive ? C.navy : C.textSub,
+                    fontSize: 15, fontWeight: isActive ? 700 : 500,
+                    padding: "16px 20px", cursor: "pointer", fontFamily: font, whiteSpace: "nowrap",
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* ── 4. 지역 필터 ── */}
-      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "14px 6%" }}>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {REGIONS.map(reg => {
-            const isActive = activeRegion === reg;
-            return (
-              <button
-                key={reg}
-                onClick={() => { setActiveRegion(reg); setCurrentPage(0); }}
-                style={{
-                  background: isActive ? C.navy : C.white,
-                  color: isActive ? "white" : C.textBody,
-                  border: `2px solid ${isActive ? C.navy : C.border}`,
-                  borderRadius: 999, padding: "7px 18px",
-                  fontSize: 14, fontWeight: isActive ? 600 : 400,
-                  cursor: "pointer", fontFamily: font, transition: "all 0.2s",
-                }}
-              >
-                {reg}
-              </button>
-            );
-          })}
+      <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "12px 0" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+            {REGIONS.map(reg => {
+              const isActive = activeRegion === reg;
+              return (
+                <button
+                  key={reg}
+                  onClick={() => { setActiveRegion(reg); setCurrentPage(0); }}
+                  style={{
+                    background: isActive ? C.navy : C.white,
+                    color: isActive ? "white" : C.textBody,
+                    border: `2px solid ${isActive ? C.navy : C.border}`,
+                    borderRadius: 999, padding: "6px 16px",
+                    fontSize: 13, fontWeight: isActive ? 600 : 400,
+                    cursor: "pointer", fontFamily: font, transition: "all 0.2s",
+                  }}
+                >
+                  {reg}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* ── 5. 카드 그리드 ── */}
-      <div style={{ padding: "40px 6% 60px", maxWidth: 1400, margin: "0 auto" }}>
+      <div style={{ padding: "40px 6% 60px", maxWidth: 1280, margin: "0 auto" }}>
         <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, marginBottom: 24, fontFamily: font }}>
           {filtered.length}<span style={{ fontWeight: 400, color: C.textSub }}>件の遺産</span>
         </p>
@@ -276,39 +292,11 @@ export default function HeritageList() {
         )}
 
         {/* ── 페이지네이션 ── */}
-        {totalPages > 1 && (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 48 }}>
-            <button
-              disabled={currentPage === 0}
-              onClick={() => setCurrentPage(p => p - 1)}
-              style={{ width: 44, height: 44, borderRadius: 12, border: `2px solid ${C.border}`, background: C.white, cursor: currentPage === 0 ? "default" : "pointer", opacity: currentPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-              onMouseEnter={e => { if (currentPage !== 0) e.currentTarget.style.background = C.bg; }}
-              onMouseLeave={e => e.currentTarget.style.background = C.white}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i)}
-                style={{ width: 44, height: 44, borderRadius: 12, border: currentPage === i ? "none" : `2px solid ${C.border}`, background: currentPage === i ? C.navy : C.white, color: currentPage === i ? "white" : C.navy, cursor: "pointer", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", fontFamily: font }}
-                onMouseEnter={e => { if (currentPage !== i) e.currentTarget.style.background = C.bg; }}
-                onMouseLeave={e => { if (currentPage !== i) e.currentTarget.style.background = C.white; }}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setCurrentPage(p => p + 1)}
-              style={{ width: 44, height: 44, borderRadius: 12, border: `2px solid ${C.border}`, background: C.white, cursor: currentPage >= totalPages - 1 ? "default" : "pointer", opacity: currentPage >= totalPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-              onMouseEnter={e => { if (currentPage < totalPages - 1) e.currentTarget.style.background = C.bg; }}
-              onMouseLeave={e => e.currentTarget.style.background = C.white}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          onPageChange={(p) => setCurrentPage(p - 1)}
+        />
       </div>
     </div>
   );

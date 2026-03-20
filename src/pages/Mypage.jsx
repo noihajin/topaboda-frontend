@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Pagination from "../components/Pagination";
+import icPen from "../assets/community/icon_pen_c.svg";
 
 // ── 디자인 토큰 ────────────────────────────────────────────────────
 const C = {
@@ -29,24 +31,37 @@ const ROUTES = [
     { id: 3, title: "扶余の百済遺跡", region: "忠清南道", date: "2024.02.15", spots: 6 },
 ];
 
+// ── 피그마 메달 이미지 ────────────────────────────────────────────
+const MEDAL_GOLD   = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
+const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
+const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
+
 const ACHIEVEMENTS = [
-    { id: 1, title: "最初の一歩", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: true, progress: 100 },
-    { id: 2, title: "国宝征服者", medal: "https://www.figma.com/api/mcp/asset/3b7b88af-7e3e-455e-8742-548cee70092d", achieved: true, progress: 100 },
-    { id: 3, title: "朝鮮王朝探検家", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: true, progress: 100 },
-    { id: 8, title: "百済文化の道", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 67 },
-    { id: 9, title: "ユネスコマスター", medal: "https://www.figma.com/api/mcp/asset/10cbf9d5-6802-4b32-96a5-56132b61aaa3", achieved: false, progress: 53 },
-    { id: 10, title: "レビューマスター", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 68 },
-    { id: 11, title: "連続訪問者", medal: "https://www.figma.com/api/mcp/asset/c8ea0fa8-d4b2-4bf7-a663-fdb8102a4ab9", achieved: false, progress: 42 },
-    { id: 12, title: "コミュニティリーダー", medal: "https://www.figma.com/api/mcp/asset/3b7b88af-7e3e-455e-8742-548cee70092d", achieved: false, progress: 32 },
+    { id:  1, title: "国宝探訪者",        grade: "金", medal: MEDAL_GOLD,   achieved: true  },
+    { id:  2, title: "遺産の守護者",      grade: "金", medal: MEDAL_GOLD,   achieved: true  },
+    { id:  3, title: "文化探求者",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  4, title: "首都の歴史人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  5, title: "慶州の旅人",        grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  6, title: "自然の守り人",      grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  7, title: "朝鮮王朝の探検家",  grade: "銀", medal: MEDAL_SILVER, achieved: true  },
+    { id:  8, title: "初めての一歩",      grade: "銅", medal: MEDAL_BRONZE, achieved: true  },
+    { id:  9, title: "無形文化の継承者",  grade: "金", medal: MEDAL_GOLD,   achieved: false },
+    { id: 10, title: "全国制覇の旅人",    grade: "金", medal: MEDAL_GOLD,   achieved: false },
+    { id: 11, title: "コミュニティリーダー", grade: "金", medal: MEDAL_GOLD, achieved: false },
+    { id: 12, title: "民俗文化の探求者",  grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 13, title: "史跡踏破者",        grade: "銀", medal: MEDAL_SILVER, achieved: false },
+    { id: 14, title: "週末の冒険家",      grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 15, title: "写真記録者",        grade: "銅", medal: MEDAL_BRONZE, achieved: false },
+    { id: 16, title: "レビュー貢献者",    grade: "銅", medal: MEDAL_BRONZE, achieved: false },
 ];
 
 const POSTS = [
-    { id: 1, title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, comments: 28, likes: 12 },
-    { id: 2, title: "仏国寺の夜景撮影チップス", desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。", date: "2024.02.10", views: 521, comments: 45, likes: 23 },
-    { id: 3, title: "瞻星台（チョムソンデ）訪問記", desc: "新羅時代の天文台、瞻星台に行ってきました。", date: "2024.01.28", views: 287, comments: 19, likes: 8 },
-    { id: 4, title: "昌徳宮・後苑（秘苑）散策コース", desc: "昌徳宮・後苑の美しい散策路を紹介します。", date: "2024.01.15", views: 456, comments: 38, likes: 15 },
-    { id: 5, title: "海印寺・八万大蔵経ガイド", desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, comments: 31, likes: 18 },
-    { id: 6, title: "水原華城の散策", desc: "城壁に沿って歩く歴史の道。", date: "2023.12.20", views: 150, comments: 7, likes: 5 },
+    { id: 1, category: "レビュー",     title: "景福宮の隠れた美しさを求めて", desc: "景福宮を訪問して感じた魅力や、おすすめの観覧コースを詳しく共有します。", date: "2024.02.20", views: 342, likes: 12 },
+    { id: 2, category: "ヒント",       title: "仏国寺の夜景撮影チップス",   desc: "仏国寺の夜景を撮影するのに適した時間帯や場所をまとめました。",         date: "2024.02.10", views: 521, likes: 23 },
+    { id: 3, category: "レビュー",     title: "瞻星台（チョムソンデ）訪問記",desc: "新羅時代の天文台、瞻星台に行ってきました。",                           date: "2024.01.28", views: 287, likes: 8  },
+    { id: 4, category: "フリートーク", title: "昌徳宮・後苑（秘苑）散策コース",desc: "昌徳宮・後苑の美しい散策路を紹介します。",                           date: "2024.01.15", views: 456, likes: 15 },
+    { id: 5, category: "質問",         title: "海印寺・八万大蔵経ガイド",   desc: "ユネスコ世界文化遺産である八万大蔵経を保管する海印寺を訪問しました。", date: "2024.01.05", views: 398, likes: 18 },
+    { id: 6, category: "レビュー",     title: "水原華城の散策",             desc: "城壁に沿って歩く歴史の道。",                                             date: "2023.12.20", views: 150, likes: 5  },
 ];
 
 const COMMENTS = [
@@ -191,14 +206,29 @@ function RouteCard({ route }) {
     );
 }
 
-// ── 리스트 행: 카드형 (피그마 디자인) ────────────────────────────────
-function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }) {
+// ── 카테고리 컬러 ─────────────────────────────────────────────────
+const CAT_COLORS = {
+    "レビュー":     { bg: "#dbeafe", color: "#1447e6" },
+    "ヒント":       { bg: "#ffedd4", color: "#ca3500" },
+    "フリートーク": { bg: "#f3e8ff", color: "#8200db" },
+    "質問":         { bg: "#dcfce7", color: "#008236" },
+};
+
+// ── 리스트 행: 카드형 ─────────────────────────────────────────────
+function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete }) {
+    const cat = CAT_COLORS[category];
     return (
         <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "20px 22px", background: C.white, marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontSize: 18, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</h4>
-                    {desc && <p style={{ fontSize: 14, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>{desc}</p>}
+                    {/* 카테고리 배지 */}
+                    {cat && (
+                        <span style={{ display: "inline-block", background: cat.bg, color: cat.color, padding: "3px 12px", borderRadius: 99, fontSize: 11, fontWeight: 700, marginBottom: 8, fontFamily: font }}>
+                            {category}
+                        </span>
+                    )}
+                    <h4 style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: font }}>{title}</h4>
+                    {desc && <p style={{ fontSize: 13, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", fontFamily: font }}>{desc}</p>}
                     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
                             <CalendarIcon /> {date}
@@ -206,11 +236,6 @@ function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }
                         {views !== undefined && (
                             <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
                                 <EyeIcon /> {views}
-                            </span>
-                        )}
-                        {comments !== undefined && (
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
-                                <MsgIcon /> {comments}
                             </span>
                         )}
                         {likes !== undefined && (
@@ -221,10 +246,10 @@ function ListRow({ title, desc, date, views, comments, likes, onEdit, onDelete }
                     </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "flex-start" }}>
-                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
+                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
                         <EditIcon /> 編集
                     </button>
-                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
+                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
                         <TrashIcon /> 削除
                     </button>
                 </div>
@@ -491,99 +516,112 @@ export default function MyPage() {
                             })}
                         </div>
                         <button
-                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: `2px solid ${C.red}`, padding: "10px 20px", borderRadius: 10, fontWeight: 500, fontSize: 15, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "white";
-                                e.currentTarget.style.color = C.red;
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = C.red;
-                                e.currentTarget.style.color = "white";
-                            }}
+                            onClick={() => navigate("/community/write")}
+                            style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
                         >
-                            <PenWriteIcon /> 새 글 작성
+                            <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
                         </button>
                     </div>
 
                     {/* 리스트 */}
                     <div style={{ minHeight: 400 }}>
                         {displayedAct.map((item) => (
-                            <ListRow key={item.id} title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName} desc={postTab === "posts" ? item.desc : item.content} date={item.date} views={postTab === "posts" ? item.views : undefined} comments={postTab === "posts" ? item.comments : undefined} likes={postTab === "posts" ? item.likes : undefined} onEdit={() => console.log("Edit", item.id)} onDelete={() => confirm("削除しますか？")} />
+                            <ListRow
+                                key={item.id}
+                                category={postTab === "posts" ? item.category : undefined}
+                                title={postTab === "posts" ? item.title : postTab === "comments" ? item.postTitle : item.heritageName}
+                                desc={postTab === "posts" ? item.desc : item.content}
+                                date={item.date}
+                                views={postTab === "posts" ? item.views : undefined}
+                                likes={postTab === "posts" ? item.likes : undefined}
+                                onEdit={() => navigate("/community/write", { state: { post: item, isEdit: true } })}
+                                onDelete={() => confirm("削除しますか？")}
+                            />
                         ))}
                     </div>
 
-                    {/* 번호형 페이지네이션 */}
+                    {/* 공용 페이지네이션 */}
                     {totalActPages > 1 && (
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 24 }}>
-                            <button
-                                disabled={actPage === 0}
-                                onClick={() => setActPage((p) => p - 1)}
-                                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-                                onMouseEnter={(e) => {
-                                    if (actPage !== 0) e.currentTarget.style.background = "#f3f4f6";
-                                }}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
-                            >
-                                <ChevronLeft />
-                            </button>
-                            {Array.from({ length: totalActPages }, (_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActPage(i)}
-                                    style={{ width: 40, height: 40, borderRadius: 10, border: actPage === i ? "none" : `1.5px solid ${C.borderD}`, background: actPage === i ? C.red : "white", color: actPage === i ? "white" : C.gray1, cursor: "pointer", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
-                                    onMouseEnter={(e) => {
-                                        if (actPage !== i) e.currentTarget.style.background = "#f3f4f6";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (actPage !== i) e.currentTarget.style.background = "white";
-                                    }}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                disabled={actPage >= totalActPages - 1}
-                                onClick={() => setActPage((p) => p + 1)}
-                                style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${C.borderD}`, background: "white", cursor: "pointer", opacity: actPage >= totalActPages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}
-                                onMouseEnter={(e) => {
-                                    if (actPage < totalActPages - 1) e.currentTarget.style.background = "#f3f4f6";
-                                }}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
-                            >
-                                <ChevronRight />
-                            </button>
-                        </div>
+                        <Pagination
+                            currentPage={actPage + 1}
+                            totalPages={totalActPages}
+                            onPageChange={(p) => setActPage(p - 1)}
+                        />
                     )}
                 </div>
 
-                {/* ── 4. 업적 갤러리 (도넛 차트 포함) ── */}
+                {/* ── 4. 업적 갤러리 ── */}
                 <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 40 }}>
-                        <div>
-                            <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
-                            <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                            <div style={{ position: "relative", width: 100, height: 100 }}>
-                                <svg width="100" height="100" viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)" }}>
-                                    <circle cx="50" cy="50" r="42" fill="none" stroke={C.border} strokeWidth="8" />
-                                    <circle cx="50" cy="50" r="42" fill="none" stroke={C.red} strokeWidth="8" strokeDasharray={`${2 * Math.PI * 42 * 0.69} ${2 * Math.PI * 42 * 0.31}`} strokeLinecap="round" />
-                                </svg>
-                                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: C.red, fontSize: 20 }}>69%</div>
-                            </div>
-                            <div style={{ textAlign: "right" }}>
-                                <div style={{ fontSize: 24, fontWeight: 900, color: C.red }}>
-                                    7 <span style={{ fontSize: 14, color: C.gray4 }}>/ 16</span>
-                                </div>
-                                <p style={{ fontSize: 12, color: C.gray3, marginTop: 4 }}>達成済み</p>
-                            </div>
-                        </div>
+                    {/* 헤더 */}
+                    <div style={{ marginBottom: 32 }}>
+                        <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
+                        <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "24px" }}>
+
+                    {/* 16개 메달 그리드 */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px" }}>
                         {ACHIEVEMENTS.map((item) => (
                             <AchievementCard key={item.id} item={item} />
                         ))}
                     </div>
+
+                    {/* 피그마 1767-2214 하단 바 */}
+                    {(() => {
+                        const achievedCount  = ACHIEVEMENTS.filter((a) => a.achieved).length;
+                        const inProgressCount = ACHIEVEMENTS.filter((a) => !a.achieved && a.progress > 0).length;
+                        const notStartedCount = ACHIEVEMENTS.filter((a) => !a.achieved && !a.progress).length;
+                        return (
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                                {/* 범례 */}
+                                <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: `linear-gradient(135deg, ${C.gold}, ${C.red})`, flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>達成した実績</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.navy }}>{achievedCount}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#d1d5dc", flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>進行中</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.gray1 }}>{inProgressCount}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ width: 12, height: 12, borderRadius: "50%", background: "#e5e7eb", border: `1px solid ${C.border}`, flexShrink: 0, display: "inline-block" }} />
+                                        <span style={{ fontSize: 13, color: C.gray2, fontWeight: 600 }}>未開始</span>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: C.gray3 }}>{notStartedCount}</span>
+                                    </div>
+                                </div>
+
+                                {/* 実績ページへ → ボタン */}
+                                <button
+                                    onClick={() => navigate("/achievements")}
+                                    style={{
+                                        display: "flex", alignItems: "center", gap: 8,
+                                        padding: "12px 28px",
+                                        borderRadius: 12,
+                                        border: "none",
+                                        background: `linear-gradient(135deg, ${C.red}, ${C.navy})`,
+                                        color: "white",
+                                        fontWeight: 700,
+                                        fontSize: 15,
+                                        cursor: "pointer",
+                                        fontFamily: font,
+                                        transition: "0.2s",
+                                        flexShrink: 0,
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                                >
+                                    実績ページへ
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                        <polyline points="12 5 19 12 12 19" />
+                                    </svg>
+                                </button>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
         </div>

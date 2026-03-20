@@ -2,7 +2,7 @@
   "INITIAL": { "center": { "lat": 36.5, "lng": 127.8 }, "zoom": 8 },
   "Seoul": { "center": { "lat": 37.5665, "lng": 126.9780 }, "zoom": 12 },
   "Busan": { "center": { "lat": 35.1796, "lng": 129.0756 }, "zoom": 12 },
-  "Daegu": { "center": { "lat": 35.8714, "lng": 128.6014 }, "zoom": 12 },
+  "Daegu": { "center": { "lat": 35.8714, "lng": 128.6014 }, "zoom": 11 },
   "Incheon": { "center": { "lat": 37.4563, "lng": 126.7052 }, "zoom": 11 },
   "Gwangju": { "center": { "lat": 35.1595, "lng": 126.8526 }, "zoom": 12 },
   "Daejeon": { "center": { "lat": 36.3504, "lng": 127.3845 }, "zoom": 12 },

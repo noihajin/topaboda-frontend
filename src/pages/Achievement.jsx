@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 // ── フィグマメダル画像 (node 1857-2258より) ──
 const MEDAL_IMG_GOLD   = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
@@ -439,7 +440,7 @@ export default function Achievement() {
       </div>
 
       {/* ── コンテンツ ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 40px 80px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 40px 80px" }}>
 
         {/* ── サマリーカード ── */}
         <div style={{
@@ -550,64 +551,11 @@ export default function Achievement() {
         </div>
 
         {/* ── ページネーション ── */}
-        {totalPages > 1 && (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
-            {/* 前へ */}
-            <button
-              onClick={() => setPage(p => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              style={{
-                width: 38, height: 38, borderRadius: 10,
-                background: "#F3F4F6", border: "none",
-                cursor: page === 1 ? "not-allowed" : "pointer",
-                opacity: page === 1 ? 0.4 : 1,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 16, transition: "all 0.2s",
-              }}
-            >
-              ←
-            </button>
-
-            {/* ページ番号 */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-              <button
-                key={n}
-                onClick={() => setPage(n)}
-                style={{
-                  width: 38, height: 38, borderRadius: 10,
-                  border: page === n ? "none" : `1.5px solid ${C.border}`,
-                  background: page === n
-                    ? `linear-gradient(90deg, ${C.red} 0%, ${C.navy} 100%)`
-                    : C.white,
-                  color: page === n ? C.white : C.sub,
-                  fontWeight: 700, fontSize: 14, fontFamily: font,
-                  cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: page === n ? "0 4px 8px rgba(0,0,0,0.15)" : "none",
-                  transition: "all 0.2s",
-                }}
-              >
-                {n}
-              </button>
-            ))}
-
-            {/* 次へ */}
-            <button
-              onClick={() => setPage(p => Math.min(p + 1, totalPages))}
-              disabled={page === totalPages}
-              style={{
-                width: 38, height: 38, borderRadius: 10,
-                background: "#F3F4F6", border: "none",
-                cursor: page === totalPages ? "not-allowed" : "pointer",
-                opacity: page === totalPages ? 0.4 : 1,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 16, transition: "all 0.2s",
-              }}
-            >
-              →
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );
