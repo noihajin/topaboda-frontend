@@ -126,7 +126,7 @@ export default function Community() {
           <div style={{ position: "relative", zIndex: 50 }}>
             <div onClick={() => setIsCatOpen(!isCatOpen)} style={{
               width: isTablet ? "100%" : 220,
-              height: 56, background: "#f3f4f6", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: "none", boxSizing: "border-box"
+              height: 56, background: "#ffffff", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: `1px solid ${C.border}`, boxSizing: "border-box"
             }}>
               <span style={{ fontWeight: 800, color: C.navy, whiteSpace: "nowrap", fontSize: 14 }}>{selectedCategory}</span>
               <img src={icFilter} alt="" style={{ width: 16, transform: isCatOpen ? "rotate(180deg)" : "none", transition: "0.3s" }} />
@@ -144,7 +144,7 @@ export default function Community() {
 
           {/* 검색바 - 완전 타원 + 호버 레드 */}
           <div style={{ flex: 1, position: "relative" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: "none", borderRadius: 9999, background: "#f3f4f6", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
             <button
               style={{ position: "absolute", right: 6, top: 6, bottom: 6, width: 44, background: C.navy, border: "none", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.2s" }}
               onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
@@ -183,7 +183,7 @@ export default function Community() {
         <div className="no-scrollbar" style={{ background: "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderRadius: isMobile ? 20 : 32, border: "1px solid rgba(255, 255, 255, 0.4)", overflowX: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.04)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: isMobile ? 700 : "auto" }}>
             <thead>
-              <tr style={{ borderBottom: `2px solid rgba(0,0,0,0.05)`, background: "rgba(0, 13, 87, 0.04)" }}>
+              <tr style={{ borderBottom: `2px solid rgba(0,0,0,0.08)`, background: "#e9eaf0" }}>
                 <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 80, textAlign: "center" }}>No</th>
                 <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 140 }}>カテゴリ</th>
                 <th style={{ padding: "24px", color: C.navy, fontSize: 14, fontWeight: 900, textAlign: "left" }}>タイトル</th>
