@@ -135,6 +135,10 @@ export default function MyPage() {
     const [reviewData, setReviewData] = useState(initialPageData);
     const [reviewPage, setReviewPage] = useState(0);
 
+    const currentTabData = postTab === "posts" ? postData : postTab === "comments" ? commentData : reviewData;
+    const currentSetPage = postTab === "posts" ? setPostPage : postTab === "comments" ? setCommentPage : setReviewPage;
+    const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
+
     const PAGE_SIZE = 5;
     const HT_SIZE = 3;
     const ROUTE_SIZE = 2;
@@ -146,9 +150,7 @@ export default function MyPage() {
     const displayedRoutes = allRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
 
     const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
-    const totalActPages = postTab === "posts" ? postData.totalPages : postTab === "comments" ? commentData.totalPages : reviewData.totalPages;
-    const actPage = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
-    const displayedAct = currentActData.slice(actPage * PAGE_SIZE, (actPage + 1) * PAGE_SIZE);
+    const displayedAct = currentActData;
 
     const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
     const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
@@ -191,9 +193,13 @@ export default function MyPage() {
         fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
     }, [postPage]);
 
-    useEffect(() => {}, [commentPage]);
+    useEffect(() => {
+        fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
+    }, [commentPage]);
 
-    useEffect(() => {}, [reviewPage]);
+    useEffect(() => {
+        fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+    }, [reviewPage]);
 
     return (
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
@@ -379,7 +385,7 @@ export default function MyPage() {
                     </div>
 
                     {/* 공용 페이지네이션 */}
-                    {totalActPages > 1 && <Pagination currentPage={actPage + 1} totalPages={totalActPages} onPageChange={(p) => setActPage(p - 1)} />}
+                    {currentTabData.totalPages > 1 && <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />}
                 </div>
 
                 {/* ── 4. 업적 갤러리 ── */}
