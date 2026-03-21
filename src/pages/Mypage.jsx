@@ -112,30 +112,28 @@ export default function MyPage() {
         visitCount: 0,
     });
 
-    const [heritageBookmark, setHeritageBookmark] = useState([]);
+    const initialPageData = {
+        contents: [],
+        currentPage: 0,
+        pageSize: 10,
+        totalElements: 0,
+        totalPages: 0,
+    };
+
+    const [htBkData, setHtBkData] = useState(initialPageData);
     const [htBkPage, setHtBkPage] = useState(0);
 
-    const [heritageLike, setHeritageLike] = useState([]);
+    const [htLkData, setHtLkData] = useState(initialPageData);
     const [htLkPage, setHtLkPage] = useState(0);
 
-    const [htLkTotalPages, setHtLkTotalPages] = useState(0);
-    const [htBkTotalPages, setHtBkTotalPages] = useState(0);
-
-    const [posts, setPosts] = useState([]);
-    const [postCount, setPostCount] = useState(0);
+    const [postData, setPostData] = useState(initialPageData);
     const [postPage, setPostPage] = useState(0);
 
-    const [comments, setComments] = useState([]);
-    const [commentCount, setCommentCount] = useState(0);
+    const [commentData, setCommentData] = useState(initialPageData);
     const [commentPage, setCommentPage] = useState(0);
 
-    const [reviews, setReviews] = useState([]);
-    const [reviewCount, setReviewCount] = useState(0);
+    const [reviewData, setReviewData] = useState(initialPageData);
     const [reviewPage, setReviewPage] = useState(0);
-
-    const [postsTotalPages, setPostsTotalPages] = useState(0);
-    const [commentsTotalPages, setCommentsTotalPages] = useState(0);
-    const [reviewsTotalPages, setReviewsTotalPages] = useState(0);
 
     const PAGE_SIZE = 5;
     const HT_SIZE = 3;
@@ -147,132 +145,50 @@ export default function MyPage() {
     const totalRoutePages = Math.ceil(allRoutes.length / ROUTE_SIZE);
     const displayedRoutes = allRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
 
-    const currentActData = postTab === "posts" ? posts : postTab === "comments" ? comments : reviews;
-    const totalActPages = postTab === "posts" ? postsTotalPages : postTab === "comments" ? commentsTotalPages : reviewsTotalPages;
+    const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
+    const totalActPages = postTab === "posts" ? postData.totalPages : postTab === "comments" ? commentData.totalPages : reviewData.totalPages;
     const actPage = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
     const displayedAct = currentActData.slice(actPage * PAGE_SIZE, (actPage + 1) * PAGE_SIZE);
 
-    const currentHtData = heritageTab === "bookmark" ? heritageBookmark : heritageLike;
-    const totalHtPages = heritageTab === "bookmark" ? htBkTotalPages : htLkTotalPages;
+    const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
+    const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
     const displayedHt = currentHtData;
 
-    // 페이지 로드 시 데이터 요청
-    useEffect(() => {
+    const fetchData = async (url, params, setData) => {
         const id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
 
-        const fetchUserData = async () => {
-            if (!id) {
-                console.error("저장된 ID가 없습니다.");
-                return;
-            }
+        if (!id || !token) {
+            console.error("인증 정보가 없습니다.");
+            return;
+        }
 
-            try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+        try {
+            const response = await axios.get(`http://localhost:9990/topaboda/api${url}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: params,
+            });
+            setData(response.data);
+        } catch (error) {
+            console.error(`${url} 로드 실패:`, error);
+        }
+    };
 
-                setUser(response.data);
-            } catch (error) {
-                console.error("데이터 로드 실패:", error);
-            }
-        };
-
-        fetchUserData();
+    useEffect(() => {
+        const id = localStorage.getItem("id");
+        fetchData(`/users/profile/${id}`, {}, setUser);
     }, []);
 
     useEffect(() => {
-        const id = localStorage.getItem("id");
-        const token = localStorage.getItem("token");
-
-        const fetchHeritageLikeData = async () => {
-            if (!id) {
-                console.error("저장된 ID가 없습니다.");
-                return;
-            }
-
-            try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/heritages/likes/snippet`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    params: {
-                        page: htLkPage,
-                        size: HT_SIZE,
-                    },
-                });
-
-                setHeritageLike(response.data.contents);
-                setHtLkTotalPages(response.data.totalPages);
-            } catch (error) {
-                console.error("데이터 로드 실패:", error);
-            }
-        };
-        fetchHeritageLikeData();
+        fetchData("/heritages/likes/snippet", { page: htLkPage, size: HT_SIZE }, setHtLkData);
     }, [htLkPage]);
 
     useEffect(() => {
-        const id = localStorage.getItem("id");
-        const token = localStorage.getItem("token");
-
-        const fetchHeritageBookmarkData = async () => {
-            if (!id) {
-                console.log("저장된 ID가 없습니다.");
-                return;
-            }
-
-            try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/heritages/bookmarks/snippet`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    params: {
-                        page: htLkPage,
-                        size: HT_SIZE,
-                    },
-                });
-
-                setHeritageBookmark(response.data.contents);
-                setHtBkTotalPages(response.data.totalPages);
-            } catch (error) {
-                console.error("데이터 로드 실패:", error);
-            }
-        };
-        fetchHeritageBookmarkData();
+        fetchData("/heritages/bookmarks/snippet", { page: htBkPage, size: HT_SIZE }, setHtBkData);
     }, [htBkPage]);
 
     useEffect(() => {
-        const id = localStorage.getItem("id");
-        const token = localStorage.getItem("token");
-
-        const fetchPostData = async () => {
-            if (!id) {
-                console.log("저장된 ID가 없습니다.");
-                return;
-            }
-
-            try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/me/boards/snippet`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    params: {
-                        page: postPage,
-                        size: PAGE_SIZE,
-                    },
-                });
-
-                setPosts(response.data.contents);
-                setPostCount(response.data.totalElements);
-                setPostsTotalPages(response.data.totalPages);
-            } catch (error) {
-                console.error("데이터 로드 실패:", error);
-            }
-        };
-
-        fetchPostData();
+        fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
     }, [postPage]);
 
     useEffect(() => {}, [commentPage]);
@@ -395,7 +311,7 @@ export default function MyPage() {
 
                                     {/* 다음 */}
                                     <button
-                                        disabled={heritageTab === "bookmark" ? htBkPage >= htBkTotalPages - 1 : htLkPage >= htLkTotalPages - 1}
+                                        disabled={heritageTab === "bookmark" ? htBkPage >= htBkData.totalPages - 1 : htLkPage >= htLkData.totalPages - 1}
                                         onClick={() => {
                                             if (heritageTab === "bookmark") {
                                                 setHtBkPage((p) => p + 1);
@@ -423,9 +339,9 @@ export default function MyPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                         <div style={{ display: "flex", gap: 8 }}>
                             {[
-                                { key: "posts", label: "投稿した記事", count: postCount },
-                                { key: "comments", label: "コメント", count: commentCount },
-                                { key: "reviews", label: "レビュー", count: reviewCount },
+                                { key: "posts", label: "投稿した記事", count: postData.totalElements },
+                                { key: "comments", label: "コメント", count: commentData.totalElements },
+                                { key: "reviews", label: "レビュー", count: reviewData.totalElements },
                             ].map(({ key, label, count }) => {
                                 const isActive = postTab === key;
                                 return (
