@@ -22,35 +22,6 @@ const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-
 const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
 const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
 
-const ACHIEVEMENTS = [
-    { id: 1, title: "国宝探訪者", grade: "金", medal: MEDAL_GOLD, achieved: true },
-    { id: 2, title: "遺産の守護者", grade: "金", medal: MEDAL_GOLD, achieved: true },
-    { id: 3, title: "文化探求者", grade: "銀", medal: MEDAL_SILVER, achieved: true },
-    { id: 4, title: "首都の歴史人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
-    { id: 5, title: "慶州の旅人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
-    { id: 6, title: "自然の守り人", grade: "銀", medal: MEDAL_SILVER, achieved: true },
-    { id: 7, title: "朝鮮王朝の探検家", grade: "銀", medal: MEDAL_SILVER, achieved: true },
-    { id: 8, title: "初めての一歩", grade: "銅", medal: MEDAL_BRONZE, achieved: true },
-    { id: 9, title: "無形文化の継承者", grade: "金", medal: MEDAL_GOLD, achieved: false },
-    { id: 10, title: "全国制覇の旅人", grade: "金", medal: MEDAL_GOLD, achieved: false },
-    { id: 11, title: "コミュニティリーダー", grade: "金", medal: MEDAL_GOLD, achieved: false },
-    { id: 12, title: "民俗文化の探求者", grade: "銀", medal: MEDAL_SILVER, achieved: false },
-    { id: 13, title: "史跡踏破者", grade: "銀", medal: MEDAL_SILVER, achieved: false },
-    { id: 14, title: "週末の冒険家", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
-    { id: 15, title: "写真記録者", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
-    { id: 16, title: "レビュー貢献者", grade: "銅", medal: MEDAL_BRONZE, achieved: false },
-];
-
-const COMMENTS = [
-    { id: 1, postTitle: "景福宮の隠れた美しさ", content: "写真スポットの情報ありがとうございます！", date: "2024.02.21" },
-    { id: 6, postTitle: "水原華城", content: "夜間開場も綺麗ですよ！", date: "2023.12.22" },
-];
-
-const REVIEWS = [
-    { id: 1, heritageName: "景福宮", content: "案内が詳細で分かりやすかったです。", date: "2024.02.20" },
-    { id: 6, heritageName: "海印寺", content: "歴史の重みを感じました。", date: "2023.12.25" },
-];
-
 // ── 서브 컴포넌트: 업적/탐방로 복구 ──────────────────────────────────────
 function AchievementProgressBar({ progress }) {
     return (
@@ -135,6 +106,8 @@ export default function MyPage() {
     const [reviewData, setReviewData] = useState(initialPageData);
     const [reviewPage, setReviewPage] = useState(0);
 
+    const [achievements, setAchievements] = useState({ contents: [] });
+
     const currentTabData = postTab === "posts" ? postData : postTab === "comments" ? commentData : reviewData;
     const currentSetPage = postTab === "posts" ? setPostPage : postTab === "comments" ? setCommentPage : setReviewPage;
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
@@ -200,6 +173,46 @@ export default function MyPage() {
     useEffect(() => {
         fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
     }, [reviewPage]);
+
+    useEffect(() => {
+        const MEDAL_MAP = {
+            金: MEDAL_GOLD,
+            銀: MEDAL_SILVER,
+            銅: MEDAL_BRONZE,
+        };
+
+        const fetchAchievements = async () => {
+            const id = localStorage.getItem("id");
+            const token = localStorage.getItem("token");
+
+            if (!id || !token) return;
+
+            try {
+                const response = await axios.get(`http://localhost:9990/topaboda/api/users/achievements/snippet`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const rawData = response.data.contents || response.data;
+
+                const mappedData = rawData.map((item) => ({
+                    id: item.id,
+                    title: item.title || item.name,
+                    grade: item.grade || item.rarity,
+                    medal: MEDAL_MAP[item.grade || item.rarity] || MEDAL_BRONZE,
+                    achieved: !!item.achieved,
+                    progress: item.progress,
+                }));
+
+                mappedData.sort((a, b) => b.achieved - a.achieved);
+
+                setAchievements({ contents: mappedData });
+            } catch (error) {
+                console.error("업적 로드 실패:", error);
+            }
+        };
+
+        fetchAchievements();
+    }, []);
 
     return (
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
@@ -398,16 +411,16 @@ export default function MyPage() {
 
                     {/* 16개 메달 그리드 */}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px" }}>
-                        {ACHIEVEMENTS.map((item) => (
+                        {achievements.contents.map((item) => (
                             <AchievementCard key={item.id} item={item} />
                         ))}
                     </div>
 
                     {/* 피그마 1767-2214 하단 바 */}
                     {(() => {
-                        const achievedCount = ACHIEVEMENTS.filter((a) => a.achieved).length;
-                        const inProgressCount = ACHIEVEMENTS.filter((a) => !a.achieved && a.progress > 0).length;
-                        const notStartedCount = ACHIEVEMENTS.filter((a) => !a.achieved && !a.progress).length;
+                        const achievedCount = achievements.contents.filter((a) => a.achieved).length;
+                        const inProgressCount = achievements.contents.filter((a) => !a.achieved && a.progress > 0).length;
+                        const notStartedCount = achievements.contents.filter((a) => !a.achieved && !a.progress).length;
                         return (
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
                                 {/* 범례 */}
