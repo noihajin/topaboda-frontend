@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -31,7 +32,7 @@ export default function WritePost() {
   const [category, setCategory] = useState(editPost?.category ?? "");
   const [catOpen, setCatOpen] = useState(false);
   const [title, setTitle] = useState(editPost?.title ?? "");
-  const [content, setContent] = useState(editPost?.desc ?? "");
+  const [content, setContent] = useState(editPost?.content ?? "");
   const [images, setImages] = useState([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
@@ -50,22 +51,64 @@ export default function WritePost() {
     setImages((prev) => [...prev, ...mapped]);
   };
 
-  const handleSubmit = () => {
-    if (!category) {
-      alert("カテゴリーを選択してください。");
+  const handleSubmit = async () => {
+  if (!category) {
+    alert("カテゴリーを選択してください。");
+    return;
+  }
+
+  if (!title.trim()) {
+    alert("タイトルを入力してください。");
+    return;
+  }
+
+  if (!content.trim()) {
+    alert("内容を入力してください。");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("localStorage token:", token);
+    console.log("Authorization header:", `Bearer ${token}`);
+
+    if (!token) {
+      alert("ログイン情報がありません。");
       return;
     }
-    if (!title.trim()) {
-      alert("タイトルを入力してください。");
-      return;
-    }
-    if (!content.trim()) {
-      alert("内容を入力してください。");
-      return;
-    }
+
+    const response = await axios.post(
+      "http://localhost:9990/topaboda/api/boards",
+      {
+        title: title.trim(),
+        content: content.trim(),
+        category,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("작성 성공:", response.data);
     alert("記事が登録されました！");
     navigate("/community");
-  };
+  } catch (err) {
+    console.error("작성 실패:", err);
+    console.error("응답 데이터:", err.response?.data);
+    console.error("상태 코드:", err.response?.status);
+
+    if (err.response?.status === 401) {
+      alert("ログイン情報が必要です。");
+      return;
+    }
+
+    alert("記事の登録に失敗しました。");
+  }
+};
 
   return (
     <div
