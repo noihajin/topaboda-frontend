@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
@@ -37,28 +38,51 @@ const CAT_COLORS = {
   "質問": { bg: "#dcfce7", color: "#008236" },
 };
 
-const initialPosts = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  category: ["レビュー", "ヒント", "フリートーク", "質問"][i % 4],
-  title: `${["景福宮", "仏国寺", "石窟庵", "昌徳宮"][i % 4]} 探訪の記録 ${i + 1}`,
-  comments: Math.floor(Math.random() * 50),
-  author: `ユーザー${i + 1}`,
-  date: `2026.03.13`,
-  views: Math.floor(Math.random() * 2000),
-  likes: Math.floor(Math.random() * 300),
-}));
 
 export default function Community() {
+
+  
+const [posts123, setPosts] = useState([]);
+const [currentPage, setCurrentPage] = useState(1);
+const [totalPages, setTotalPages] = useState(0);
+const [totalElements, setTotalElements] = useState(0);
+const postsPerPage = 10;
+
+
+useEffect(() => {
+  axios
+    .get(`http://localhost:9990/topaboda/api/boards?page=${currentPage - 1}&size=${postsPerPage}&sort=id,desc`)
+    .then((res) => {
+      console.log("서버 데이터:", res.data);
+
+      const mapped = res.data.content.map((item) => ({
+        id: item.id,
+        category: item.categories,        // 이름 바꿔줌
+        title: item.title,
+        author: item.nicName,           // 중요!
+        date: item.createdAt.slice(0, 10), // 날짜만 자르기
+        views: item.viewCount,
+        likes: item.likeCount ?? 0,      // null 방지
+        comments: item.commentCount ?? 0,
+      }));
+
+      setPosts(mapped);
+      setTotalPages(res.data.totalPages);
+      setTotalElements(res.data.totalElements);
+    })
+    .catch((err) => {
+      console.error("API 실패", err);
+    });
+}, [currentPage]);
+
   const navigate = useNavigate();
   
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("すべて");
   const [isCatOpen, setIsCatOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [sortType, setSortType] = useState("latest");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  const postsPerPage = 10;
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -70,14 +94,14 @@ export default function Community() {
   const isTablet = windowWidth <= 1024;
 
   const popularPosts = useMemo(() => {
-    return [...initialPosts]
+    return [...posts123]
       .filter(p => p.category === "レビュー")
       .sort((a, b) => b.likes - a.likes)
       .slice(0, 3);
-  }, []);
+  }, [posts123]);
 
   const processedPosts = useMemo(() => {
-    let result = [...initialPosts];
+    let result = [...posts123];
     if (selectedCategory !== "すべて") {
       result = result.filter(p => p.category === selectedCategory);
     }
@@ -87,10 +111,9 @@ export default function Community() {
     if (sortType === "latest") result.sort((a, b) => b.id - a.id);
     else if (sortType === "views") result.sort((a, b) => b.views - a.views);
     return result;
-  }, [selectedCategory, sortType, search]);
+  }, [posts123, selectedCategory, sortType, search]);
 
-  const totalPages = Math.ceil(processedPosts.length / postsPerPage);
-  const currentPosts = processedPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+  const currentPosts = processedPosts;
 
   const categories = ["すべて", "レビュー", "ヒント", "フリートーク", "質問"];
 
@@ -194,7 +217,7 @@ export default function Community() {
             </thead>
             <tbody>
               {currentPosts.map((post, idx) => (
-                <BoardRow key={post.id} post={post} displayNo={processedPosts.length - ((currentPage - 1) * postsPerPage + idx)} />
+                <BoardRow key={post.id} post={post} displayNo={totalElements - ((currentPage - 1) * postsPerPage + idx)} />
               ))}
             </tbody>
           </table>
