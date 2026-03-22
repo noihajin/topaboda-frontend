@@ -38,28 +38,52 @@ const CAT_COLORS = {
   "質問": { bg: "#dcfce7", color: "#008236" },
 };
 
-
 export default function Community() {
 
+  const navigate = useNavigate();
   
-const [posts123, setPosts] = useState([]);
-const [currentPage, setCurrentPage] = useState(1);
-const [totalPages, setTotalPages] = useState(0);
-const [totalElements, setTotalElements] = useState(0);
-const postsPerPage = 10;
+  const [posts, setPosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
+  const [searchInput, setSearchInput] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("すべて");
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [sortType, setSortType] = useState("latest");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  
+  const postsPerPage = 10;
+
+    const handleSearch = () => {
+  setCurrentPage(1);
+  setKeyword(searchInput.trim());
+  };
 
 useEffect(() => {
-  axios
-    .get(`http://localhost:9990/topaboda/api/boards?page=${currentPage - 1}&size=${postsPerPage}&sort=id,desc`)
-    .then((res) => {
-      console.log("서버 데이터:", res.data);
+    const params = {
+    page: currentPage - 1,
+    size: postsPerPage,
+    sort: "id,desc",
+  };
 
+  if (selectedCategory !== "すべて") {
+    params.category = selectedCategory;
+  }
+
+  if (keyword) {
+    params.keyword = keyword;
+  }
+
+  axios
+    .get(`http://localhost:9990/topaboda/api/boards`,{ params })
+    .then((res) => {
       const mapped = res.data.content.map((item) => ({
         id: item.id,
         category: item.categories,        // 이름 바꿔줌
         title: item.title,
-        author: item.nicName,           // 중요!
+        author: item.nickName,           // 중요!
         date: item.createdAt.slice(0, 10), // 날짜만 자르기
         views: item.viewCount,
         likes: item.likeCount ?? 0,      // null 방지
@@ -73,16 +97,12 @@ useEffect(() => {
     .catch((err) => {
       console.error("API 실패", err);
     });
-}, [currentPage]);
+}, [currentPage, selectedCategory, keyword]);
 
-  const navigate = useNavigate();
-  
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("すべて");
-  const [isCatOpen, setIsCatOpen] = useState(false);
-  const [sortType, setSortType] = useState("latest");
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
+useEffect(() => {
+  setSearchInput(""); // 1. 입력창에 보이는 텍스트 비우기
+  setKeyword("");    // 2. 실제 검색 서버에 보낼 키워드 비우기
+}, [selectedCategory]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -94,24 +114,18 @@ useEffect(() => {
   const isTablet = windowWidth <= 1024;
 
   const popularPosts = useMemo(() => {
-    return [...posts123]
+    return [...posts]
       .filter(p => p.category === "レビュー")
       .sort((a, b) => b.likes - a.likes)
       .slice(0, 3);
-  }, [posts123]);
+  }, [posts]);
 
   const processedPosts = useMemo(() => {
-    let result = [...posts123];
-    if (selectedCategory !== "すべて") {
-      result = result.filter(p => p.category === selectedCategory);
-    }
-    if (search) {
-      result = result.filter(p => p.title.includes(search) || p.author.includes(search));
-    }
+    let result = [...posts];
     if (sortType === "latest") result.sort((a, b) => b.id - a.id);
     else if (sortType === "views") result.sort((a, b) => b.views - a.views);
     return result;
-  }, [posts123, selectedCategory, sortType, search]);
+  }, [posts, selectedCategory, sortType, searchInput]);
 
   const currentPosts = processedPosts;
 
@@ -167,8 +181,9 @@ useEffect(() => {
 
           {/* 검색바 - 완전 타원 + 호버 레드 */}
           <div style={{ flex: 1, position: "relative" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
+            <input value={searchInput} onChange={e => setSearchInput(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
             <button
+              onClick={handleSearch}
               style={{ position: "absolute", right: 6, top: 6, bottom: 6, width: 44, background: C.navy, border: "none", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.2s" }}
               onMouseEnter={e => e.currentTarget.style.background = "#6E0000"}
               onMouseLeave={e => e.currentTarget.style.background = C.navy}
