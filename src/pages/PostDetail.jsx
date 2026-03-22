@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect ,useState } from "react";
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 /* ── 색상 토큰 ── */
@@ -27,23 +28,23 @@ const CAT_COLORS = {
 };
 
 /* ── 목업 게시글 ── */
-const MOCK_POSTS = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  category: ["レビュー", "ヒント", "フリートーク", "質問"][i % 4],
-  title: `${["景福宮", "仏国寺", "石窟庵", "昌徳宮"][i % 4]} 探訪の記録 ${i + 1}`,
-  author: `ユーザー${i + 1}`,
-  authorInitial: ["文", "ソ", "写", "歴"][i % 4],
-  date: "2026.03.13",
-  views: 1243 + i * 7,
-  likes: 342 + i * 3,
-  content: `こんにちは、文化遺産ラバーです。先週末に${["景福宮", "仏国寺", "石窟庵", "昌徳宮"][i % 4]}の夜間特別観覧に行ってきたので、感想を残します。\n\n## 訪問情報\n\n- 日付：2024年3月2日（土）\n- 時間：19:00〜21:00\n- 予約：文化財庁のホームページで2週間前に事前予約\n- 入場料：大人3,000ウォン\n\n## 主な観覧ポイント\n\n### 1. 勤政殿\n照明を浴びた勤政殿の姿は本当に壮観です。昼に見るのとは全く違う壮大さと神秘さを感じました。特に屋根の曲線美が照明によってさらに際立ち、美しかったです。\n\n### 2. 慶会楼\n慶会楼の池に映る楼閣の姿は幻想的でした。水に反射した夜景がまるで水彩画のようでした。写真撮影に最適なポイントとして、ぜひ強くおすすめします！🥰\n\n### 3. 香遠亭\n香遠亭へ向かう道の照明も本当に綺麗でした。夜間の照明が柔らかく道を照らし、ロマンチックな雰囲気でした。\n\n## 訪問のヒント\n\n1. 予約は必須です：人気が高いため、予約がすぐに埋まります。最低でも2週間前に予約してください。\n2. 暖かく着る：夜間は気温がかなり低くなります。暖かい服は必須！\n3. 三脚禁止：専門の撮影機材の持ち込みは制限されています。\n4. 観覧時間に余裕を持って：ゆっくり回ると約2時間かかります。\n\n## 総評\n\n星明かりの下で朝鮮王朝の歴史を感じることができ、本当に特別な体験でした。昼間の観覧とはまた違った魅力があり、すでに訪れた方々にもぜひ夜間開放を体験していただきたいです！\n\n次回は昌徳宮の月明かり散策にも行く予定です。その時も感想を投稿しますね 😊`,
-}));
+// const MOCK_POSTS = Array.from({ length: 45 }, (_, i) => ({
+//   id: i + 1,
+//   category: ["レビュー", "ヒント", "フリートーク", "質問"][i % 4],
+//   title: `${["景福111宮", "仏国111寺", "石窟111庵", "昌徳111宮"][i % 4]} 探訪の記録 ${i + 1}`,
+//   author: `ユーザー${i + 1}`,
+//   authorInitial: ["文", "ソ", "写", "歴"][i % 4],
+//   date: "2026.03.13",
+//   views: 1243 + i * 7,
+//   likes: 342 + i * 3,
+//   content: `こんにちは、文化遺産ラバーです。先週末に${["景福宮", "仏国寺", "石窟庵", "昌徳宮"][i % 4]}の夜間特別観覧に行ってきたので、感想を残します。\n\n## 訪問情報\n\n- 日付：2024年3月2日（土）\n- 時間：19:00〜21:00\n- 予約：文化財庁のホームページで2週間前に事前予約\n- 入場料：大人3,000ウォン\n\n## 主な観覧ポイント\n\n### 1. 勤政殿\n照明を浴びた勤政殿の姿は本当に壮観です。昼に見るのとは全く違う壮大さと神秘さを感じました。特に屋根の曲線美が照明によってさらに際立ち、美しかったです。\n\n### 2. 慶会楼\n慶会楼の池に映る楼閣の姿は幻想的でした。水に反射した夜景がまるで水彩画のようでした。写真撮影に最適なポイントとして、ぜひ強くおすすめします！🥰\n\n### 3. 香遠亭\n香遠亭へ向かう道の照明も本当に綺麗でした。夜間の照明が柔らかく道を照らし、ロマンチックな雰囲気でした。\n\n## 訪問のヒント\n\n1. 予約は必須です：人気が高いため、予約がすぐに埋まります。最低でも2週間前に予約してください。\n2. 暖かく着る：夜間は気温がかなり低くなります。暖かい服は必須！\n3. 三脚禁止：専門の撮影機材の持ち込みは制限されています。\n4. 観覧時間に余裕を持って：ゆっくり回ると約2時間かかります。\n\n## 総評\n\n星明かりの下で朝鮮王朝の歴史を感じることができ、本当に特別な体験でした。昼間の観覧とはまた違った魅力があり、すでに訪れた方々にもぜひ夜間開放を体験していただきたいです！\n\n次回は昌徳宮の月明かり散策にも行く予定です。その時も感想を投稿しますね 😊`,
+// }));
 
-const INIT_COMMENTS = [
-  { id: 1, initial: "歴", author: "歴史愛好家",   date: "2024.03.05 14:30", content: "本当に有益な情報、ありがとうございます！来週は必ず訪れてみます。" },
-  { id: 2, initial: "ソ", author: "ソウル土着",     date: "2024.03.05 15:45", content: "夜間の開園時間帯は本当に素晴らしいですね。私も去年行ったことがありますが、ぜひおすすめします！" },
-  { id: 3, initial: "写", author: "写真家",         date: "2024.03.05 16:20", content: "写真情報も共有していただけると嬉しいです。どのレンズを使いましたか？" },
-];
+// const INIT_COMMENTS = [
+//   { id: 1, initial: "歴", author: "歴史愛好家",   date: "2024.03.05 14:30", content: "本当に有益な情報、ありがとうございます！来週は必ず訪れてみます。" },
+//   { id: 2, initial: "ソ", author: "ソウル土着",     date: "2024.03.05 15:45", content: "夜間の開園時間帯は本当に素晴らしいですね。私も去年行ったことがありますが、ぜひおすすめします！" },
+//   { id: 3, initial: "写", author: "写真家",         date: "2024.03.05 16:20", content: "写真情報も共有していただけると嬉しいです。どのレンズを使いましたか？" },
+// ];
 
 /* ── SVG 아이콘 ── */
 const BookmarkIcon = ({ active }) => (
@@ -144,16 +145,56 @@ export default function PostDetail() {
   const { postId } = useParams();
   const navigate   = useNavigate();
 
-  const post = MOCK_POSTS.find(p => p.id === Number(postId)) ?? MOCK_POSTS[0];
-  const catColor = CAT_COLORS[post.category] ?? { bg: "#f3f4f6", color: C.gray3 };
-
+  const [post,        setPost]        = useState(null);
   const [liked,       setLiked]       = useState(false);
-  const [likeCount,   setLikeCount]   = useState(post.likes);
+  const [likeCount,   setLikeCount]   = useState(0);
   const [helpful,     setHelpful]     = useState(false);
   const [bookmarked,  setBookmarked]  = useState(false);
-  const [comments,    setComments]    = useState(INIT_COMMENTS);
+  const [comments,    setComments]    = useState([]);
   const [commentText, setCommentText] = useState("");
   const [submitHover, setSubmitHover] = useState(false);
+
+  useEffect(() => {
+  axios
+    .get(`http://localhost:9990/topaboda/api/boards/${postId}`)
+    .then((res) => {
+      console.log("상세 응답:", res.data);
+
+      const mappedPost = {
+        id: res.data.id,
+        category: res.data.categories,
+        title: res.data.title,
+        author: res.data.nickname,
+        date: res.data.createdAt?.slice(0, 10).replace(/-/g, "."),
+        views: res.data.viewCount ?? 0,
+        likes: res.data.likeCount ?? 0,
+        content: res.data.content ?? "",
+      };
+
+      const mappedComments = (res.data.comments ?? []).map((comment) => ({
+        id: comment.id,
+        initial: comment.nickName?.[0] ?? "匿",
+        author: comment.nickName,
+        date: comment.createAt?.slice(0, 16).replace("T", " ").replace(/-/g, "."),
+        content: comment.content,
+      }));
+
+      setPost(mappedPost);
+      setLikeCount(mappedPost.likes);
+      setComments(mappedComments);
+    })
+    .catch((err) => {
+      console.error("상세 조회 실패:", err);
+      console.error("응답 데이터:", err.response?.data);
+      console.error("상태 코드:", err.response?.status);
+    });
+}, [postId]);
+
+if (!post) {
+  return <div style={{ paddingTop: "11.9rem", textAlign: "center" }}>ローディング中...</div>;
+}
+
+  const catColor = CAT_COLORS[post.category] ?? { bg: "#f3f4f6", color: C.gray3 };
 
   const handleLike = () => { setLiked(v => !v); setLikeCount(v => liked ? v - 1 : v + 1); };
 
