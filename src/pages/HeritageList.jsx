@@ -61,6 +61,7 @@ export default function HeritageList() {
           </div>
         )}
 
+        {/* ── 페이지네이션 ── */}
         <Pagination
           currentPage={currentPage + 1}
           totalPages={totalPages}
