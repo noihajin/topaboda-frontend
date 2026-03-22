@@ -65,7 +65,7 @@ useEffect(() => {
     const params = {
     page: currentPage - 1,
     size: postsPerPage,
-    sort: "id,desc",
+    sort: sortType === "views" ? "boardStatus.viewCount,desc" : "id,desc",
   };
 
   if (selectedCategory !== "すべて") {
@@ -96,8 +96,10 @@ useEffect(() => {
     })
     .catch((err) => {
       console.error("API 실패", err);
+      console.error("응답 데이터:", err.response?.data);
+      console.error("상태 코드:", err.response?.status);
     });
-}, [currentPage, selectedCategory, keyword]);
+}, [currentPage, selectedCategory, keyword, sortType]);
 
 useEffect(() => {
   setSearchInput(""); // 1. 입력창에 보이는 텍스트 비우기
@@ -120,14 +122,14 @@ useEffect(() => {
       .slice(0, 3);
   }, [posts]);
 
-  const processedPosts = useMemo(() => {
-    let result = [...posts];
-    if (sortType === "latest") result.sort((a, b) => b.id - a.id);
-    else if (sortType === "views") result.sort((a, b) => b.views - a.views);
-    return result;
-  }, [posts, selectedCategory, sortType, searchInput]);
+  // const processedPosts = useMemo(() => {
+  //   let result = [...posts];
+  //   if (sortType === "latest") result.sort((a, b) => b.id - a.id);
+  //   else if (sortType === "views") result.sort((a, b) => b.views - a.views);
+  //   return result;
+  // }, [posts, selectedCategory, sortType, searchInput]);
 
-  const currentPosts = processedPosts;
+  const currentPosts = posts;
 
   const categories = ["すべて", "レビュー", "ヒント", "フリートーク", "質問"];
 
@@ -212,9 +214,9 @@ useEffect(() => {
 
         {/* 정렬 버튼 */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginBottom: 20 }}>
-          <button onClick={() => setSortType("latest")} style={{ background: "none", border: "none", color: sortType === "latest" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>最新順</button>
+          <button onClick={() => {setSortType("latest"); setCurrentPage(1)}} style={{ background: "none", border: "none", color: sortType === "latest" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>最新順</button>
           <span style={{ color: C.border }}>|</span>
-          <button onClick={() => setSortType("views")} style={{ background: "none", border: "none", color: sortType === "views" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>閲覧順</button>
+          <button onClick={() => {setSortType("views"); setCurrentPage(1)}} style={{ background: "none", border: "none", color: sortType === "views" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>閲覧順</button>
         </div>
 
         {/* 테이블 */}
