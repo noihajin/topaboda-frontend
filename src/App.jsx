@@ -27,6 +27,7 @@ import MyPage from "./pages/Mypage";
 import Achievement from "./pages/Achievement";
 import RouteCreate from "./pages/RouteCreate";
 import PostDetail from "./pages/PostDetail";
+import EditProfile from "./pages/EditProfile";
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -39,7 +40,6 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // 마이페이지 편집(임시)
-const MyPageEditRedirect = () => <Navigate to="/mypage" replace />;
 
 // ── Navbar/Footer를 조건부로 렌더하는 레이아웃 ───────────────────
 const HIDE_NAV_PATHS = ["/route/create"];
@@ -76,7 +76,7 @@ function AppLayout() {
 
           {/* 6. 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
-          <Route path="/mypage/edit" element={<MyPageEditRedirect />} />
+          <Route path="/mypage/edit" element={<EditProfile />} />
 
           {/* 7. 업적 페이지 */}
           <Route path="/achievements" element={<Achievement />} />
