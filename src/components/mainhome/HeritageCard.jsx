@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { itemVariants } from "./constants";
+import axios from "axios";
 
 import imgIconLocation from "../../assets/icon_location.svg";
 import imgIconHeart from "../../assets/icon_heart_2.svg";
@@ -28,7 +29,91 @@ export default function HeritageCard({ heritageData, status }) {
     const navigate = useNavigate();
     const [isLiked, setIsLiked] = useState(status.like);
     const [isBookmarked, setIsBookmarked] = useState(status.bookmark);
+    const [likesCount, setLikesCount] = useState(heritageData.likes ?? 0);
+    const [isLiking, setIsLiking] = useState(false);
+    const [isBookmarking, setIsBookmarking] = useState(false);
     const badgeStyle = heritageData.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : heritageData.badge === "宝物" ? "bg-[#6E0000] text-white" : "bg-[#000D57] text-white";
+
+    const handleLikeClick = async (e) => {
+        e.stopPropagation();
+        if (isLiking) return;
+
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            alert("ログインが必要です。");
+            return;
+        }
+
+        setIsLiking(true);
+
+        const originalLiked = isLiked;
+        const originalCount = likesCount;
+
+        setIsLiked(!originalLiked);
+        setLikesCount((prev) => (originalLiked ? prev - 1 : prev + 1));
+
+        try {
+            if (originalLiked) {
+                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${heritageData.id}/likes`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post(
+                    `http://localhost:9990/topaboda/api/heritages/${heritageData.id}/likes`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+            }
+        } catch (e) {
+            console.error("에러 발생:", e);
+            setIsLiked(originalLiked);
+            setLikesCount(originalCount);
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleBookmarkClick = async (e) => {
+        e.stopPropagation();
+        if (isBookmarking) return;
+
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            alert("ログインが必要です。");
+            return;
+        }
+
+        setIsBookmarking(true);
+
+        const originalBookmarked = isBookmarked;
+        setIsBookmarked(!originalBookmarked);
+        try {
+            if (isBookmarked) {
+                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${heritageData.id}/bookmarks`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post(
+                    `http://localhost:9990/topaboda/api/heritages/${heritageData.id}/bookmarks`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+            }
+        } catch (e) {
+            console.error("에러 발생:", e);
+            setIsBookmarked(originalBookmarked);
+        } finally {
+            setIsBookmarking(false);
+        }
+    };
 
     useEffect(() => {
         setIsLiked(status.like);
@@ -37,6 +122,7 @@ export default function HeritageCard({ heritageData, status }) {
     useEffect(() => {
         setIsBookmarked(status.bookmark);
     }, [status.bookmark]);
+
     return (
         <motion.div variants={itemVariants} className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer">
             <div className="relative h-[300px] overflow-hidden">
@@ -47,21 +133,19 @@ export default function HeritageCard({ heritageData, status }) {
                 <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
                     {/* 하트 버튼 */}
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsLiked(!isLiked);
-                        }}
-                        className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
+                        disabled={isLiking}
+                        onClick={handleLikeClick}
+                        className={`w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all
+    ${isLiking ? "opacity-50 cursor-not-allowed" : "hover:bg-white active:scale-90"}`}
                     >
                         <HeartIcon filled={isLiked} />
                     </button>
                     {/* 북마크 버튼 */}
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsBookmarked(!isBookmarked);
-                        }}
-                        className="w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center hover:bg-white transition-all active:scale-90"
+                        disabled={isBookmarking}
+                        onClick={handleBookmarkClick}
+                        className={`w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all
+    ${isBookmarking ? "opacity-50 cursor-not-allowed" : "hover:bg-white active:scale-90"}`}
                     >
                         <BookmarkIcon filled={isBookmarked} />
                     </button>
@@ -80,7 +164,7 @@ export default function HeritageCard({ heritageData, status }) {
                     <div className="flex items-center gap-1.5 text-gray-400">
                         <img src={imgIconHeart} alt="" className="w-4.5 h-4.5 opacity-50" />
                         <span className="text-sm font-bold ml-1">
-                            {(heritageData.likes ?? 0).toLocaleString()}
+                            {likesCount.toLocaleString()}
                             <span className="text-[10px] opacity-70 ml-1">LIKES</span>
                         </span>
                     </div>
