@@ -234,6 +234,7 @@ export default function MyPage() {
     }, []);
 
     return (
+        <>
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
             <style>{`
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -521,5 +522,6 @@ export default function MyPage() {
                     : " のいいねを解除しますか？"}
             </p>
         </TopaModal>
+        </>
     );
 }
