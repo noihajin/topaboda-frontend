@@ -198,6 +198,112 @@ export default function MyPage() {
         }
     };
 
+    // 게시글 삭제
+    const handleDeletePost = async (postId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("ログイン情報がありません。");
+        return;
+    }
+
+    try {
+        await axios.delete(
+            `http://localhost:9990/topaboda/api/boards/${postId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+    alert("記事が削除されました。");
+
+        // 삭제 후 현재 게시글 목록 다시 불러오기
+        fetchData(
+            "/users/me/boards/snippet",
+            { page: postPage, size: PAGE_SIZE },
+            setPostData
+        );
+        } catch (error) {
+            console.error("게시글 삭제 실패:", error);
+            console.error("status:", error.response?.status);
+            console.error("data:", error.response?.data);
+            alert("記事の削除に失敗しました。");
+        }
+    };
+
+    // 댓글 수정
+    const handleEditComment = async (commentId, newContent) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("ログイン情報がありません。");
+        return;
+    }
+
+    try {
+        await axios.patch(
+            `http://localhost:9990/topaboda/api/comments/${commentId}`,
+            { content: newContent },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        alert("コメントが修正されました。");
+
+        fetchData(
+            "/users/me/comments/snippet",
+            { page: commentPage, size: PAGE_SIZE },
+            setCommentData
+        );
+        } catch (error) {
+            console.error("댓글 수정 실패:", error);
+            console.error("status:", error.response?.status);
+            console.error("data:", error.response?.data);
+            alert("コメントの修正に失敗しました。");
+        }
+    };
+
+    // 댓글 삭제
+    const handleDeleteComment = async (commentId) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("ログイン情報がありません。");
+        return;
+    }
+
+    try {
+        await axios.delete(
+            `http://localhost:9990/topaboda/api/comments/${commentId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+    alert("コメントが削除されました。");
+
+        // 삭제 후 현재 게시글 목록 다시 불러오기
+        fetchData(
+            "/users/me/comments/snippet",
+            { page: commentPage, size: PAGE_SIZE },
+            setCommentData
+        );
+        } catch (error) {
+            console.error("댓글 삭제 실패:", error);
+            console.error("status:", error.response?.status);
+            console.error("data:", error.response?.data);
+            alert("コメントの削除に失敗しました。");
+        }
+    };
+
     useEffect(() => {
         const id = localStorage.getItem("id");
         fetchData(`/users/profile/${id}`, {}, setUser);
@@ -447,11 +553,11 @@ export default function MyPage() {
                     <div style={{ minHeight: 400 }}>
                         {displayedAct.map((item) => {
                             if (postTab === "posts") {
-                                return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} />;
+                                return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
                             }
 
                             if (postTab === "comments") {
-                                return <CommentRow key={item.id} item={item} />;
+                                return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
                             }
 
                             return <ReviewRow key={item.id} item={item} />;

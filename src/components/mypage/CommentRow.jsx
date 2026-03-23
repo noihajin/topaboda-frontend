@@ -2,12 +2,16 @@ import { useState } from "react";
 import { ListRow } from "./ListRow";
 import CommentEditModal from "./CommentEditModal";
 
-export default function CommentRow({ item, onDelete }) {
+export default function CommentRow({ item, onEditComment, onDeleteComment }) {
     const [editOpen, setEditOpen] = useState(false);
 
-    const handleSave = (newContent) => {
-        // PUT /api/comments/{item.id} ← API 연동 시 교체
-        console.log("댓글 수정:", item.id, newContent);
+    const handleSave = async (newContent) => {
+        await onEditComment(item.id, newContent);
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm("コメントを削除しますか？")) return;
+        await onDeleteComment(item.id);
     };
 
     return (
@@ -17,7 +21,7 @@ export default function CommentRow({ item, onDelete }) {
                 desc={item.content}
                 date={item.date}
                 onEdit={() => setEditOpen(true)}
-                onDelete={() => onDelete?.(item.id)}
+                onDelete={handleDelete}
             />
             <CommentEditModal
                 isOpen={editOpen}
