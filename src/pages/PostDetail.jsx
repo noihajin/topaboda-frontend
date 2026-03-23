@@ -142,7 +142,6 @@ function renderContent(text) {
 
 /* ── 메인 컴포넌트 ── */
 export default function PostDetail() {
-  console.log("렌더링됨");
   const { postId } = useParams();
   const navigate   = useNavigate();
 
@@ -155,50 +154,44 @@ export default function PostDetail() {
   const [commentText, setCommentText] = useState("");
   const [submitHover, setSubmitHover] = useState(false);
 
-  useEffect(() => {
-  let cancelled = false;
 
-  const fetchPost = async () => {
+  const fetchPostDetail = async () => {
     try {
-      const res = await axios.get(`http://localhost:9990/topaboda/api/boards/${postId}`, {withCredentials: true,});
-      if (cancelled) return;
+      const res = await axios.get(
+        `http://localhost:9990/topaboda/api/boards/${postId}`,
+        { withCredentials: true }
+      );
 
-      const mappedPost = {
-        id: res.data.id,
-        category: res.data.categories,
-        title: res.data.title,
-        author: res.data.nickname,
-        date: res.data.createdAt?.slice(0, 10).replace(/-/g, "."),
-        views: res.data.viewCount ?? 0,
-        likes: res.data.likeCount ?? 0,
-        content: res.data.content ?? "",
-      };
-
-      const mappedComments = (res.data.comments ?? []).map((comment) => ({
-        id: comment.id,
-        initial: comment.nickname?.[0] ?? "匿",
-        author: comment.nickname,
-        date: comment.createAt?.slice(0, 16).replace("T", " ").replace(/-/g, "."),
-        content: comment.content,
-      }));
-
-      setPost(mappedPost);
-      setLikeCount(mappedPost.likes);
-      setComments(mappedComments);
-    } catch (err) {
-      if (!cancelled) {
-        console.error("상세 조회 실패:", err);
-      }
-      }
+    const mappedPost = {
+      id: res.data.id,
+      category: res.data.categories,
+      title: res.data.title,
+      author: res.data.nickname,
+      date: res.data.createdAt?.slice(0, 10).replace(/-/g, "."),
+      views: res.data.viewCount ?? 0,
+      likes: res.data.likeCount ?? 0,
+      content: res.data.content ?? "",
     };
 
-    fetchPost();
+    const mappedComments = (res.data.comments ?? []).map((comment) => ({
+      id: comment.id,
+      initial: comment.nickname?.[0] ?? "匿",
+      author: comment.nickname,
+      date: comment.createAt?.slice(0, 16).replace("T", " ").replace(/-/g, "."),
+      content: comment.content,
+    }));
 
-    return () => {
-      cancelled = true;
-      console.log("cleanup 실행");
-    };
-  }, [postId]);
+    setPost(mappedPost);
+    setLikeCount(mappedPost.likes);
+    setComments(mappedComments);
+  } catch (err) {
+    console.error("상세 조회 실패:", err);
+  }
+};
+
+useEffect(() => {
+  fetchPostDetail();
+}, [postId]);
 
 if (!post) {
   return <div style={{ paddingTop: "11.9rem", textAlign: "center" }}>ローディング中...</div>;
@@ -208,16 +201,44 @@ if (!post) {
 
   const handleLike = () => { setLiked(v => !v); setLikeCount(v => liked ? v - 1 : v + 1); };
 
-  const handleCommentSubmit = () => {
-    if (!commentText.trim()) return;
-    setComments(prev => [...prev, {
-      id: Date.now(), initial: "ゲ", author: "ゲスト",
-      date: new Date().toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).replace(/\//g, "."),
-      content: commentText.trim(),
-    }]);
-    setCommentText("");
-  };
+  const handleCommentSubmit = async () => {
+  const trimmed = commentText.trim();
 
+  console.log("postId =", postId);
+  console.log("trimmed =", trimmed);
+
+  if (!trimmed) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    console.log("comment token =", token);
+
+    if (!token) {
+      alert("ログイン情報がありません。");
+      return;
+    }
+
+    const response = await axios.post(
+      `http://localhost:9990/topaboda/api/boards/${postId}/comments`,
+      { content: trimmed },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("댓글 작성 성공:", response.data);
+
+    setCommentText("");
+    await fetchPostDetail();
+    } catch (error) {
+      console.error("댓글 작성 실패:", error);
+      console.error("status:", error.response?.status);
+      console.error("data:", error.response?.data);
+    }
+  };
   return (
     <div style={{ background: C.bg, minHeight: "100vh", paddingTop: "11.9rem", paddingBottom: "8rem" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
