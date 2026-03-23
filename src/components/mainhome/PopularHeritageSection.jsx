@@ -15,15 +15,40 @@ export default function PopularHeritageSection() {
     const [sortType, setSortType] = useState("BOOKMARK");
     const [herBookmark, setHerBookmark] = useState({ contents: [] });
     const [herLike, setHerLike] = useState({ contents: [] });
+    const [herBookmarkStatus, setHerBookmarkStatus] = useState({});
+    const [herLikeStatus, setHerLikeStatus] = useState({});
 
     const currentHtData = sortType === "BOOKMARK" ? herBookmark.contents : herLike.contents;
+    const currentHtStatus = sortType === "BOOKMARK" ? herBookmarkStatus : herLikeStatus;
     const displayedHt = currentHtData;
+    const displayedHtStatus = currentHtStatus;
 
-    const fetchRankingData = async (criteria, limit, setData) => {
+    const fetchRankingData = async (criteria, limit, setData, setStatus) => {
         try {
-            const response = await axios.get(`http://localhost:9990/topaboda/api/rankings/heritages?criteria=${criteria}&limit=${limit}`);
+            const responseHeritage = await axios.get(`http://localhost:9990/topaboda/api/rankings/heritages?criteria=${criteria}&limit=${limit}`);
 
-            setData(response.data);
+            setData(responseHeritage.data);
+
+            const id = localStorage.getItem("id");
+            const token = localStorage.getItem("token");
+
+            if (!id || !token) return;
+
+            const heritageIds = responseHeritage.data.contents.map((item) => item.id);
+            const idsString = heritageIds.join(",");
+
+            const responseLike = await axios.get(`http://localhost:9990/topaboda/api/heritages/likes/status?heritageIds=${idsString}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const responseBookmark = await axios.get(`http://localhost:9990/topaboda/api/heritages/bookmarks/status?heritageIds=${idsString}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setStatus({
+                like: responseLike.data.contents,
+                bookmark: responseBookmark.data.contents,
+            });
         } catch (error) {
             console.error(`[${criteria}/${limit}]데이터 로드 실패:`, error);
         }
@@ -31,7 +56,7 @@ export default function PopularHeritageSection() {
 
     useEffect(() => {
         const initFetch = async () => {
-            await Promise.all([fetchRankingData("BOOKMARK", 6, setHerBookmark), fetchRankingData("LIKE", 6, setHerLike)]);
+            await Promise.all([fetchRankingData("BOOKMARK", 6, setHerBookmark, setHerBookmarkStatus), fetchRankingData("LIKE", 6, setHerLike, setHerLikeStatus)]);
         };
         initFetch();
     }, []);
@@ -60,7 +85,14 @@ export default function PopularHeritageSection() {
             {/* 카드 그리드 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
                 {displayedHt.map((item) => (
-                    <HeritageCard key={`${sortType}-${item.id}`} data={item} />
+                    <HeritageCard
+                        key={`${item.id}`}
+                        heritageData={item}
+                        status={{
+                            like: displayedHtStatus?.like?.[item.id] || false,
+                            bookmark: displayedHtStatus?.bookmark?.[item.id] || false,
+                        }}
+                    />
                 ))}
             </div>
             {/* 더보기 버튼 */}
