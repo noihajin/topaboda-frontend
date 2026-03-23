@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { C, font, fontSerif } from "./constants";
 import { SectionTitle, ReviewCard, IconChevronLeft, IconChevronRight } from "./DetailUI";
+import ReviewWriteModal from "./ReviewWriteModal";
 
 export default function HeritageContent({
   data,
   reviews,
-  showReviewForm,
-  reviewText,
-  setShowReviewForm,
-  setReviewText,
   galleryRef,
   scrollGallery,
 }) {
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+
+  const handleSubmitReview = (text) => {
+    // POST /api/heritages/{heritageId}/reviews ← API 연동 시 교체
+    console.log("리뷰 등록:", text);
+  };
+
   return (
     <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: 40 }}>
 
@@ -109,8 +114,9 @@ export default function HeritageContent({
               実際に訪問した方々のレビュー
             </p>
           </div>
+          {/* 리뷰 작성 버튼 → 모달 오픈 */}
           <button
-            onClick={() => setShowReviewForm((v) => !v)}
+            onClick={() => setReviewModalOpen(true)}
             style={{
               background: C.red, color: "white", border: "none", borderRadius: 10,
               padding: "12px 28px", fontSize: 14, fontWeight: 600, cursor: "pointer",
@@ -123,49 +129,6 @@ export default function HeritageContent({
           </button>
         </div>
 
-        {/* 리뷰 작성 폼 */}
-        {showReviewForm && (
-          <div style={{
-            background: "#f8f9fc", borderRadius: 14, padding: "24px",
-            marginBottom: 24, border: `1px solid ${C.border}`,
-          }}>
-            <textarea
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              placeholder="この文化遺産についての感想を書いてください..."
-              rows={4}
-              style={{
-                width: "100%", borderRadius: 10, border: `1px solid ${C.border}`,
-                padding: "14px 16px", fontSize: 15, fontFamily: font,
-                resize: "none", outline: "none", boxSizing: "border-box",
-                lineHeight: 1.7,
-              }}
-            />
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
-              <button
-                onClick={() => setShowReviewForm(false)}
-                style={{
-                  padding: "10px 20px", borderRadius: 8,
-                  border: `1px solid ${C.border}`, background: "white",
-                  cursor: "pointer", fontFamily: font, fontSize: 14,
-                }}
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={() => { /* POST /api/heritages/{id}/reviews */ setShowReviewForm(false); setReviewText(""); }}
-                style={{
-                  padding: "10px 20px", borderRadius: 8, border: "none",
-                  background: C.navy, color: "white", cursor: "pointer",
-                  fontFamily: font, fontSize: 14, fontWeight: 700,
-                }}
-              >
-                投稿する
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* 리뷰 목록 */}
         {/* GET /api/heritages/{heritageId}/reviews */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -174,6 +137,14 @@ export default function HeritageContent({
           ))}
         </div>
       </div>
+
+      {/* 리뷰 작성 모달 */}
+      <ReviewWriteModal
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        heritageName={data.nameJa}
+        onSubmit={handleSubmitReview}
+      />
     </div>
   );
 }

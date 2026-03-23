@@ -13,8 +13,6 @@ export default function HeritageDetail() {
   const [isLiked,       setIsLiked]       = useState(false);
   const [isBookmarked,  setIsBookmarked]  = useState(false);
   const [likeCount,     setLikeCount]     = useState(MOCK_HERITAGE.likeCount);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewText,    setReviewText]    = useState("");
 
   // GET /api/heritages/{heritageId}  ← API 연동 시 교체
   const data = MOCK_HERITAGE;
@@ -58,10 +56,6 @@ export default function HeritageDetail() {
         <HeritageContent
           data={data}
           reviews={MOCK_REVIEWS}
-          showReviewForm={showReviewForm}
-          reviewText={reviewText}
-          setShowReviewForm={setShowReviewForm}
-          setReviewText={setReviewText}
           galleryRef={galleryRef}
           scrollGallery={scrollGallery}
         />
