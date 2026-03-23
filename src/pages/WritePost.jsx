@@ -51,17 +51,15 @@ export default function WritePost() {
     setImages((prev) => [...prev, ...mapped]);
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
   if (!category) {
     alert("カテゴリーを選択してください。");
     return;
   }
-
   if (!title.trim()) {
     alert("タイトルを入力してください。");
     return;
   }
-
   if (!content.trim()) {
     alert("内容を入力してください。");
     return;
@@ -69,22 +67,37 @@ export default function WritePost() {
 
   try {
     const token = localStorage.getItem("token");
-
-    console.log("localStorage token:", token);
-    console.log("Authorization header:", `Bearer ${token}`);
-
     if (!token) {
       alert("ログイン情報がありません。");
       return;
     }
 
-    const response = await axios.post(
+    const payload = {
+      title: title.trim(),
+      content: content.trim(),
+      category,
+    };
+
+    if (isEdit && editPost?.id) {
+      await axios.patch(
+        `http://localhost:9990/topaboda/api/boards/${editPost.id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      alert("記事が修正されました。");
+      navigate("/mypage");
+      return;
+    }
+
+    await axios.post(
       "http://localhost:9990/topaboda/api/boards",
-      {
-        title: title.trim(),
-        content: content.trim(),
-        category,
-      },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -93,20 +106,13 @@ export default function WritePost() {
       }
     );
 
-    console.log("작성 성공:", response.data);
     alert("記事が登録されました！");
     navigate("/community");
   } catch (err) {
-    console.error("작성 실패:", err);
+    console.error("작성/수정 실패:", err);
     console.error("응답 데이터:", err.response?.data);
     console.error("상태 코드:", err.response?.status);
-
-    if (err.response?.status === 401) {
-      alert("ログイン情報が必要です。");
-      return;
-    }
-
-    alert("記事の登録に失敗しました。");
+    alert(isEdit ? "修正する" : "登録する");
   }
 };
 
