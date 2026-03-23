@@ -124,7 +124,7 @@ export default function HeritageCard({ heritageData, status }) {
     }, [status.bookmark]);
 
     return (
-        <motion.div variants={itemVariants} className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer">
+        <motion.div variants={itemVariants} onClick={() => navigate(`/heritage/${heritageData.id}`)} className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer">
             <div className="relative h-[300px] overflow-hidden">
                 <img src={heritageData.imageUrl || "/fallback.jpg"} alt={heritageData.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                 {/* 배지 */}
