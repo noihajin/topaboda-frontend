@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { C, font } from "./theme";
 
 const MAX = 1000;
-const MIN = 10;
+const MIN = 1;
 
 export default function CommentEditModal({ isOpen, onClose, item, onSave }) {
     const [text, setText] = useState(item?.content ?? "");
@@ -122,7 +122,7 @@ export default function CommentEditModal({ isOpen, onClose, item, onSave }) {
                                     onBlur={(e) => (e.currentTarget.style.borderColor = C.border)}
                                 />
                                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                                    <span style={{ fontSize: 12, color: C.gray3 }}>最低10文字以上入力してください</span>
+                                    <span style={{ fontSize: 12, color: C.gray3 }}></span>
                                     <span style={{ fontSize: 12, color: C.gray4 }}>{text.length}/{MAX}</span>
                                 </div>
                             </div>
