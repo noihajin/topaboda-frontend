@@ -1,6 +1,6 @@
 import React from "react";
 import heroBg from "../assets/hero_background.png";
-import SearchFilter from "./SearchFilter";
+import SearchFilter from "./SearchFilter.jsx";
 
 export default function HeroSection() {
   return (
