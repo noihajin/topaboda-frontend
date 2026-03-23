@@ -20,19 +20,7 @@ export default function Achievement() {
     const goldCount = achievements.contents.filter((a) => a.achieved && a.grade === "金").length;
     const silverCount = achievements.contents.filter((a) => a.achieved && a.grade === "銀").length;
     const bronzeCount = achievements.contents.filter((a) => a.achieved && a.grade === "銅").length;
-    /*
-    { 
-      id:1,  
-      title:"国宝探訪者",       
-      description:"国宝に指定された文化遺産を50か所訪問した達成者に贈られる称号です。",               
-      grade:"金", 
-      criteriaLabel:"国宝訪問",      
-      current:50, 
-      total:50,  
-      achieved:true,  
-      date:"2024.08.15" 
-    },
-    */
+
     useEffect(() => {
         const fetchAchievements = async () => {
             const id = localStorage.getItem("id");
