@@ -71,10 +71,10 @@ export default function EditProfile() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 80 }}>
+    <div style={{ minHeight: "100vh", background: "#f8f9fc", fontFamily: font, paddingBottom: 80 }}>
 
       {/* ── 헤더 ── */}
-      <div style={{ paddingTop: 60, textAlign: "center", marginBottom: 32 }}>
+      <div style={{ paddingTop: "11.9rem", textAlign: "center", marginBottom: 32 }}>
         <h1 style={{ fontSize: 34, fontWeight: 700, color: C.navy, margin: "0 0 10px" }}>
           プロフィール編集
         </h1>
