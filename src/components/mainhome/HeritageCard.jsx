@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { itemVariants } from "./constants";
@@ -24,17 +24,25 @@ function BookmarkIcon({ filled }) {
 }
 
 // ─── 개별 카드 컴포넌트 ───
-export default function HeritageCard({ data }) {
+export default function HeritageCard({ heritageData, status }) {
     const navigate = useNavigate();
-    const [isLiked, setIsLiked] = useState(false);
-    const [isBookmarked, setIsBookmarked] = useState(false);
-    const badgeStyle = data.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : data.badge === "宝物" ? "bg-[#6E0000] text-white" : "bg-[#000D57] text-white";
+    const [isLiked, setIsLiked] = useState(status.like);
+    const [isBookmarked, setIsBookmarked] = useState(status.bookmark);
+    const badgeStyle = heritageData.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : heritageData.badge === "宝物" ? "bg-[#6E0000] text-white" : "bg-[#000D57] text-white";
+
+    useEffect(() => {
+        setIsLiked(status.like);
+    }, [status.like]);
+
+    useEffect(() => {
+        setIsBookmarked(status.bookmark);
+    }, [status.bookmark]);
     return (
         <motion.div variants={itemVariants} className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer">
             <div className="relative h-[300px] overflow-hidden">
-                <img src={data.imageUrl || "/fallback.jpg"} alt={data.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+                <img src={heritageData.imageUrl || "/fallback.jpg"} alt={heritageData.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                 {/* 배지 */}
-                <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>{data.badge}</span>
+                <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>{heritageData.badge}</span>
                 {/* ── 우측 상단 버튼 그룹 (가로 정렬) ── */}
                 <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
                     {/* 하트 버튼 */}
@@ -61,22 +69,22 @@ export default function HeritageCard({ data }) {
             </div>
             <div className="p-8">
                 <div className="flex items-baseline gap-2 mb-3">
-                    <h3 className="text-2xl font-black text-[#000D57] tracking-tight">{data.name}</h3>
-                    <span className="text-sm text-gray-400 font-medium">| {data.nameKr}</span>
+                    <h3 className="text-2xl font-black text-[#000D57] tracking-tight">{heritageData.name}</h3>
+                    <span className="text-sm text-gray-400 font-medium">| {heritageData.nameKr}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-400 mb-8">
                     <img src={imgIconLocation} alt="" className="w-3.5 h-3.5 opacity-50" />
-                    <span className="text-sm font-bold">{data.location}</span>
+                    <span className="text-sm font-bold">{heritageData.location}</span>
                 </div>
                 <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div className="flex items-center gap-1.5 text-gray-400">
                         <img src={imgIconHeart} alt="" className="w-4.5 h-4.5 opacity-50" />
                         <span className="text-sm font-bold ml-1">
-                            {(data.likes ?? 0).toLocaleString()}
+                            {(heritageData.likes ?? 0).toLocaleString()}
                             <span className="text-[10px] opacity-70 ml-1">LIKES</span>
                         </span>
                     </div>
-                    <button onClick={() => navigate(`/heritage/${data.id}`)} className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn">
+                    <button onClick={() => navigate(`/heritage/${heritageData.id}`)} className="flex items-center gap-1 text-[#6E0000] font-black text-xs tracking-tighter hover:text-[#000D57] transition-all group/btn">
                         詳細を見る
                         <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
                     </button>
