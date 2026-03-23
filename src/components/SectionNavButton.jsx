@@ -13,6 +13,7 @@ export default function SectionNavButton() {
 
   // 현재 보이는 섹션 인덱스 (IntersectionObserver로 추적)
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [direction, setDirection] = useState("down"); // "down" | "up"
   const [hovered, setHovered] = useState(false);
 
   // IntersectionObserver로 각 섹션 감지
@@ -45,17 +46,37 @@ export default function SectionNavButton() {
   }, [isHome]);
 
   const goNext = useCallback(() => {
-    const nextIdx = (currentIdx + 1) % SECTIONS.length;
-    const el = document.getElementById(SECTIONS[nextIdx].id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    let nextIdx;
+
+    if (direction === "down") {
+      nextIdx = currentIdx + 1;
+      if (nextIdx >= SECTIONS.length) {
+        // 마지막에서 방향 전환 → 한 단계 위로
+        nextIdx = currentIdx - 1;
+        setDirection("up");
+      } else if (nextIdx === SECTIONS.length - 1) {
+        // 마지막 섹션 도달 → 다음 클릭부터 위로 올라가도록 방향 전환
+        setDirection("up");
+      }
+    } else {
+      // 위로 올라가는 중
+      nextIdx = currentIdx - 1;
+      if (nextIdx <= 0) {
+        nextIdx = 0;
+        setDirection("down"); // 맨 위 도달 → 다시 아래로
+      }
     }
-  }, [currentIdx]);
+
+    const el = document.getElementById(SECTIONS[nextIdx].id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [currentIdx, direction]);
 
   if (!isHome) return null;
 
-  const isLast = currentIdx === SECTIONS.length - 1;
-  const nextLabel = SECTIONS[(currentIdx + 1) % SECTIONS.length].label;
+  const isGoingUp = direction === "up";
+  const nextLabel = isGoingUp
+    ? (currentIdx > 0 ? SECTIONS[currentIdx - 1].label : "トップ")
+    : (currentIdx < SECTIONS.length - 1 ? SECTIONS[currentIdx + 1].label : "トップ");
 
   return (
     <div
@@ -86,7 +107,7 @@ export default function SectionNavButton() {
           pointerEvents: "none",
         }}
       >
-        {isLast ? "トップへ戻る" : `↓ ${nextLabel}`}
+        {isGoingUp ? `↑ ${nextLabel}` : `↓ ${nextLabel}`}
       </div>
 
       {/* 섹션 이동 버튼 */}
@@ -123,7 +144,7 @@ export default function SectionNavButton() {
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{
-            transform: isLast ? "rotate(180deg)" : "none",
+            transform: isGoingUp ? "rotate(180deg)" : "none",
             transition: "transform 0.3s",
           }}
         >
