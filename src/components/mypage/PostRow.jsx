@@ -1,7 +1,7 @@
 import React from "react";
 import { ListRow } from "./ListRow";
 
-const PostRow = ({ item, navigate }) => {
+const PostRow = ({ item, navigate, onEditPost }) => {
     // 카테고리 클릭 핸들러 (예: 해당 카테고리 목록으로 이동)
     const handleCategoryClick = (e) => {
         e.stopPropagation();
@@ -14,9 +14,10 @@ const PostRow = ({ item, navigate }) => {
         navigate(`/community/view/${item.id}`);
     };
 
-    const handleEditClick = (e) => {
+    // 수정 클릭 핸들러 (게시글 수정 폼으로 이동)
+    const handleEditClick = async (e) => {
         e.stopPropagation();
-        navigate("/community/write", { state: { post: item, isEdit: true } });
+        await onEditPost(item.id);
     };
 
     const handleDeleteClick = (e) => {

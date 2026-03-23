@@ -162,6 +162,42 @@ export default function MyPage() {
         }
     };
 
+    // 게시글 편집 메서드
+    const handleEditPost = async (postId) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("ログイン情報がありません。");
+            return;
+        }
+
+        const res = await axios.get(
+            `http://localhost:9990/topaboda/api/boards/${postId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        navigate("/community/write", {
+            state: {
+                isEdit: true,
+                post: {
+                    id: res.data.id,
+                    category: res.data.categories,
+                    title: res.data.title,
+                    content: res.data.content,
+                },
+            },
+        });
+        } catch (error) {
+            console.error("게시글 상세 불러오기 실패:", error);
+            alert("記事情報を読み込めませんでした。");
+        }
+    };
+
     useEffect(() => {
         const id = localStorage.getItem("id");
         fetchData(`/users/profile/${id}`, {}, setUser);
@@ -411,7 +447,7 @@ export default function MyPage() {
                     <div style={{ minHeight: 400 }}>
                         {displayedAct.map((item) => {
                             if (postTab === "posts") {
-                                return <PostRow key={item.id} item={item} navigate={navigate} />;
+                                return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} />;
                             }
 
                             if (postTab === "comments") {
