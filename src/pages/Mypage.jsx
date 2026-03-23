@@ -203,7 +203,13 @@ export default function MyPage() {
                     progress: item.progress,
                 }));
 
-                mappedData.sort((a, b) => b.achieved - a.achieved);
+                mappedData.sort((a, b) => {
+                    if (a.achieved !== b.achieved) {
+                        return b.achieved - a.achieved;
+                    }
+
+                    return b.progress - a.progress;
+                });
 
                 setAchievements({ contents: mappedData });
             } catch (error) {
