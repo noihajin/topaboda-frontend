@@ -9,6 +9,7 @@ import HeritageCard from "../components/mypage/HeritageCard";
 import CommentRow from "../components/mypage/CommentRow";
 import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
+import TopaModal from "../components/TopaModal";
 
 // ── 데이터 ─────────────────────────────────────────────────────────
 const ROUTES = [
@@ -113,7 +114,19 @@ export default function MyPage() {
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
 
     const PAGE_SIZE = 5;
-    const HT_SIZE = 3;
+    const HT_SIZE = 4;
+
+    // 북마크/좋아요 취소 모달
+    const [cancelModal, setCancelModal] = useState({ open: false, item: null });
+    const handleCancelRequest = (item) => setCancelModal({ open: true, item });
+    const handleCancelClose   = ()     => setCancelModal({ open: false, item: null });
+    const handleCancelConfirm = ()     => {
+        // TODO: API 연동 시 실제 취소 처리
+        // heritageTab === "bookmark"
+        //   ? DELETE /api/bookmarks/{cancelModal.item.heritageId}
+        //   : DELETE /api/heritages/{cancelModal.item.heritageId}/likes
+        setCancelModal({ open: false, item: null });
+    };
     const ROUTE_SIZE = 2;
 
     // localStorage에서 사용자 저장 루트 불러오기
@@ -221,6 +234,7 @@ export default function MyPage() {
     }, []);
 
     return (
+        <>
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
             <style>{`
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -350,9 +364,14 @@ export default function MyPage() {
                                 </div>
                             )}
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                             {displayedHt.map((item) => (
-                                <HeritageCard key={item.heritageId} item={item} />
+                                <HeritageCard
+                                    key={item.heritageId}
+                                    item={item}
+                                    type={heritageTab}
+                                    onCancel={handleCancelRequest}
+                                />
                             ))}
                         </div>
                     </div>
@@ -482,5 +501,27 @@ export default function MyPage() {
                 </div>
             </div>
         </div>
+
+        {/* 북마크 / 좋아요 취소 확인 모달 */}
+        <TopaModal
+            isOpen={cancelModal.open}
+            onClose={handleCancelClose}
+            onConfirm={handleCancelConfirm}
+            variant={heritageTab === "bookmark" ? "info" : "danger"}
+            title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"}
+            confirmLabel="解除する"
+            cancelLabel="キャンセル"
+            icon={heritageTab === "bookmark" ? "🔖" : "❤️"}
+        >
+            <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
+                <strong style={{ color: "#000d57" }}>
+                    {cancelModal.item?.heritageName}
+                </strong>
+                {heritageTab === "bookmark"
+                    ? " のブックマークを解除しますか？"
+                    : " のいいねを解除しますか？"}
+            </p>
+        </TopaModal>
+        </>
     );
 }

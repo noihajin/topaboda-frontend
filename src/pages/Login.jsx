@@ -97,7 +97,7 @@ export default function LoginPage() {
                 }
 
                 alert("ログインに成功しました！");
-                navigate("/community");
+                navigate("/");
             }
         } catch (error) {
             // 5. 에러 처리 (ID/PW 불일치, 서버 에러 등)
