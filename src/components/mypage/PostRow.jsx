@@ -1,7 +1,7 @@
 import React from "react";
 import { ListRow } from "./ListRow";
 
-const PostRow = ({ item, navigate, onEditPost }) => {
+const PostRow = ({ item, navigate, onEditPost, onDeletePost }) => {
     // 카테고리 클릭 핸들러 (예: 해당 카테고리 목록으로 이동)
     const handleCategoryClick = (e) => {
         e.stopPropagation();
@@ -20,11 +20,12 @@ const PostRow = ({ item, navigate, onEditPost }) => {
         await onEditPost(item.id);
     };
 
-    const handleDeleteClick = (e) => {
+    const handleDeleteClick = async (e) => {
         e.stopPropagation();
-        if (window.confirm("削除しますか？")) {
-            // 삭제 로직 호출
-        }
+
+        if (!window.confirm("削除しますか？")) return;
+
+        await onDeletePost(item.id);
     };
 
     return <ListRow category={item.category} title={item.title} desc={item.desc} date={item.date} views={item.views} likes={item.likes} onCategoryClick={handleCategoryClick} onTitleClick={handleTitleClick} onEdit={handleEditClick} onDelete={handleDeleteClick} />;
