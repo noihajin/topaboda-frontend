@@ -11,7 +11,7 @@ const PostRow = ({ item, navigate, onEditPost, onDeletePost }) => {
     // 제목 클릭 핸들러 (상세 페이지로 이동)
     const handleTitleClick = (e) => {
         e.stopPropagation();
-        navigate(`/community/view/${item.id}`);
+        navigate(`/community/${item.id}`);
     };
 
     // 수정 클릭 핸들러 (게시글 수정 폼으로 이동)
