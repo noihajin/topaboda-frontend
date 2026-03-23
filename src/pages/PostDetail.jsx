@@ -142,6 +142,7 @@ function renderContent(text) {
 
 /* ── 메인 컴포넌트 ── */
 export default function PostDetail() {
+  console.log("렌더링됨");
   const { postId } = useParams();
   const navigate   = useNavigate();
 
@@ -155,10 +156,12 @@ export default function PostDetail() {
   const [submitHover, setSubmitHover] = useState(false);
 
   useEffect(() => {
-  axios
-    .get(`http://localhost:9990/topaboda/api/boards/${postId}`)
-    .then((res) => {
-      console.log("상세 응답:", res.data);
+  let cancelled = false;
+
+  const fetchPost = async () => {
+    try {
+      const res = await axios.get(`http://localhost:9990/topaboda/api/boards/${postId}`, {withCredentials: true,});
+      if (cancelled) return;
 
       const mappedPost = {
         id: res.data.id,
@@ -173,8 +176,8 @@ export default function PostDetail() {
 
       const mappedComments = (res.data.comments ?? []).map((comment) => ({
         id: comment.id,
-        initial: comment.nickName?.[0] ?? "匿",
-        author: comment.nickName,
+        initial: comment.nickname?.[0] ?? "匿",
+        author: comment.nickname,
         date: comment.createAt?.slice(0, 16).replace("T", " ").replace(/-/g, "."),
         content: comment.content,
       }));
@@ -182,13 +185,20 @@ export default function PostDetail() {
       setPost(mappedPost);
       setLikeCount(mappedPost.likes);
       setComments(mappedComments);
-    })
-    .catch((err) => {
-      console.error("상세 조회 실패:", err);
-      console.error("응답 데이터:", err.response?.data);
-      console.error("상태 코드:", err.response?.status);
-    });
-}, [postId]);
+    } catch (err) {
+      if (!cancelled) {
+        console.error("상세 조회 실패:", err);
+      }
+      }
+    };
+
+    fetchPost();
+
+    return () => {
+      cancelled = true;
+      console.log("cleanup 실행");
+    };
+  }, [postId]);
 
 if (!post) {
   return <div style={{ paddingTop: "11.9rem", textAlign: "center" }}>ローディング中...</div>;
