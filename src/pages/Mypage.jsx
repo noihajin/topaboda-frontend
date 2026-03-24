@@ -794,9 +794,6 @@ export default function MyPage() {
                         })()}
                     </div>
                 </div>
-            </div>
-        </div>
-        </div>
 
         {/* 북마크 / 좋아요 취소 확인 모달 */}
         <TopaModal
