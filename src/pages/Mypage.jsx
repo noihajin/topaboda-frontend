@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "../components/Pagination";
@@ -43,6 +43,46 @@ function AchievementCard({ item }) {
             </div>
             <p style={{ fontSize: 14, fontWeight: 700, color: item.achieved ? C.navy : C.gray4, marginTop: 8 }}>{item.title}</p>
             {!item.achieved && <AchievementProgressBar progress={item.progress} />}
+        </div>
+    );
+}
+
+function AddSlot({ type, onClick }) {
+    const [hovered, setHovered] = React.useState(false);
+    return (
+        <div
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                borderRadius: 16,
+                height: 170,
+                cursor: "pointer",
+                background: hovered
+                    ? "linear-gradient(135deg, rgba(202,202,0,0.10) 0%, rgba(202,202,0,0.05) 100%)"
+                    : "#f5f5f5",
+                border: `2px dashed ${hovered ? "#caca00" : "#d1d5db"}`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                transition: "all 0.25s ease",
+                transform: hovered ? "scale(1.02)" : "scale(1)",
+            }}
+        >
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="15" stroke={hovered ? "#caca00" : "#b0b0b0"} strokeWidth="1.5" strokeDasharray="4 2" />
+                <path d="M16 9v14M9 16h14" stroke={hovered ? "#caca00" : "#b0b0b0"} strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span style={{
+                fontSize: 12, fontWeight: 700,
+                color: hovered ? "#9a9a00" : "#9ca3af",
+                letterSpacing: "0.5px",
+                transition: "color 0.25s ease",
+            }}>
+                {type === "bookmark" ? "ブックマーク追加" : "いいね追加"}
+            </span>
         </div>
     );
 }
@@ -114,7 +154,7 @@ export default function MyPage() {
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
 
     const PAGE_SIZE = 5;
-    const HT_SIZE = 4;
+    const HT_SIZE = 3;
 
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
@@ -507,8 +547,8 @@ export default function MyPage() {
                             )}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                            {/* 데이터 카드 */}
-                            {displayedHt.slice(0, 4).map((item) => (
+                            {/* 데이터 카드 (최대 3개) */}
+                            {displayedHt.slice(0, 3).map((item) => (
                                 <HeritageCard
                                     key={item.heritageId}
                                     item={item}
@@ -516,41 +556,8 @@ export default function MyPage() {
                                     onCancel={handleCancelRequest}
                                 />
                             ))}
-                            {/* 빈 슬롯: 4개 고정 */}
-                            {Array.from({ length: Math.max(0, 4 - displayedHt.length) }).map((_, i) => (
-                                <div
-                                    key={`empty-${i}`}
-                                    onClick={() => navigate("/heritage")}
-                                    style={{
-                                        borderRadius: 16,
-                                        height: 170,
-                                        border: `2px dashed ${C.border}`,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: 8,
-                                        cursor: "pointer",
-                                        background: "#fafafa",
-                                        transition: "background 0.2s, border-color 0.2s",
-                                    }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = "#f0f0f0"; e.currentTarget.style.borderColor = C.navy; }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = "#fafafa"; e.currentTarget.style.borderColor = C.border; }}
-                                >
-                                    <div style={{
-                                        width: 40, height: 40, borderRadius: "50%",
-                                        background: C.border,
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                    }}>
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M10 4v12M4 10h12" stroke={C.gray3} strokeWidth="2" strokeLinecap="round" />
-                                        </svg>
-                                    </div>
-                                    <span style={{ fontSize: 12, color: C.gray3, fontWeight: 600 }}>
-                                        {heritageTab === "bookmark" ? "ブックマーク追加" : "いいね追加"}
-                                    </span>
-                                </div>
-                            ))}
+                            {/* 추가 슬롯 1개 — 항상 마지막 칸에 표시 */}
+                            <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
                         </div>
                     </div>
                 </div>
