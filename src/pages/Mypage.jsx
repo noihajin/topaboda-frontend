@@ -557,6 +557,53 @@ export default function MyPage() {
                             </button>
                         </div>
 
+                        {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
+                        <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                                <div style={{ display: "flex", gap: 24 }}>
+                                    <button
+                                        onClick={() => setHeritageTab("bookmark")}
+                                        style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
+                                    >
+                                        <BookmarkIcon active={heritageTab === "bookmark"} />
+                                        ブックマーク
+                                    </button>
+                                    <button
+                                        onClick={() => setHeritageTab("like")}
+                                        style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
+                                    >
+                                        <HeartIcon active={heritageTab === "like"} />
+                                        いいね
+                                    </button>
+                                </div>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    <button
+                                        disabled={heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0}
+                                        onClick={() => { if (heritageTab === "bookmark") setHtBkPage((p) => p - 1); else setHtLkPage((p) => p - 1); }}
+                                        style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                    >
+                                        <ChevronLeft />
+                                    </button>
+                                    <button
+                                        disabled={heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1}
+                                        onClick={() => { if (heritageTab === "bookmark") setHtBkPage((p) => p + 1); else setHtLkPage((p) => p + 1); }}
+                                        style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                    >
+                                        <ChevronRight />
+                                    </button>
+                                </div>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+                                {Array.from({ length: 4 }).map((_, i) => {
+                                    const item = displayedHt[i];
+                                    if (item) return <HeritageCard key={item.heritageId} item={item} type={heritageTab} onCancel={handleCancelRequest} />;
+                                    if (i === displayedHt.length) return <AddSlot key="add-slot" type={heritageTab} onClick={() => navigate("/heritage")} />;
+                                    return <div key={`ht-empty-${i}`} style={{ borderRadius: 16, height: 170 }} />;
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
                 {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "start" }}>
 
