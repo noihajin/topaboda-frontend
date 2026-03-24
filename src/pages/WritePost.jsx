@@ -26,8 +26,8 @@ const CATEGORIES = ["レビュー", "ヒント", "フリートーク", "質問"]
 export default function WritePost() {
   const navigate = useNavigate();
   const location = useLocation();
-  const editPost  = location.state?.post   ?? null;
-  const isEdit    = location.state?.isEdit ?? false;
+  const editPost = location.state?.post ?? null;
+  const isEdit = location.state?.isEdit ?? false;
 
   const [category, setCategory] = useState(editPost?.category ?? "");
   const [catOpen, setCatOpen] = useState(false);
