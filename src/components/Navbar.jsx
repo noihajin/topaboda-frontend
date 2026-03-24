@@ -8,6 +8,8 @@ import imgLogoBlk from "../assets/logo_black.svg";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
+import imgIconHome from "../assets/icon_home.svg";
+import imgIconLogout from "../assets/icon_logout.svg";
 
 const NAV_LINKS = [
     { label: "国の遺産リスト", to: "/heritage" },
@@ -238,19 +240,11 @@ export default function Navbar() {
                                 {isAuthenticated ? (
                                     <>
                                         <button className="gnb-btn" onClick={handleMyPageClick} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="12" cy="7" r="4"/>
-                                            </svg>
+                                            <img src={imgIconHome} alt="" style={{ width: 15, height: 15, filter: isActive ? "none" : "brightness(0) invert(1)" }} />
                                             My Page
                                         </button>
-                                        <button className="gnb-btn" onClick={handleLogout} style={{
-                                            border: `1.5px solid ${isActive ? "#000d57" : "#ffffff"}`,
-                                            borderRadius: 8,
-                                            padding: "5px 14px",
-                                            display: "flex", alignItems: "center", gap: 6,
-                                        }}>
-                                            <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" />
+                                        <button className="gnb-btn" onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <img src={imgIconLogout} alt="" style={{ width: 16, height: 17, filter: isActive ? "none" : "brightness(0) invert(1)" }} />
                                             Logout
                                         </button>
                                     </>
@@ -321,7 +315,7 @@ export default function Navbar() {
                                     gap: "8px",
                                 }}
                             >
-                                <img src={imgIconLoginBlk} alt="" style={{ width: 18, height: 18 }} />
+                                <img src={imgIconLogout} alt="" style={{ width: 18, height: 18 }} />
                                 Logout
                             </button>
                         </>
