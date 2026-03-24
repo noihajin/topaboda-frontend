@@ -6,8 +6,6 @@ import axios from "axios";
 import imgLogoWht from "../assets/logo_white.svg";
 import imgLogoBlk from "../assets/logo_black.svg";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
-import imgIconGlobeWht from "../assets/icon_globe_white.svg";
-import imgIconGlobeBlk from "../assets/icon_globe_black.svg";
 import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
@@ -237,15 +235,21 @@ export default function Navbar() {
                     <div className="gnb-action-area">
                         {!isMobile ? (
                             <>
-                                <button className="gnb-btn">
-                                    <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
-                                </button>
                                 {isAuthenticated ? (
                                     <>
-                                        <button className="gnb-btn" onClick={handleMyPageClick}>
+                                        <button className="gnb-btn" onClick={handleMyPageClick} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="12" cy="7" r="4"/>
+                                            </svg>
                                             My Page
                                         </button>
-                                        <button className="gnb-btn" onClick={handleLogout}>
+                                        <button className="gnb-btn" onClick={handleLogout} style={{
+                                            border: `1.5px solid ${isActive ? "#000d57" : "#ffffff"}`,
+                                            borderRadius: 8,
+                                            padding: "5px 14px",
+                                            display: "flex", alignItems: "center", gap: 6,
+                                        }}>
                                             <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" />
                                             Logout
                                         </button>
@@ -283,9 +287,6 @@ export default function Navbar() {
                     ))}
                 </nav>
                 <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <button className="gnb-btn" style={{ color: "#000", padding: "12px 0", justifyContent: "flex-start" }}>
-                        <img src={imgIconGlobeBlk} alt="" /> Language: JP
-                    </button>
                     {isAuthenticated ? (
                         <>
                             <button
