@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { itemVariants } from "./constants";
 import axios from "axios";
 
 import imgIconLocation from "../../assets/icon_location.svg";
@@ -33,6 +31,20 @@ export default function HeritageCard({ heritageData, status }) {
     const [isLiking, setIsLiking] = useState(false);
     const [isBookmarking, setIsBookmarking] = useState(false);
     const badgeStyle = heritageData.badge === "国宝" ? "bg-[#CACA00] text-[#000D57]" : heritageData.badge === "宝物" ? "bg-[#6E0000] text-white" : "bg-[#000D57] text-white";
+
+    // JS scroll animation (IntersectionObserver)
+    const cardRef = useRef(null);
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        const el = cardRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+            { threshold: 0.08 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     const handleLikeClick = async (e) => {
         e.stopPropagation();
@@ -124,7 +136,16 @@ export default function HeritageCard({ heritageData, status }) {
     }, [status.bookmark]);
 
     return (
-        <motion.div variants={itemVariants} onClick={() => navigate(`/heritage/${heritageData.id}`)} className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer">
+        <div
+            ref={cardRef}
+            onClick={() => navigate(`/heritage/${heritageData.id}`)}
+            className="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-500 border border-gray-50 group cursor-pointer"
+            style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(32px)",
+                transition: "opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+        >
             <div className="relative h-[300px] overflow-hidden">
                 <img src={heritageData.imageUrl || "/fallback.jpg"} alt={heritageData.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                 {/* 배지 */}
@@ -156,9 +177,9 @@ export default function HeritageCard({ heritageData, status }) {
                     <h3 className="text-2xl font-black text-[#000D57] tracking-tight">{heritageData.name}</h3>
                     <span className="text-sm text-gray-400 font-medium">| {heritageData.nameKr}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-400 mb-8">
-                    <img src={imgIconLocation} alt="" className="w-3.5 h-3.5 opacity-50" />
-                    <span className="text-sm font-bold">{heritageData.location}</span>
+                <div className="flex items-center gap-2 text-gray-400 mb-8" style={{ height: 20, overflow: "hidden" }}>
+                    <img src={imgIconLocation} alt="" className="w-3.5 h-3.5 opacity-50" style={{ flexShrink: 0 }} />
+                    <span className="text-sm font-bold" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{heritageData.location}</span>
                 </div>
                 <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div className="flex items-center gap-1.5 text-gray-400">
@@ -174,6 +195,6 @@ export default function HeritageCard({ heritageData, status }) {
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }
