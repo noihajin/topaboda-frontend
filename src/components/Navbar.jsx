@@ -8,7 +8,6 @@ import imgLogoBlk from "../assets/logo_black.svg";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
-import imgIconLogout from "../assets/icon_logout.svg";
 
 const NAV_LINKS = [
     { label: "国の遺産リスト", to: "/heritage" },
@@ -21,7 +20,6 @@ export default function Navbar() {
     const [isHovered, setIsHovered] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [hoverLogout, setHoverLogout] = useState(false);
     const isAuthenticated = Boolean(localStorage.getItem("token"));
 
     const location = useLocation();
@@ -246,24 +244,12 @@ export default function Navbar() {
                                             </svg>
                                             My Page
                                         </button>
-                                        <button
-                                            className="gnb-btn"
-                                            onClick={handleLogout}
-                                            onMouseEnter={() => setHoverLogout(true)}
-                                            onMouseLeave={() => setHoverLogout(false)}
-                                            style={{ display: "flex", alignItems: "center", gap: 6 }}
-                                        >
-                                            <img
-                                                src={imgIconLogout}
-                                                alt=""
-                                                style={{
-                                                    width: 16, height: 17,
-                                                    filter: hoverLogout
-                                                        ? "brightness(0) saturate(100%) invert(74%) sepia(98%) saturate(490%) hue-rotate(19deg) brightness(95%)"
-                                                        : isActive ? "none" : "brightness(0) invert(1)",
-                                                    transition: "filter 0.2s",
-                                                }}
-                                            />
+                                        <button className="gnb-btn" onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                                <polyline points="16 17 21 12 16 7"/>
+                                                <line x1="21" y1="12" x2="9" y2="12"/>
+                                            </svg>
                                             Logout
                                         </button>
                                     </>
@@ -334,7 +320,11 @@ export default function Navbar() {
                                     gap: "8px",
                                 }}
                             >
-                                <img src={imgIconLogout} alt="" style={{ width: 18, height: 18 }} />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
                                 Logout
                             </button>
                         </>
