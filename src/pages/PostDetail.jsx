@@ -397,11 +397,13 @@ if (!post) {
                 </div>
                 {/* 댓글 내용 */}
                 <p style={{
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.6,
-                wordBreak: "break-word",
-                  margin: "0 0 0 60px", fontSize: 15, lineHeight: 1.8,
-                  color: C.gray1, fontFamily: font,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  margin: "0 0 0 60px",
+                  fontSize: 15,
+                  lineHeight: 1.8,
+                  color: C.gray1,
+                  fontFamily: font,
                 }}>
                   {c.content}
                 </p>
