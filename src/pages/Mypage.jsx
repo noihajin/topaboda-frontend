@@ -661,7 +661,7 @@ export default function MyPage() {
                         </div>
 
                         {/* 리스트 */}
-                        <div style={{ minHeight: 400 }}>
+                        <div style={{ minHeight: 500 }}>
                             {displayedAct.length === 0 ? (
                                 <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                     {postTab === "posts"    && "投稿した記事がありません。"}
@@ -714,7 +714,7 @@ export default function MyPage() {
                             const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
                             return (
                                 <>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 500 }}>
                                         {saveData.contents.length === 0 ? (
                                             <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                                 {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}

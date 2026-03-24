@@ -4,8 +4,8 @@ import { CalendarIcon, EyeIcon, SmallHeartIcon, EditIcon, TrashIcon } from "./Ic
 export function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete, onCategoryClick, onTitleClick }) {
     const cat = CAT_COLORS[category];
     return (
-        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "20px 22px", background: C.white, marginBottom: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "12px 16px", background: C.white, marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     {/* 카테고리 배지 */}
                     {cat && (
@@ -15,11 +15,11 @@ export function ListRow({ category, title, desc, date, views, likes, onEdit, onD
                                 display: "inline-block",
                                 background: cat.bg,
                                 color: cat.color,
-                                padding: "3px 12px",
+                                padding: "2px 9px",
                                 borderRadius: 99,
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: 700,
-                                marginBottom: 8,
+                                marginBottom: 4,
                                 fontFamily: font,
                                 cursor: onCategoryClick ? "pointer" : "default",
                             }}
@@ -30,10 +30,10 @@ export function ListRow({ category, title, desc, date, views, likes, onEdit, onD
                     <h4
                         onClick={onTitleClick}
                         style={{
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: 700,
                             color: C.navy,
-                            margin: "0 0 6px",
+                            margin: "0 0 4px",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -43,28 +43,27 @@ export function ListRow({ category, title, desc, date, views, likes, onEdit, onD
                     >
                         {title}
                     </h4>
-                    {desc && <p style={{ fontSize: 13, color: C.gray2, margin: "0 0 10px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", fontFamily: font }}>{desc}</p>}
-                    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
                             <CalendarIcon /> {date}
                         </span>
                         {views !== undefined && (
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
                                 <EyeIcon /> {views}
                             </span>
                         )}
                         {likes !== undefined && (
-                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3 }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
                                 <SmallHeartIcon /> {likes}
                             </span>
                         )}
                     </div>
                 </div>
-                <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "flex-start" }}>
-                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f3f4f6", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.gray1, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
+                    <button onClick={onEdit} style={{ display: "flex", alignItems: "center", gap: 4, background: "#f3f4f6", border: "none", padding: "6px 10px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 12, color: C.gray1, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e7eb")} onMouseLeave={(e) => (e.currentTarget.style.background = "#f3f4f6")}>
                         <EditIcon /> 編集
                     </button>
-                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 6, background: "#fff0f0", border: "none", padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 14, color: C.red, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
+                    <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 4, background: "#fff0f0", border: "none", padding: "6px 10px", borderRadius: 8, cursor: "pointer", fontWeight: 500, fontSize: 12, color: C.red, transition: "background 0.2s", fontFamily: font }} onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0e0")} onMouseLeave={(e) => (e.currentTarget.style.background = "#fff0f0")}>
                         <TrashIcon /> 削除
                     </button>
                 </div>
