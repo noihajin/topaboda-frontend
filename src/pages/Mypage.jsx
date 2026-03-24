@@ -561,7 +561,7 @@ export default function MyPage() {
                                 />
                             ))}
                             {/* 추가 슬롯 — 빈 칸 있을 때만 표시 */}
-                            {displayedHt.length === 0 && (
+                            {displayedHt.length < 4 && (
                                 <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
                             )}
                         </div>
