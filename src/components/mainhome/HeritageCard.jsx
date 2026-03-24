@@ -11,7 +11,7 @@ import imgIconHeart from "../../assets/icon_heart_2.svg";
 function HeartIcon({ filled }) {
     return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.55 9.83333C13.5185 8.86 14.5 7.69333 14.5 6.16667C14.5 5.19421 14.1233 4.26158 13.4529 3.57394C12.7825 2.88631 11.8731 2.5 10.925 2.5C9.781 2.5 8.975 2.83333 8 3.83333C7.025 2.83333 6.219 2.5 5.075 2.5C4.12685 2.5 3.21754 2.88631 2.54709 3.57394C1.87665 4.26158 1.5 5.19421 1.5 6.16667C1.5 7.7 2.475 8.86667 3.45 9.83333L8 14.5L12.55 9.83333Z" fill={filled ? "#6E0000" : "none"} stroke={filled ? "#6E0000" : "#000D57"} strokeOpacity={filled ? 1 : 0.35} strokeWidth="1.47215" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "fill 0.2s, stroke 0.2s" }} />
+            <path d="M12.55 9.83333C13.5185 8.86 14.5 7.69333 14.5 6.16667C14.5 5.19421 14.1233 4.26158 13.4529 3.57394C12.7825 2.88631 11.8731 2.5 10.925 2.5C9.781 2.5 8.975 2.83333 8 3.83333C7.025 2.83333 6.219 2.5 5.075 2.5C4.12685 2.5 3.21754 2.88631 2.54709 3.57394C1.87665 4.26158 1.5 5.19421 1.5 6.16667C1.5 7.7 2.475 8.86667 3.45 9.83333L8 14.5L12.55 9.83333Z" fill={filled ? "#6E0000" : "none"} stroke={filled ? "#6E0000" : "#6E0000"} strokeOpacity={filled ? 1 : 0.35} strokeWidth="1.47215" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "fill 0.2s, stroke 0.2s" }} />
         </svg>
     );
 }
@@ -19,7 +19,7 @@ function HeartIcon({ filled }) {
 function BookmarkIcon({ filled }) {
     return (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14.2505 15.75L9.00049 12.75L3.75049 15.75V3.75C3.75049 3.35218 3.90852 2.97064 4.18983 2.68934C4.47113 2.40804 4.85266 2.25 5.25049 2.25H12.7505C13.1483 2.25 13.5298 2.40804 13.8111 2.68934C14.0925 2.97064 14.2505 3.35218 14.2505 3.75V15.75Z" fill={filled ? "#000D57" : "none"} stroke={filled ? "#000D57" : "#6E0000"} strokeOpacity={filled ? 1 : 0.35} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "fill 0.2s, stroke 0.2s" }} />
+            <path d="M14.2505 15.75L9.00049 12.75L3.75049 15.75V3.75C3.75049 3.35218 3.90852 2.97064 4.18983 2.68934C4.47113 2.40804 4.85266 2.25 5.25049 2.25H12.7505C13.1483 2.25 13.5298 2.40804 13.8111 2.68934C14.0925 2.97064 14.2505 3.35218 14.2505 3.75V15.75Z" fill={filled ? "#000D57" : "none"} stroke={filled ? "#000D57" : "#000D57"} strokeOpacity={filled ? 1 : 0.35} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "fill 0.2s, stroke 0.2s" }} />
         </svg>
     );
 }
@@ -131,15 +131,6 @@ export default function HeritageCard({ heritageData, status }) {
                 <span className={`absolute top-6 left-6 ${badgeStyle} px-4 py-1.5 rounded-lg text-xs font-black shadow-sm`}>{heritageData.badge}</span>
                 {/* ── 우측 상단 버튼 그룹 (가로 정렬) ── */}
                 <div className="absolute top-6 right-6 flex flex-row gap-2 z-10">
-                    {/* 하트 버튼 */}
-                    <button
-                        disabled={isLiking}
-                        onClick={handleLikeClick}
-                        className={`w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all
-    ${isLiking ? "opacity-50 cursor-not-allowed" : "hover:bg-white active:scale-90"}`}
-                    >
-                        <HeartIcon filled={isLiked} />
-                    </button>
                     {/* 북마크 버튼 */}
                     <button
                         disabled={isBookmarking}
@@ -148,6 +139,15 @@ export default function HeritageCard({ heritageData, status }) {
     ${isBookmarking ? "opacity-50 cursor-not-allowed" : "hover:bg-white active:scale-90"}`}
                     >
                         <BookmarkIcon filled={isBookmarked} />
+                    </button>
+                    {/* 하트 버튼 */}
+                    <button
+                        disabled={isLiking}
+                        onClick={handleLikeClick}
+                        className={`w-10 h-10 bg-white/80 backdrop-blur-md rounded-full shadow-sm flex items-center justify-center transition-all
+    ${isLiking ? "opacity-50 cursor-not-allowed" : "hover:bg-white active:scale-90"}`}
+                    >
+                        <HeartIcon filled={isLiked} />
                     </button>
                 </div>
             </div>
