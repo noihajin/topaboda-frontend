@@ -154,7 +154,7 @@ export default function MyPage() {
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
 
     const PAGE_SIZE = 5;
-    const HT_SIZE = 3;
+    const HT_SIZE = 4;
 
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
@@ -547,8 +547,8 @@ export default function MyPage() {
                             )}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                            {/* 데이터 카드 (최대 3개) */}
-                            {displayedHt.slice(0, 3).map((item) => (
+                            {/* 데이터 카드 (최대 4개) */}
+                            {displayedHt.slice(0, 4).map((item) => (
                                 <HeritageCard
                                     key={item.heritageId}
                                     item={item}
@@ -556,8 +556,10 @@ export default function MyPage() {
                                     onCancel={handleCancelRequest}
                                 />
                             ))}
-                            {/* 추가 슬롯 1개 — 항상 마지막 칸에 표시 */}
-                            <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
+                            {/* 추가 슬롯 — 빈 칸 있을 때만 표시 */}
+                            {displayedHt.length < 4 && (
+                                <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
+                            )}
                         </div>
                     </div>
                 </div>
