@@ -1,67 +1,182 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
 import { C, font, MOCK_HERITAGE, MOCK_REVIEWS } from "../components/heritagedetail/constants";
-import HeritageHero    from "../components/heritagedetail/HeritageHero";
+import HeritageHero from "../components/heritagedetail/HeritageHero";
 import HeritageContent from "../components/heritagedetail/HeritageContent";
 import HeritageSidebar from "../components/heritagedetail/HeritageSidebar";
 
 export default function HeritageDetail() {
-  const { heritageId } = useParams();
-  const galleryRef = useRef(null);
+    const { heritageId } = useParams();
+    const galleryRef = useRef(null);
 
-  const [isLiked,       setIsLiked]       = useState(false);
-  const [isBookmarked,  setIsBookmarked]  = useState(false);
-  const [likeCount,     setLikeCount]     = useState(MOCK_HERITAGE.likeCount);
+    const [data, setData] = useState(null);
 
-  // GET /api/heritages/{heritageId}  ← API 연동 시 교체
-  const data = MOCK_HERITAGE;
+    const [reviewData, setReviewData] = useState({
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: 0,
+    });
+    const [reviewPage, setReviewPage] = useState(0);
 
-  const handleLike = () => {
-    // POST/DELETE /api/heritages/{heritageId}/likes
-    setIsLiked((prev) => !prev);
-    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-  };
+    const [isLiked, setIsLiked] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [isLiking, setIsLiking] = useState(false);
+    const [isBookmarking, setIsBookmarking] = useState(false);
 
-  const handleBookmark = () => {
-    // POST/DELETE /api/bookmarks/{heritageId}
-    setIsBookmarked((prev) => !prev);
-  };
+    const fetchReviews = async () => {
+        try {
+            const response = await axios.get(`http://localhost:9990/topaboda/api/heritages/${heritageId}/reviews`, { params: { page: reviewPage, size: 5 } });
+            setReviewData(response.data);
+        } catch (e) {
+            console.error("리뷰 불러오기 실패:", e);
+        }
+    };
 
-  const scrollGallery = (dir) => {
-    if (galleryRef.current) {
-      galleryRef.current.scrollBy({ left: dir * 340, behavior: "smooth" });
-    }
-  };
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const responseHeritage = await axios.get(`http://localhost:9990/topaboda/api/heritages/${heritageId}`);
+                setData(responseHeritage.data);
+                setLikeCount(responseHeritage.data.likeCount ?? 0);
 
-  return (
-    <div style={{ fontFamily: font, background: C.bg, minHeight: "100vh" }}>
+                await fetchReviews();
 
-      {/* 히어로 섹션 */}
-      <HeritageHero
-        data={data}
-        isLiked={isLiked}
-        isBookmarked={isBookmarked}
-        likeCount={likeCount}
-        onLike={handleLike}
-        onBookmark={handleBookmark}
-      />
+                const id = localStorage.getItem("id");
+                const token = localStorage.getItem("token");
+                if (!id || !token) return;
 
-      {/* 메인 콘텐츠 */}
-      <div style={{
-        background: "#eeeeee", padding: "60px 72px",
-        display: "flex", gap: 48, alignItems: "stretch",
-        maxWidth: 1920, margin: "0 auto",
-      }}>
-        <HeritageContent
-          data={data}
-          reviews={MOCK_REVIEWS}
-          galleryRef={galleryRef}
-          scrollGallery={scrollGallery}
-        />
-        <HeritageSidebar data={data} />
-      </div>
+                const responseLike = await axios.get(`http://localhost:9990/topaboda/api/heritages/${heritageId}/likes`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setIsLiked(responseLike.data);
 
-    </div>
-  );
+                const responseBookmark = await axios.get(`http://localhost:9990/topaboda/api/heritages/${heritageId}/bookmarks`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setIsBookmarked(responseBookmark.data);
+            } catch (e) {
+                console.error("데이터 불러오기 실패:", e);
+            }
+        };
+        fetchData();
+    }, [heritageId]);
+
+    useEffect(() => {
+        fetchReviews(reviewPage);
+    }, [heritageId, reviewPage]);
+
+    const handleLike = async (e) => {
+        e.stopPropagation();
+        if (isLiking) return;
+
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            alert("ログインが必要です。");
+            return;
+        }
+
+        setIsLiking(true);
+
+        const originalLiked = isLiked;
+        const originalCount = likeCount;
+
+        setIsLiked(!originalLiked);
+        setLikeCount((prev) => (originalLiked ? prev - 1 : prev + 1));
+
+        try {
+            if (originalLiked) {
+                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${data.id}/likes`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post(
+                    `http://localhost:9990/topaboda/api/heritages/${data.id}/likes`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+            }
+        } catch (e) {
+            console.error("에러 발생:", e);
+            setIsLiked(originalLiked);
+            setLikeCount(originalCount);
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleBookmark = async (e) => {
+        e.stopPropagation();
+        if (isBookmarking) return;
+
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            alert("ログインが必要です。");
+            return;
+        }
+
+        setIsBookmarking(true);
+
+        const originalBookmarked = isBookmarked;
+        setIsBookmarked(!originalBookmarked);
+        try {
+            if (originalBookmarked) {
+                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${data.id}/bookmarks`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post(
+                    `http://localhost:9990/topaboda/api/heritages/${data.id}/bookmarks`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+            }
+        } catch (e) {
+            console.error("에러 발생:", e);
+            setIsBookmarked(originalBookmarked);
+        } finally {
+            setIsBookmarking(false);
+        }
+    };
+
+    const scrollGallery = (dir) => {
+        if (galleryRef.current) {
+            galleryRef.current.scrollBy({ left: dir * 340, behavior: "smooth" });
+        }
+    };
+
+    if (!data) return <div>Loading...</div>;
+    return (
+        <div style={{ fontFamily: font, background: C.bg, minHeight: "100vh" }}>
+            {/* 히어로 섹션 */}
+            <HeritageHero data={data} isLiked={isLiked} isBookmarked={isBookmarked} likeCount={likeCount} isLiking={isLiking} isBookmarking={isBookmarking} onLike={handleLike} onBookmark={handleBookmark} />
+
+            {/* 메인 콘텐츠 */}
+            <div
+                style={{
+                    background: "#eeeeee",
+                    padding: "60px 72px",
+                    display: "flex",
+                    gap: 48,
+                    alignItems: "stretch",
+                    maxWidth: 1920,
+                    margin: "0 auto",
+                }}
+            >
+                <HeritageContent data={data} reviews={reviewData.content} reviewPage={reviewPage} totalPages={reviewData.totalPages} setReviewPage={setReviewPage} fetchReviews={fetchReviews} galleryRef={galleryRef} scrollGallery={scrollGallery} />
+                <HeritageSidebar data={data} />
+            </div>
+        </div>
+    );
 }
