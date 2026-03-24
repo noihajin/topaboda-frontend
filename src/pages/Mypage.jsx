@@ -32,7 +32,7 @@ function AchievementProgressBar({ progress }) {
 
 function AchievementCard({ item }) {
     return (
-        <div style={{ width: 160, textAlign: "center", animation: "fadeSlideIn 0.3s ease both" }}>
+        <div style={{ textAlign: "center", animation: "fadeSlideIn 0.3s ease both" }}>
             <div style={{ opacity: item.achieved ? 1 : 0.4, filter: item.achieved ? "none" : "grayscale(0.5)", transition: "all 0.3s" }}>
                 <img src={item.medal} alt={item.title} style={{ width: 130, height: 130, objectFit: "contain", margin: "0 auto" }} />
             </div>
@@ -533,7 +533,6 @@ export default function MyPage() {
                                         <div key={`route-empty-${i}`} style={{
                                             height: 72, borderRadius: 12,
                                             border: `1.5px dashed ${C.border}`,
-                                            background: "#fafafa",
                                         }} />
                                     ))}
                                     {/* 마지막 칸: 항상 새 경로 버튼 */}
@@ -624,7 +623,6 @@ export default function MyPage() {
                                 return (
                                     <div key={`ht-empty-${i}`} style={{
                                         borderRadius: 16, height: 170,
-                                        background: "#f5f5f5",
                                         border: `1.5px dashed ${C.border}`,
                                     }} />
                                 );
@@ -691,7 +689,7 @@ export default function MyPage() {
                     </div>
 
                     {/* 16개 메달 그리드 */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px", justifyItems: "center" }}>
                         {achievements.contents.map((item) => (
                             <AchievementCard key={item.id} item={item} />
                         ))}
