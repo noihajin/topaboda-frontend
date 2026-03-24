@@ -176,7 +176,7 @@ export default function MyPage() {
         //   : DELETE /api/heritages/{cancelModal.item.heritageId}/likes
         setCancelModal({ open: false, item: null });
     };
-    const ROUTE_SIZE = 2;
+    const ROUTE_SIZE = 3;
 
     const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
     const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
@@ -503,50 +503,42 @@ export default function MyPage() {
                                 <button disabled={routePage === 0} onClick={() => setRoutePage((p) => p - 1)} style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage === 0 ? "default" : "pointer", opacity: routePage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
                                     <ChevronLeft />
                                 </button>
-                                <span style={{ fontSize: 12, color: C.gray3 }}>
-                                    {routePage + 1} / {totalRoutePages}
-                                </span>
                                 <button disabled={routePage >= totalRoutePages - 1} onClick={() => setRoutePage((p) => p + 1)} style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage >= totalRoutePages - 1 ? "default" : "pointer", opacity: routePage >= totalRoutePages - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
                                     <ChevronRight />
                                 </button>
                             </div>
                         </div>
-                        {/* 항상 3칸 고정: 최대 2개 경로 + 마지막 칸 = 새 경로 버튼 */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
                             {routesLoading ? (
                                 <>
                                     <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
                                     <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
                                 </>
+                            ) : savedRoutes.length === 0 ? (
+                                /* 목록 없을 때 */
+                                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
+                                    <p style={{ fontSize: 14, color: C.gray3, margin: 0 }}>탐방로がありません。</p>
+                                </div>
                             ) : (
-                                <>
-                                    {/* 경로 카드 (최대 2개) */}
-                                    {displayedRoutes.slice(0, 2).map((r) => (
-                                        <RouteCard
-                                            key={r.id}
-                                            route={r}
-                                            onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)}
-                                        />
-                                    ))}
-                                    {/* 빈 슬롯: 경로 2개 미만이면 채우기 */}
-                                    {Array.from({ length: Math.max(0, 2 - displayedRoutes.length) }).map((_, i) => (
-                                        <div key={`route-empty-${i}`} style={{
-                                            height: 72, borderRadius: 12,
-                                            border: `1.5px dashed ${C.border}`,
-                                        }} />
-                                    ))}
-                                    {/* 마지막 칸: 항상 새 경로 버튼 */}
-                                    <button
-                                        onClick={() => navigate("/route/create")}
-                                        style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
-                                    >
-                                        + 新しい探訪路を作る
-                                    </button>
-                                </>
+                                /* 경로 카드 (최대 3개) */
+                                displayedRoutes.slice(0, 3).map((r) => (
+                                    <RouteCard
+                                        key={r.id}
+                                        route={r}
+                                        onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)}
+                                    />
+                                ))
                             )}
                         </div>
+                        {/* 항상 하단: 새 경로 만들기 버튼 */}
+                        <button
+                            onClick={() => navigate("/route/create")}
+                            style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
+                        >
+                            + 新しい探訪路を作る
+                        </button>
                     </div>
 
                     {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
@@ -572,37 +564,28 @@ export default function MyPage() {
                                     いいね
                                 </button>
                             </div>
-                            {totalHtPagesWithAdd >= 1 && (
-                                <div style={{ display: "flex", gap: 8 }}>
-                                    {/* 이전 */}
-                                    <button
-                                        disabled={heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0}
-                                        onClick={() => {
-                                            if (heritageTab === "bookmark") {
-                                                setHtBkPage((p) => p - 1);
-                                            } else {
-                                                setHtLkPage((p) => p - 1);
-                                            }
-                                        }}
-                                    >
-                                        <ChevronLeft />
-                                    </button>
-
-                                    {/* 다음 */}
-                                    <button
-                                        disabled={heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1}
-                                        onClick={() => {
-                                            if (heritageTab === "bookmark") {
-                                                setHtBkPage((p) => p + 1);
-                                            } else {
-                                                setHtLkPage((p) => p + 1);
-                                            }
-                                        }}
-                                    >
-                                        <ChevronRight />
-                                    </button>
-                                </div>
-                            )}
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <button
+                                    disabled={heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0}
+                                    onClick={() => {
+                                        if (heritageTab === "bookmark") setHtBkPage((p) => p - 1);
+                                        else setHtLkPage((p) => p - 1);
+                                    }}
+                                    style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                >
+                                    <ChevronLeft />
+                                </button>
+                                <button
+                                    disabled={heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1}
+                                    onClick={() => {
+                                        if (heritageTab === "bookmark") setHtBkPage((p) => p + 1);
+                                        else setHtLkPage((p) => p + 1);
+                                    }}
+                                    style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                >
+                                    <ChevronRight />
+                                </button>
+                            </div>
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
                             {Array.from({ length: 4 }).map((_, i) => {
@@ -623,7 +606,6 @@ export default function MyPage() {
                                 return (
                                     <div key={`ht-empty-${i}`} style={{
                                         borderRadius: 16, height: 170,
-                                        border: `1.5px dashed ${C.border}`,
                                     }} />
                                 );
                             })}
