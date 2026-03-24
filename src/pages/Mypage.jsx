@@ -629,75 +629,40 @@ export default function MyPage() {
                     </div>
                 </div>
 
-                {/* ── 3. 활동 리스트 ── */}
-                <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
-                    {/* 탭 + 새 글 작성 버튼 */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            {[
-                                { key: "posts",    label: "投稿した記事", count: postData.totalElements },
-                                { key: "comments", label: "コメント",      count: commentData.totalElements },
-                                { key: "reviews",  label: "レビュー",      count: reviewData.totalElements },
-                                { key: "postBk",   label: "ブックマーク",  count: postBkData.totalElements },
-                                { key: "postLk",   label: "いいね",        count: postLkData.totalElements },
-                            ].map(({ key, label, count }) => {
-                                const isActive = postTab === key;
-                                return (
-                                    <button
-                                        key={key}
-                                        onClick={() => setPostTab(key)}
-                                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
-                                    >
-                                        {label}
-                                        <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
-                            <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
-                        </button>
-                    </div>
+                {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "start" }}>
 
-                    {/* 리스트 */}
-                    <div style={{ minHeight: 400 }}>
-                        {(postTab === "postBk" || postTab === "postLk") ? (
-                            /* 게시글 북마크 / 좋아요 탭 */
-                            (() => {
-                                const saveData   = postTab === "postBk" ? postBkData : postLkData;
-                                const savePage   = postTab === "postBk" ? postBkPage : postLkPage;
-                                const setPage    = postTab === "postBk" ? setPostBkPage : setPostLkPage;
-                                const type       = postTab === "postBk" ? "bookmark" : "like";
-                                return (
-                                    <>
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                                            {saveData.contents.length === 0 ? (
-                                                <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
-                                                    {type === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
-                                                </p>
-                                            ) : (
-                                                saveData.contents.map((item) => (
-                                                    <PostSaveCard
-                                                        key={item.id}
-                                                        item={item}
-                                                        type={type}
-                                                        onCancel={(it) => setPostSaveCancelModal({ open: true, item: it, type })}
-                                                    />
-                                                ))
-                                            )}
-                                        </div>
-                                        {saveData.totalPages > 1 && (
-                                            <Pagination
-                                                currentPage={savePage + 1}
-                                                totalPages={saveData.totalPages}
-                                                onPageChange={(p) => setPage(p - 1)}
-                                            />
-                                        )}
-                                    </>
-                                );
-                            })()
-                        ) : (
-                            displayedAct.length === 0 ? (
+                    {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        {/* 탭 + 새 글 작성 버튼 */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                {[
+                                    { key: "posts",    label: "投稿した記事", count: postData.totalElements },
+                                    { key: "comments", label: "コメント",      count: commentData.totalElements },
+                                    { key: "reviews",  label: "レビュー",      count: reviewData.totalElements },
+                                ].map(({ key, label, count }) => {
+                                    const isActive = postTab === key;
+                                    return (
+                                        <button
+                                            key={key}
+                                            onClick={() => setPostTab(key)}
+                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
+                                        >
+                                            {label}
+                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s", flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
+                                <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
+                            </button>
+                        </div>
+
+                        {/* 리스트 */}
+                        <div style={{ minHeight: 400 }}>
+                            {displayedAct.length === 0 ? (
                                 <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                     {postTab === "posts"    && "投稿した記事がありません。"}
                                     {postTab === "comments" && "コメントがありません。"}
@@ -705,22 +670,77 @@ export default function MyPage() {
                                 </p>
                             ) : (
                                 displayedAct.map((item) => {
-                                    if (postTab === "posts") {
-                                        return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
-                                    }
-                                    if (postTab === "comments") {
-                                        return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                    }
+                                    if (postTab === "posts")    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
+                                    if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
                                     return <ReviewRow key={item.id} item={item} />;
                                 })
-                            )
+                            )}
+                        </div>
+
+                        {/* 페이지네이션 */}
+                        {currentTabData.totalPages > 1 && (
+                            <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
                         )}
                     </div>
 
-                    {/* 공용 페이지네이션 (posts/comments/reviews 탭만) */}
-                    {(postTab !== "postBk" && postTab !== "postLk") && currentTabData.totalPages > 1 && (
-                        <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
-                    )}
+                    {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
+                    <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        {/* 탭 헤더 */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                {[
+                                    { key: "bookmark", label: "ブックマーク", count: postBkData.totalElements },
+                                    { key: "like",     label: "いいね",       count: postLkData.totalElements },
+                                ].map(({ key, label, count }) => {
+                                    const isActive = postSaveTab === key;
+                                    return (
+                                        <button
+                                            key={key}
+                                            onClick={() => setPostSaveTab(key)}
+                                            style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 14, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
+                                        >
+                                            {label}
+                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 7px", fontSize: 12 }}>{count}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* 리스트 */}
+                        {(() => {
+                            const saveData = postSaveTab === "bookmark" ? postBkData : postLkData;
+                            const savePage = postSaveTab === "bookmark" ? postBkPage : postLkPage;
+                            const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
+                            return (
+                                <>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
+                                        {saveData.contents.length === 0 ? (
+                                            <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
+                                                {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
+                                            </p>
+                                        ) : (
+                                            saveData.contents.map((item) => (
+                                                <PostSaveCard
+                                                    key={item.id}
+                                                    item={item}
+                                                    type={postSaveTab}
+                                                    onCancel={(it) => setPostSaveCancelModal({ open: true, item: { ...it, type: postSaveTab } })}
+                                                />
+                                            ))
+                                        )}
+                                    </div>
+                                    {saveData.totalPages > 1 && (
+                                        <Pagination
+                                            currentPage={savePage + 1}
+                                            totalPages={saveData.totalPages}
+                                            onPageChange={(p) => setPage(p - 1)}
+                                        />
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
                 </div>
 
                 {/* ── 4. 업적 갤러리 ── */}
