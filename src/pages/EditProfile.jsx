@@ -48,13 +48,15 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const [nickname,  setNickname]  = useState("");
-  const [email,     setEmail]     = useState("");
-  const [previewImg, setPreviewImg] = useState(null);
+  const [nickname,    setNickname]    = useState("");
+  const [newNickname, setNewNickname] = useState("");
+  const [nickCheck,   setNickCheck]   = useState(null); // null | "ok" | "dup"
+  const [previewImg,  setPreviewImg]  = useState(null);
   const [hoverSave,   setHoverSave]   = useState(false);
   const [hoverCancel, setHoverCancel] = useState(false);
   const [hoverPw,     setHoverPw]     = useState(false);
   const [hoverDel,    setHoverDel]    = useState(false);
+  const [hoverCheck,  setHoverCheck]  = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -64,8 +66,20 @@ export default function EditProfile() {
     reader.readAsDataURL(file);
   };
 
+  const handleNicknameCheck = async () => {
+    if (!newNickname.trim()) return;
+    // TODO: GET /api/users/check-nickname?nickname=...
+    // 임시 목 처리 (API 연동 시 교체)
+    const isDup = newNickname === nickname;
+    setNickCheck(isDup ? "dup" : "ok");
+  };
+
   const handleSave = () => {
-    // TODO: PATCH /api/users/profile  { nickname, email, profileImage }
+    if (newNickname && nickCheck !== "ok") {
+      alert("ニックネームの重複確認をしてください。");
+      return;
+    }
+    // TODO: PATCH /api/users/profile  { nickname: newNickname || nickname, profileImage }
     alert("変更を保存しました！");
     navigate("/mypage");
   };
@@ -154,7 +168,7 @@ export default function EditProfile() {
 
           {/* 입력 필드 */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            {/* 유저명 */}
+            {/* 현재 유저명 (읽기 전용) */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.navy }}>
                 <IconUser /> ユーザー名
@@ -174,24 +188,54 @@ export default function EditProfile() {
               />
             </div>
 
-            {/* 이메일 */}
+            {/* 닉네임 변경 + 중복확인 */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.navy }}>
-                <IconMail /> メールアドレス
+                <IconUser /> ニックネーム変更
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="explorer@example.com"
-                style={{
-                  border: `1.2px solid ${C.border}`, borderRadius: 13,
-                  padding: "12px 16px", fontSize: 14, fontFamily: font,
-                  outline: "none", color: "#0a0a0a", transition: "border-color 0.2s",
-                }}
-                onFocus={e => e.target.style.borderColor = C.navy}
-                onBlur={e => e.target.style.borderColor = C.border}
-              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  type="text"
+                  value={newNickname}
+                  onChange={e => { setNewNickname(e.target.value); setNickCheck(null); }}
+                  placeholder="新しいニックネームを入力"
+                  style={{
+                    flex: 1,
+                    border: `1.2px solid ${nickCheck === "ok" ? "#16a34a" : nickCheck === "dup" ? "#dc2626" : C.border}`,
+                    borderRadius: 13,
+                    padding: "12px 16px", fontSize: 14, fontFamily: font,
+                    outline: "none", color: "#0a0a0a", transition: "border-color 0.2s",
+                  }}
+                  onFocus={e => { if (!nickCheck) e.target.style.borderColor = C.navy; }}
+                  onBlur={e => { if (!nickCheck) e.target.style.borderColor = C.border; }}
+                />
+                <button
+                  onClick={handleNicknameCheck}
+                  onMouseEnter={() => setHoverCheck(true)}
+                  onMouseLeave={() => setHoverCheck(false)}
+                  style={{
+                    padding: "0 14px", borderRadius: 13, fontSize: 13, fontWeight: 700,
+                    border: `1.2px solid ${C.navy}`,
+                    background: hoverCheck ? C.navy : C.white,
+                    color: hoverCheck ? C.white : C.navy,
+                    cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
+                    fontFamily: font,
+                  }}
+                >
+                  重複確認
+                </button>
+              </div>
+              {/* 중복확인 결과 메시지 */}
+              {nickCheck === "ok" && (
+                <p style={{ fontSize: 12, color: "#16a34a", margin: 0, fontFamily: font }}>
+                  ✓ 使用可能なニックネームです。
+                </p>
+              )}
+              {nickCheck === "dup" && (
+                <p style={{ fontSize: 12, color: "#dc2626", margin: 0, fontFamily: font }}>
+                  ✗ すでに使用されているニックネームです。
+                </p>
+              )}
             </div>
           </div>
 
@@ -233,7 +277,7 @@ export default function EditProfile() {
             borderRadius: 13, padding: "16px",
             fontSize: 12, color: C.gray, textAlign: "center",
           }}>
-            🔒 メールアドレスは他のユーザーに公開されません。
+            ✏️ ニックネームは重複確認後に変更を保存してください。
           </div>
         </div>
 
