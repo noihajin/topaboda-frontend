@@ -47,19 +47,13 @@ function SearchFilter() {
     }, []);
 
     const handleSearch = () => {
-        // 문화유산 리스트에 테마 없어서 없애는거 고려
-        const params = new URLSearchParams();
+        const searchData = {
+            search: searchQuery.trim(),
+            type: heritageType,
+            typeName: TYPE_OPTIONS.find((o) => o.value === heritageType)?.label,
+        };
 
-        if (searchQuery.trim() !== "") {
-            params.append("search", searchQuery);
-        }
-
-        if (heritageType !== "0") {
-            params.append("type", heritageType);
-        }
-
-        const queryString = params.toString();
-        navigate(`/heritage${queryString ? `?${queryString}` : ""}`);
+        navigate("/heritage", { state: searchData });
     };
 
     return (
@@ -135,7 +129,6 @@ function SearchFilter() {
                                     )}
                                 </AnimatePresence>
                             </div>
-
                         </div>
 
                         {/* 검색 버튼 */}
