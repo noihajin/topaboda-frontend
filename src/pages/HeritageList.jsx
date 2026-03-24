@@ -20,7 +20,7 @@ export default function HeritageList() {
       const response = await axios.get("http://localhost:9990/topaboda/api/heritages", {
         params: {
           page: 0,
-          size: 100,
+          size: 1000,
         },
       });
       setHeritages(response.data);
@@ -33,16 +33,17 @@ export default function HeritageList() {
   }, []);
 
   const filtered = useMemo(() => {
-    return heritages.filter(h => {
-      const matchCat    = activeCategory === "すべて" || h.type === activeCategory;
+    return heritages.filter((h) => {
+      const matchCat = activeCategory === "すべて" || h.type === activeCategory;
       const matchRegion = activeRegion === "すべての地域" || h.region === activeRegion;
-      const matchQuery  =
+
+      const matchQuery =
         !query ||
         h.nameKo?.includes(query) ||
         h.nameJa?.includes(query);
 
       return matchCat && matchRegion && matchQuery;
-  });
+    });
   }, [heritages, activeCategory, activeRegion, query]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
