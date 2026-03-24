@@ -1,6 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import logoBlack from "../assets/logo_black.svg";
+
+const API_MAP_CONFIG = "/api/maps/config";
+const API_HERITAGE_BOOKMARKS = "/api/heritages/bookmarks";
+const DEFAULT_MAP_ID = "DEMO_MAP_ID";
+const ROUTE_MAP_DEFAULT_CENTER = { lat: 36.5, lng: 127.8 };
+const GOOGLE_MAP_LIBRARIES = ["marker"];
 
 // ── 디자인 토큰 ──────────────────────────────────────────────────
 const C = {
@@ -23,19 +30,19 @@ const BADGE = {
   "ランドマーク": { bg: "#e2e8f0", color: "#6a7282" },
   "伝統市場":     { bg: "#e2e8f0", color: "#6a7282" },
   "文化通り":     { bg: "#e2e8f0", color: "#6a7282" },
+  "文化財":       { bg: "rgba(0,13,87,0.1)", color: "#000d57" },
 };
 
-// ── 목 데이터: 북마크된 장소 ────────────────────────────────────
-const BOOKMARKED = [
-  { id: 1, nameJa: "景福宮",           nameEn: "Gyeongbokgung Palace",     address: "ソウル特別市 鐘路区 社稷路 161",      duration: "2時間",   category: "国宝" },
-  { id: 2, nameJa: "昌徳宮",           nameEn: "Changdeokgung Palace",     address: "ソウル特別市 鐘路区 栗谷路 99",       duration: "1.5時間", category: "国宝" },
-  { id: 3, nameJa: "国立中央博物館",   nameEn: "National Museum of Korea", address: "ソウル特別市 龍山区 西氷庫路 137",    duration: "3時間",   category: "博物館" },
-  { id: 4, nameJa: "北村韓屋村",       nameEn: "Bukchon Hanok Village",    address: "ソウル特別市 鐘路区 渓洞路 37",       duration: "1時間",   category: "史跡" },
-  { id: 5, nameJa: "南山ソウルタワー", nameEn: "N Seoul Tower",            address: "ソウル特別市 龍山区 南山公園路 105",  duration: "2時間",   category: "ランドマーク" },
-  { id: 6, nameJa: "廣蔵市場",         nameEn: "Gwangjang Market",         address: "ソウル特別市 鐘路区 昌慶宮路 88",     duration: "1.5時間", category: "伝統市場" },
-  { id: 7, nameJa: "徳寿宮",           nameEn: "Deoksugung Palace",        address: "ソウル特別市 中区 世宗大路 99",        duration: "1時間",   category: "国宝" },
-  { id: 8, nameJa: "仁寺洞",           nameEn: "Insadong",                 address: "ソウル特別市 鐘路区 仁寺洞길",        duration: "2時間",   category: "文化通り" },
-];
+function formatBookmarkDate(iso) {
+  if (iso == null) return "";
+  try {
+    const d = typeof iso === "string" ? new Date(iso) : new Date();
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("ja-JP");
+  } catch {
+    return "";
+  }
+}
 
 // ── SVG 아이콘 ─────────────────────────────────────────────────
 const PinIcon = () => (
@@ -128,55 +135,441 @@ function SaveModal({ count, onClose, onSave }) {
   );
 }
 
-// ── 장소 카드 (북마크 탭) ───────────────────────────────────────
-function PlaceCard({ place, added, onToggle }) {
+// ── 장소 카드 (GET /api/heritages/bookmarks 응답 기준) ────────────
+/** 카드 전체 클릭 = + 버튼과 동일(ルートに追加/外す). +는 시각·터치 타깃용으로 동일 핸들러 */
+function BookmarkPlaceCard({ place, added, onToggle, isHighlightedOnMap }) {
   const [hovered, setHovered] = useState(false);
-  const badge = BADGE[place.category] || { bg: "#e2e8f0", color: "#6a7282" };
+  const badge = BADGE["文化財"] || { bg: "#e2e8f0", color: "#6a7282" };
+  const title = place.heritageName || place.heritageId;
+  const subLine =
+    typeof place.latitude === "number" && typeof place.longitude === "number"
+      ? `${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`
+      : "";
+  const dateLine = formatBookmarkDate(place.createdAt);
+  const mapRing = isHighlightedOnMap ? `2px solid ${C.navy}` : null;
   return (
     <div
-      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      aria-pressed={added}
+      aria-label={added ? "ルートから外す" : "ルートに追加"}
+      onClick={() => onToggle()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        border: `2px solid ${added ? C.navy : hovered ? "#c0c4d0" : C.border}`,
+        border: mapRing || `2px solid ${added ? C.navy : hovered ? "#c0c4d0" : C.border}`,
         borderRadius: 14,
         padding: "14px 16px",
         background: added ? "rgba(0,13,87,0.03)" : C.white,
-        cursor: "pointer",
         transition: "all 0.18s",
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "space-between",
         gap: 12,
+        cursor: "pointer",
+        outline: "none",
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: C.navy }}>{place.nameJa}</span>
-          <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}>{place.category}</span>
-        </div>
-        <p style={{ fontSize: 12, color: C.gray4, margin: "0 0 7px" }}>{place.nameEn}</p>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4, color: C.gray3 }}>
-          <PinIcon />
-          <span style={{ fontSize: 12, color: C.gray3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{place.address}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, color: C.gray3 }}>
-          <ClockIcon />
-          <span style={{ fontSize: 12, color: C.gray3 }}>{place.duration}</span>
-        </div>
-      </div>
-      <button
-        onClick={e => { e.stopPropagation(); onToggle(); }}
+      <div
         style={{
-          width: 34, height: 34, borderRadius: "50%", border: "none", flexShrink: 0,
-          background: added ? C.navy : C.border,
-          color: added ? C.white : C.gray3,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", transition: "all 0.2s",
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 12,
+          pointerEvents: "none",
         }}
       >
+        {place.imageUrl ? (
+          <img
+            src={place.imageUrl}
+            alt=""
+            style={{ width: 52, height: 52, borderRadius: 10, objectFit: "cover", flexShrink: 0, background: C.border }}
+          />
+        ) : null}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: C.navy, wordBreak: "break-word" }}>{title}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}>文化財</span>
+          </div>
+          {subLine ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4, color: C.gray3 }}>
+              <PinIcon />
+              <span style={{ fontSize: 12, color: C.gray3, wordBreak: "break-all" }}>{subLine}</span>
+            </div>
+          ) : null}
+          {dateLine ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, color: C.gray3 }}>
+              <ClockIcon />
+              <span style={{ fontSize: 12, color: C.gray3 }}>ブックマーク {dateLine}</span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <span
+        role="presentation"
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: "50%",
+          flexShrink: 0,
+          touchAction: "manipulation",
+          WebkitTapHighlightColor: "transparent",
+          background: added ? C.navy : C.border,
+          color: added ? C.white : C.gray3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          pointerEvents: "none",
+        }}
+        aria-hidden
+      >
         {added ? <CheckIcon /> : <PlusIcon />}
-      </button>
+      </span>
+    </div>
+  );
+}
+
+// ── 경로 만들기: Google 지도 + 우측 원형 컨트롤 ─────────────────
+/** 루트에 추가한 북마크 전부 핀 표시. 각 핀 호버/클릭 시 InfoWindow(MapSection 유사) */
+function RouteMapPane({
+  apiKey,
+  mapId,
+  routePins,
+  lonelyHeritageId,
+  nameFromUrl,
+  selectedCount,
+  onMarkerSelect,
+}) {
+  const mapRef = useRef(null);
+  const lockedHeritageIdRef = useRef(null);
+  const [center, setCenter] = useState(ROUTE_MAP_DEFAULT_CENTER);
+  const [zoom, setZoom] = useState(8);
+  const [lonelyPin, setLonelyPin] = useState(null);
+  const [lonelyFetchedName, setLonelyFetchedName] = useState("");
+  /** 어느 핀에 마우스가 올라가 있는지 — 포커스(detail)와 무관하게 전 핀에서 호버 가능 */
+  const [hoveredHeritageId, setHoveredHeritageId] = useState(null);
+  /** 클릭으로 고정된 미리보기(지도 빈 곳 클릭 시 해제) */
+  const [lockedHeritageId, setLockedHeritageId] = useState(null);
+  lockedHeritageIdRef.current = lockedHeritageId;
+
+  /** MapSection.jsx と同一 id（同一 SPA 内で useJsApiLoader はオプション一致必須） */
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "topaboda-map",
+    googleMapsApiKey: apiKey || "",
+    libraries: GOOGLE_MAP_LIBRARIES,
+  });
+
+  useEffect(() => {
+    if (document.getElementById("heritage-pin-style")) return;
+    const styleEl = document.createElement("style");
+    styleEl.id = "heritage-pin-style";
+    styleEl.textContent = `
+      .gm-style .gm-style-iw-c {
+        padding: 0 !important;
+        border-radius: 16px !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        overflow: hidden !important;
+      }
+      .gm-style .gm-style-iw-d {
+        overflow: hidden !important;
+        padding: 0 !important;
+      }
+      .gm-style .gm-style-iw-t::after {
+        display: none !important;
+      }
+      .gm-style .gm-style-iw-tc {
+        display: none !important;
+      }
+      .gm-style-iw-chr {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+  }, []);
+
+  useEffect(() => {
+    if (!lonelyHeritageId) {
+      setLonelyPin(null);
+      setLonelyFetchedName("");
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/maps/heritages/${encodeURIComponent(lonelyHeritageId)}/panel`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setLonelyFetchedName(data.ccceNameSimple || "");
+        const lat = data.latitude;
+        const lng = data.longitude;
+        if (typeof lat === "number" && typeof lng === "number" && !Number.isNaN(lat) && !Number.isNaN(lng)) {
+          setLonelyPin({ lat, lng });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [lonelyHeritageId]);
+
+  const allMarkers = useMemo(() => {
+    const list = routePins.map((p) => ({
+      heritageId: p.heritageId,
+      position: { lat: p.latitude, lng: p.longitude },
+      heritageName: p.heritageName,
+      imageUrl: p.imageUrl,
+    }));
+    if (lonelyPin && lonelyHeritageId && !list.some((m) => m.heritageId === lonelyHeritageId)) {
+      list.push({
+        heritageId: lonelyHeritageId,
+        position: lonelyPin,
+        heritageName: lonelyFetchedName,
+        imageUrl: null,
+      });
+    }
+    return list;
+  }, [routePins, lonelyPin, lonelyHeritageId, lonelyFetchedName]);
+
+  useEffect(() => {
+    if (!isLoaded || !mapRef.current || typeof google === "undefined") return;
+    const map = mapRef.current;
+    if (allMarkers.length === 0) {
+      setCenter(ROUTE_MAP_DEFAULT_CENTER);
+      setZoom(8);
+      return;
+    }
+    if (allMarkers.length === 1) {
+      const p = allMarkers[0].position;
+      setCenter(p);
+      setZoom(14);
+      return;
+    }
+    const bounds = new google.maps.LatLngBounds();
+    allMarkers.forEach((m) => bounds.extend(m.position));
+    map.fitBounds(bounds, 48);
+    requestAnimationFrame(() => {
+      const c = map.getCenter();
+      if (c) setCenter({ lat: c.lat(), lng: c.lng() });
+      const z = map.getZoom();
+      if (z != null) setZoom(z);
+    });
+  }, [allMarkers, isLoaded]);
+
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  const zoomIn = () => {
+    const m = mapRef.current;
+    if (m) m.setZoom((m.getZoom() || 8) + 1);
+  };
+  const zoomOut = () => {
+    const m = mapRef.current;
+    if (m) m.setZoom(Math.max(3, (m.getZoom() || 8) - 1));
+  };
+
+  const cycleMapType = () => {
+    const m = mapRef.current;
+    if (!m) return;
+    const t = m.getMapTypeId();
+    m.setMapTypeId(t === "roadmap" ? "hybrid" : "roadmap");
+  };
+
+  if (loadError) {
+    return (
+      <div style={{ flex: 1, background: "#fee2e2", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <p style={{ fontSize: 14, color: C.red, margin: 0, textAlign: "center", fontFamily: font }}>地図の読み込みに失敗しました。</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ flex: 1, background: "#e5e7eb", position: "relative", overflow: "hidden" }}>
+      {!isLoaded && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#e5e7eb",
+          }}
+        >
+          <p style={{ fontSize: 14, color: C.gray3, margin: 0, fontFamily: font }}>地図を読み込み中…</p>
+        </div>
+      )}
+      {isLoaded && (
+        <GoogleMap
+          mapContainerStyle={{ width: "100%", height: "100%" }}
+          center={center}
+          zoom={zoom}
+          onLoad={onMapLoad}
+          onClick={() => {
+            setLockedHeritageId(null);
+            lockedHeritageIdRef.current = null;
+            setHoveredHeritageId(null);
+          }}
+          options={{
+            mapId: mapId || DEFAULT_MAP_ID,
+            backgroundColor: "#e8f4ff",
+            disableDefaultUI: true,
+            gestureHandling: "greedy",
+          }}
+        >
+          {allMarkers.map((m) => {
+            const previewOpen =
+              hoveredHeritageId === m.heritageId || lockedHeritageId === m.heritageId;
+            const previewName =
+              (m.heritageName || "").trim() ||
+              (lonelyHeritageId === m.heritageId ? (nameFromUrl || "").trim() : "") ||
+              m.heritageId ||
+              "";
+            const previewImage = m.imageUrl || null;
+            const showCard = previewOpen && (previewName || previewImage);
+            return (
+              <Marker
+                key={m.heritageId}
+                position={m.position}
+                onMouseOver={() => setHoveredHeritageId(m.heritageId)}
+                onMouseOut={() => {
+                  setHoveredHeritageId((prev) => {
+                    if (prev !== m.heritageId) return prev;
+                    if (lockedHeritageIdRef.current === m.heritageId) return prev;
+                    return null;
+                  });
+                }}
+                onClick={() => {
+                  onMarkerSelect?.(m.heritageId);
+                  setLockedHeritageId((cur) => {
+                    const next = cur === m.heritageId ? null : m.heritageId;
+                    lockedHeritageIdRef.current = next;
+                    return next;
+                  });
+                  setHoveredHeritageId(m.heritageId);
+                }}
+              >
+                {showCard && (
+                  <InfoWindow
+                    onCloseClick={() => {
+                      setLockedHeritageId(null);
+                      lockedHeritageIdRef.current = null;
+                      setHoveredHeritageId(null);
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 280,
+                        background: "#ffffff",
+                        borderRadius: 16,
+                        overflow: "hidden",
+                        boxShadow: "0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)",
+                        border: "1px solid #f0f0f0",
+                        fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif",
+                      }}
+                    >
+                      {previewImage ? (
+                        <div style={{ width: "100%", height: 160, overflow: "hidden" }}>
+                          <img
+                            src={previewImage}
+                            alt=""
+                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          />
+                        </div>
+                      ) : null}
+                      <div style={{ padding: "14px 16px" }}>
+                        <div
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 700,
+                            color: "#1a1a1a",
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.4,
+                            margin: 0,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {previewName}
+                        </div>
+                      </div>
+                    </div>
+                  </InfoWindow>
+                )}
+              </Marker>
+            );
+          })}
+        </GoogleMap>
+      )}
+
+      {selectedCount > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            bottom: 28,
+            zIndex: 5,
+            background: "rgba(255,255,255,0.95)",
+            border: `1.5px solid ${C.border}`,
+            borderRadius: 14,
+            padding: "10px 20px",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+          }}
+        >
+          <p style={{ fontSize: 14, color: C.navy, fontWeight: 700, margin: 0, fontFamily: font }}>
+            {selectedCount}か所の場所を選択中
+          </p>
+        </div>
+      )}
+
+      <div style={{ position: "absolute", right: 24, bottom: 100, display: "flex", flexDirection: "column", gap: 8, zIndex: 5 }}>
+        {[
+          { icon: <LayersIcon />, title: "地図 / 航空写真", onClick: cycleMapType },
+          { icon: <span style={{ fontSize: 20, lineHeight: 1 }}>+</span>, title: "ズームイン", onClick: zoomIn },
+          { icon: <span style={{ fontSize: 24, lineHeight: 1 }}>−</span>, title: "ズームアウト", onClick: zoomOut },
+        ].map(({ icon, title, onClick }, i) => (
+          <button
+            key={i}
+            type="button"
+            title={title}
+            onClick={onClick}
+            style={{
+              width: 48,
+              height: 48,
+              background: "white",
+              border: `1.5px solid ${C.border}`,
+              borderRadius: 14,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: C.gray3,
+              fontSize: 18,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#f8fafc";
+              e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "white";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+            }}
+          >
+            {icon}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -249,25 +642,134 @@ function SavedRouteCard({ route, isOpen, onClick }) {
 // ── 메인 컴포넌트 ──────────────────────────────────────────────
 export default function RouteCreate() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const heritageIdFromMap = searchParams.get("heritageId");
+  const heritageNameFromMap = searchParams.get("heritageName") || "";
+
+  useEffect(() => {
+    if (heritageIdFromMap) {
+      try {
+        sessionStorage.setItem(
+          "routeCreateFromMap",
+          JSON.stringify({ heritageId: heritageIdFromMap, heritageName: heritageNameFromMap }),
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [heritageIdFromMap, heritageNameFromMap]);
+
   const [added, setAdded] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [navTab, setNavTab] = useState("bookmark"); // "bookmark" | "routes"
   const [openRouteId, setOpenRouteId] = useState(null);
+  const [mapConfig, setMapConfig] = useState(null);
+  const [bookmarkPlaces, setBookmarkPlaces] = useState([]);
+  const [bookmarksLoading, setBookmarksLoading] = useState(() => !!localStorage.getItem("token"));
+  const [bookmarksError, setBookmarksError] = useState(false);
+  /** 사이드바에서 선택 시 지도 핀( URL ?heritageId 보다 우선 ) */
+  const [mapFocusHeritageId, setMapFocusHeritageId] = useState(null);
+
+  useEffect(() => {
+    setMapFocusHeritageId(null);
+  }, [heritageIdFromMap]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setBookmarkPlaces([]);
+      setBookmarksLoading(false);
+      setBookmarksError(false);
+      return;
+    }
+    let cancelled = false;
+    setBookmarksLoading(true);
+    setBookmarksError(false);
+    fetch(`${API_HERITAGE_BOOKMARKS}?page=0&size=500`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (res.status === 401) throw new Error("unauthorized");
+        if (!res.ok) throw new Error("fail");
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const list = Array.isArray(data?.content) ? data.content : [];
+        setBookmarkPlaces(list);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBookmarkPlaces([]);
+          setBookmarksError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBookmarksLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!heritageIdFromMap || bookmarkPlaces.length === 0) return;
+    const has = bookmarkPlaces.some((p) => p.heritageId === heritageIdFromMap);
+    if (!has) return;
+    setAdded((prev) => {
+      if (prev.has(heritageIdFromMap)) return prev;
+      const next = new Set(prev);
+      next.add(heritageIdFromMap);
+      return next;
+    });
+  }, [heritageIdFromMap, bookmarkPlaces]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_MAP_CONFIG)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setMapConfig(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // localStorage에서 저장된 루트 읽기
   const savedRoutes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
 
   const toggle = (id) => {
-    setAdded(prev => {
+    setAdded((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        queueMicrotask(() => {
+          setMapFocusHeritageId((cur) => (cur === id ? null : cur));
+        });
+      } else {
+        next.add(id);
+        queueMicrotask(() => setMapFocusHeritageId(id));
+      }
       return next;
     });
   };
 
   const handleSave = (name) => {
     const existing = JSON.parse(localStorage.getItem("myRoutes") || "[]");
-    const selectedPlaces = BOOKMARKED.filter(p => added.has(p.id));
+    const selected = bookmarkPlaces.filter((p) => added.has(p.heritageId));
+    const selectedPlaces = selected.map((p) => ({
+      id: p.heritageId,
+      nameJa: p.heritageName || p.heritageId,
+      nameEn: "",
+      address: "",
+      duration: "",
+      category: "文化財",
+      latitude: p.latitude,
+      longitude: p.longitude,
+      imageUrl: p.imageUrl,
+    }));
     const newRoute = {
       id: Date.now(),
       title: name,
@@ -282,6 +784,80 @@ export default function RouteCreate() {
   };
 
   const addedCount = added.size;
+
+  const mapHeritageIdForMap = mapFocusHeritageId ?? heritageIdFromMap;
+
+  /** 북마크 탭: 선택한 북마크 핀 / 保存ルート 탭: 펼친 카드 1件の places だけ */
+  const routePins = useMemo(() => {
+    if (navTab === "routes" && openRouteId != null) {
+      const routes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
+      const r = routes.find((x) => x.id === openRouteId);
+      if (!r?.places?.length) return [];
+      return r.places
+        .filter(
+          (p) =>
+            p != null &&
+            typeof p.latitude === "number" &&
+            typeof p.longitude === "number" &&
+            !Number.isNaN(p.latitude) &&
+            !Number.isNaN(p.longitude),
+        )
+        .map((p) => ({
+          heritageId: String(p.id),
+          latitude: p.latitude,
+          longitude: p.longitude,
+          heritageName: p.nameJa || String(p.id),
+          imageUrl: p.imageUrl || null,
+        }));
+    }
+    return bookmarkPlaces
+      .filter(
+        (p) =>
+          added.has(p.heritageId) &&
+          typeof p.latitude === "number" &&
+          typeof p.longitude === "number",
+      )
+      .map((p) => ({
+        heritageId: p.heritageId,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        heritageName: p.heritageName,
+        imageUrl: p.imageUrl,
+      }));
+  }, [navTab, openRouteId, bookmarkPlaces, added]);
+
+  const lonelyUrlHeritage =
+    navTab === "bookmark" &&
+    heritageIdFromMap &&
+    !routePins.some((p) => p.heritageId === heritageIdFromMap)
+      ? heritageIdFromMap
+      : null;
+
+  useEffect(() => {
+    if (navTab === "bookmark") {
+      setOpenRouteId(null);
+    }
+  }, [navTab]);
+
+  useEffect(() => {
+    if (navTab !== "routes") return;
+    if (openRouteId == null) {
+      setMapFocusHeritageId(null);
+      return;
+    }
+    const routes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
+    const r = routes.find((x) => x.id === openRouteId);
+    const first = r?.places?.find(
+      (p) =>
+        p != null &&
+        typeof p.latitude === "number" &&
+        typeof p.longitude === "number",
+    );
+    if (first) setMapFocusHeritageId(String(first.id));
+    else setMapFocusHeritageId(null);
+  }, [navTab, openRouteId]);
+
+  const mapPinHighlightId = mapFocusHeritageId ?? heritageIdFromMap;
 
   // 탭 설정 (커뮤니티 제거)
   const TABS = [
@@ -390,16 +966,70 @@ export default function RouteCreate() {
               <div style={{ padding: "28px 28px 20px", borderBottom: `1.5px solid ${C.border}` }}>
                 <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>ブックマークした場所</h2>
                 <p style={{ fontSize: 14, color: C.gray4, margin: 0 }}>ルートに追加する場所を選んでください</p>
+                {heritageIdFromMap && (
+                  <div
+                    style={{
+                      marginTop: 16,
+                      padding: "12px 14px",
+                      background: "rgba(0,13,87,0.06)",
+                      borderRadius: 10,
+                      border: `1px solid ${C.border}`,
+                    }}
+                  >
+                    <p style={{ fontSize: 12, fontWeight: 700, color: C.navy, margin: "0 0 4px", fontFamily: font }}>地図から選択した文化遺産</p>
+                    <p style={{ fontSize: 14, color: C.gray3, margin: 0, lineHeight: 1.5, fontFamily: font, wordBreak: "break-word" }}>
+                      {heritageNameFromMap || heritageIdFromMap}
+                    </p>
+                    <p style={{ fontSize: 12, color: C.gray4, margin: "8px 0 0", lineHeight: 1.45, fontFamily: font }}>
+                      下のリストから他の場所を追加してルートを保存できます。
+                    </p>
+                  </div>
+                )}
               </div>
               <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                {BOOKMARKED.map(place => (
-                  <PlaceCard
-                    key={place.id}
-                    place={place}
-                    added={added.has(place.id)}
-                    onToggle={() => toggle(place.id)}
-                  />
-                ))}
+                {!localStorage.getItem("token") ? (
+                  <div style={{ padding: "24px 12px", textAlign: "center" }}>
+                    <p style={{ fontSize: 14, color: C.gray3, margin: "0 0 16px", lineHeight: 1.6 }}>
+                      ブックマーク一覧を表示するにはログインが必要です。
+                    </p>
+                    <Link
+                      to="/login"
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 20px",
+                        borderRadius: 10,
+                        background: C.navy,
+                        color: C.white,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        textDecoration: "none",
+                        fontFamily: font,
+                      }}
+                    >
+                      ログインへ
+                    </Link>
+                  </div>
+                ) : bookmarksLoading ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px" }}>読み込み中…</p>
+                ) : bookmarksError ? (
+                  <p style={{ fontSize: 14, color: C.red, margin: 0, padding: "8px 4px" }}>
+                    ブックマークの取得に失敗しました。しばらくしてから再度お試しください。
+                  </p>
+                ) : bookmarkPlaces.length === 0 ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px", lineHeight: 1.6 }}>
+                    ブックマークした文化財はまだありません。地図や詳細画面からブックマークを追加してください。
+                  </p>
+                ) : (
+                  bookmarkPlaces.map((place) => (
+                    <BookmarkPlaceCard
+                      key={place.heritageId}
+                      place={place}
+                      added={added.has(place.heritageId)}
+                      onToggle={() => toggle(place.heritageId)}
+                      isHighlightedOnMap={mapPinHighlightId === place.heritageId}
+                    />
+                  ))
+                )}
               </div>
               <div style={{ padding: "20px", borderTop: `1.5px solid ${C.border}`, background: C.bg, flexShrink: 0 }}>
                 <button
@@ -455,52 +1085,30 @@ export default function RouteCreate() {
           )}
         </aside>
 
-        {/* ── 우: 지도 영역 ── */}
-        <div style={{ flex: 1, background: "#e5e7eb", position: "relative", overflow: "hidden" }}>
-          {/* 그리드 패턴 */}
-          <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: "linear-gradient(rgba(148,163,184,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.15) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }} />
-
-          {/* 플레이스홀더 */}
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <div style={{ fontSize: 80 }}>🗺️</div>
-            <h3 style={{ fontSize: 28, fontWeight: 700, color: C.navy, margin: 0 }}>地図 API 連動エリア</h3>
-            <p style={{ fontSize: 16, color: C.gray4, margin: 0 }}>Google Maps / T-Map Integration Area</p>
-            {addedCount > 0 && (
-              <div style={{ marginTop: 12, background: "rgba(255,255,255,0.9)", border: `1.5px solid ${C.border}`, borderRadius: 14, padding: "12px 24px", backdropFilter: "blur(8px)" }}>
-                <p style={{ fontSize: 14, color: C.navy, fontWeight: 700, margin: 0 }}>📍 {addedCount}か所の場所を選択中</p>
-              </div>
-            )}
+        {/* ── 우: Google Maps + 원형 컨트롤 (RouteMapPane) ── */}
+        {mapConfig?.apiKey ? (
+          <RouteMapPane
+            apiKey={mapConfig.apiKey}
+            mapId={mapConfig.mapId}
+            routePins={routePins}
+            lonelyHeritageId={lonelyUrlHeritage}
+            nameFromUrl={heritageNameFromMap || ""}
+            selectedCount={navTab === "bookmark" ? addedCount : 0}
+            onMarkerSelect={(id) => setMapFocusHeritageId(id)}
+          />
+        ) : (
+          <div
+            style={{
+              flex: 1,
+              background: "#e5e7eb",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <p style={{ fontSize: 14, color: C.gray3, margin: 0, fontFamily: font }}>地図設定を読み込み中…</p>
           </div>
-
-          {/* 줌 컨트롤 */}
-          <div style={{ position: "absolute", right: 24, bottom: 100, display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
-              { icon: <LayersIcon />, title: "レイヤー" },
-              { icon: <span style={{ fontSize: 20, lineHeight: 1 }}>+</span>, title: "ズームイン" },
-              { icon: <span style={{ fontSize: 24, lineHeight: 1 }}>−</span>, title: "ズームアウト" },
-            ].map(({ icon, title }, i) => (
-              <button
-                key={i}
-                title={title}
-                style={{
-                  width: 48, height: 48,
-                  background: "white", border: `1.5px solid ${C.border}`, borderRadius: 14,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", color: C.gray3, fontSize: 18, transition: "all 0.15s",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#f8fafc"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.15)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-              >
-                {icon}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* ── 저장 모달 ── */}

@@ -475,20 +475,22 @@ export default function MyPage() {
                                 <RouteCard key={r.id} route={r} />
                             ))}
                         </div>
-                        <button
-                            onClick={() => navigate("/route/create")}
-                            style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = C.red;
-                                e.currentTarget.style.color = "white";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = "white";
-                                e.currentTarget.style.color = C.red;
-                            }}
-                        >
-                            + 新しい探訪路を作る
-                        </button>
+                        {typeof window !== "undefined" && localStorage.getItem("token") && (
+                            <button
+                                onClick={() => navigate("/route/create")}
+                                style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = C.red;
+                                    e.currentTarget.style.color = "white";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = "white";
+                                    e.currentTarget.style.color = C.red;
+                                }}
+                            >
+                                + 新しい探訪路を作る
+                            </button>
+                        )}
                     </div>
 
                     {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}

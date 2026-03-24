@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useJsApiLoader, GoogleMap } from "@react-google-maps/api";
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 // ✅ 파일을 따로 찾지 않도록 데이터를 코드 내부에 직접 정의합니다. (에러 해결 핵심)
@@ -77,6 +78,103 @@ const TAG_COLORS = {
   gray2: "#4b5563",
   gray3: "#6b7280",
 };
+
+/** 지도 패널 히어로 뱃지 (HeritageDetail 톤과 유사) */
+const PANEL_C = {
+  navy: "#000d57",
+  gold: "#f5c543",
+  goldD: "#d4a017",
+  red: "#6e0000",
+  redD: "#4a0000",
+  heroBg: "#101828",
+};
+
+/** 패널 정보 행 아이콘 (stroke 통일) */
+const PANEL_ICON_STROKE = "#a34a4a";
+
+function MapPinIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={PANEL_ICON_STROKE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={PANEL_ICON_STROKE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={PANEL_ICON_STROKE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function TagIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={PANEL_ICON_STROKE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  );
+}
+
+function getGcodeBadgeStyle(gcodeName) {
+  if (!gcodeName) return { bg: `linear-gradient(180deg, ${PANEL_C.navy} 0%, #001070 100%)`, color: "#fff" };
+  const g = String(gcodeName);
+  if (g.includes("国宝") || g.includes("국보")) {
+    return { bg: `linear-gradient(to bottom, ${PANEL_C.gold}, ${PANEL_C.goldD})`, color: PANEL_C.navy };
+  }
+  if (g.includes("宝物") || g.includes("보물")) {
+    return { bg: `linear-gradient(180deg, ${PANEL_C.red} 0%, ${PANEL_C.redD} 100%)`, color: "#fff" };
+  }
+  return { bg: `linear-gradient(180deg, ${PANEL_C.navy} 0%, #001070 100%)`, color: "#fff" };
+}
+
+function formatReviewDate(iso) {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleDateString("ja-JP");
+  } catch {
+    return "";
+  }
+}
+
+/** GET /api/maps/heritages/{id}/panel 의 ccbaAsdt (ISO 문자열 또는 Spring 배열) */
+function formatPanelAsdt(value) {
+  if (value == null) return "—";
+  if (typeof value === "string") {
+    const d = new Date(value);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
+    }
+    return value || "—";
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    const [y, m, d] = value;
+    return `${y}年${m}月${d}日`;
+  }
+  return "—";
+}
+
+/** 패널 분류 — 타입 캐시 미매칭 시 UNKNOWN → 미상 */
+function formatPanelTypeLabel(raw) {
+  const t = (raw ?? "").trim();
+  if (!t || t.toUpperCase() === "UNKNOWN") return "미상";
+  return t;
+}
+
 const TAGS = [
   { id: "tag-1", label: "테마 1", count: 54 },
   { id: "tag-2", label: "테마 2", count: 12 },
@@ -159,6 +257,48 @@ function getSelectedRegionCode(selectedSet) {
 
 function getThemeCacheKey(regionCode, themeIndex) {
   return `${HERITAGE_SESSION_CACHE_PREFIX}${regionCode}-${themeIndex}`;
+}
+
+/** 지도 패널 / reviews — 동일 핀 재선택 시 API 부하 완화 */
+const HERITAGE_DETAIL_REVIEWS_PREFIX = "map-heritage-detail-reviews:";
+const HERITAGE_DETAIL_PANEL_PREFIX = "map-heritage-detail-panel:";
+
+function getHeritageDetailReviewsKey(heritageId) {
+  return `${HERITAGE_DETAIL_REVIEWS_PREFIX}${encodeURIComponent(heritageId)}`;
+}
+
+function getHeritageDetailPanelKey(heritageId) {
+  return `${HERITAGE_DETAIL_PANEL_PREFIX}${encodeURIComponent(heritageId)}`;
+}
+
+function normalizePinMapPanel(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  return {
+    ccbaLcad: raw.ccbaLcad ?? "",
+    ccceNameSimple: raw.ccceNameSimple ?? "",
+    ccbaAsdt: raw.ccbaAsdt ?? null,
+    gcodeName: raw.gcodeName ?? null,
+    type: raw.type ?? "",
+    likeCount: typeof raw.likeCount === "number" ? raw.likeCount : 0,
+  };
+}
+
+function readSessionJson(key) {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionJson(key, value) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn("[MapSection] session cache 저장 실패:", e);
+  }
 }
 
 function hasThemeBit(pin, themeIndex) {
@@ -359,7 +499,17 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   const [selectedSet, setSelectedSet] = useState(new Set());
   const [selectedPin, setSelectedPin] = useState(null);
   const setSelectedPinRef = useRef(setSelectedPin);
+  const [heritageBookmarked, setHeritageBookmarked] = useState(false);
+  const [bookmarkStatusLoading, setBookmarkStatusLoading] = useState(false);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
+  const [pinMapPanel, setPinMapPanel] = useState(null);
+  const [pinReviews, setPinReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [heritageLiked, setHeritageLiked] = useState(false);
+  const [likeStatusLoading, setLikeStatusLoading] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
   const [clusterListPins, setClusterListPins] = useState([]);
+  const navigate = useNavigate();
   const setClusterListPinsRef = useRef(setClusterListPins);
   const [geoData, setGeoData] = useState({
     bbox: null,
@@ -377,6 +527,208 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   useEffect(() => {
     setClusterListPinsRef.current = setClusterListPins;
   }, []);
+
+  useEffect(() => {
+    if (!selectedPin?.id) {
+      setHeritageBookmarked(false);
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setHeritageBookmarked(false);
+      return;
+    }
+    let cancelled = false;
+    setBookmarkStatusLoading(true);
+    fetch(`/api/heritages/${encodeURIComponent(selectedPin.id)}/bookmarks`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("bookmark status");
+        return res.json();
+      })
+      .then((flag) => {
+        if (!cancelled) setHeritageBookmarked(Boolean(flag));
+      })
+      .catch(() => {
+        if (!cancelled) setHeritageBookmarked(false);
+      })
+      .finally(() => {
+        if (!cancelled) setBookmarkStatusLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPin?.id]);
+
+  useEffect(() => {
+    if (!selectedPin?.id) {
+      setHeritageLiked(false);
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setHeritageLiked(false);
+      return;
+    }
+    let cancelled = false;
+    setLikeStatusLoading(true);
+    fetch(`/api/heritages/${encodeURIComponent(selectedPin.id)}/likes`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("like status");
+        return res.json();
+      })
+      .then((flag) => {
+        if (!cancelled) setHeritageLiked(Boolean(flag));
+      })
+      .catch(() => {
+        if (!cancelled) setHeritageLiked(false);
+      })
+      .finally(() => {
+        if (!cancelled) setLikeStatusLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPin?.id]);
+
+  useEffect(() => {
+    if (!selectedPin?.id) {
+      setPinMapPanel(null);
+      return;
+    }
+    const hid = selectedPin.id;
+    const panelKey = getHeritageDetailPanelKey(hid);
+    const cached = readSessionJson(panelKey);
+    if (cached && typeof cached === "object") {
+      setPinMapPanel(normalizePinMapPanel(cached));
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/maps/heritages/${encodeURIComponent(hid)}/panel`)
+      .then((res) => {
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error("panel");
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        if (!data) {
+          setPinMapPanel(null);
+          return;
+        }
+        const next = normalizePinMapPanel(data);
+        setPinMapPanel(next);
+        writeSessionJson(panelKey, next);
+      })
+      .catch(() => {
+        if (!cancelled) setPinMapPanel(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPin?.id]);
+
+  useEffect(() => {
+    if (!selectedPin?.id) {
+      setPinReviews([]);
+      return;
+    }
+    const hid = selectedPin.id;
+    const reviewsKey = getHeritageDetailReviewsKey(hid);
+    const cached = readSessionJson(reviewsKey);
+    if (Array.isArray(cached)) {
+      setPinReviews(cached.slice(0, 5));
+      setReviewsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setReviewsLoading(true);
+    const q = new URLSearchParams({
+      size: "5",
+      page: "0",
+      sort: "createdAt,desc",
+    });
+    fetch(`/api/heritages/${encodeURIComponent(hid)}/reviews?${q.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("reviews");
+        return res.json();
+      })
+      .then((page) => {
+        const raw = page?.content;
+        const list = Array.isArray(raw) ? raw.slice(0, 5) : [];
+        if (!cancelled) {
+          setPinReviews(list);
+          writeSessionJson(reviewsKey, list);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPinReviews([]);
+      })
+      .finally(() => {
+        if (!cancelled) setReviewsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPin?.id]);
+
+  const handleHeritageLikeToggle = useCallback(async () => {
+    if (!selectedPin?.id) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    setLikeBusy(true);
+    const hid = encodeURIComponent(selectedPin.id);
+    const method = heritageLiked ? "DELETE" : "POST";
+    try {
+      const res = await fetch(`/api/heritages/${hid}/likes`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setHeritageLiked((v) => !v);
+        setPinMapPanel((prev) => {
+          const base = prev ?? normalizePinMapPanel({});
+          const n = typeof base.likeCount === "number" ? base.likeCount : 0;
+          const next = {
+            ...base,
+            likeCount: heritageLiked ? Math.max(0, n - 1) : n + 1,
+          };
+          writeSessionJson(getHeritageDetailPanelKey(selectedPin.id), next);
+          return next;
+        });
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setLikeBusy(false);
+    }
+  }, [selectedPin?.id, heritageLiked, navigate]);
+
+  const handleHeritageBookmarkToggle = useCallback(async () => {
+    if (!selectedPin?.id) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    setBookmarkBusy(true);
+    const hid = encodeURIComponent(selectedPin.id);
+    const method = heritageBookmarked ? "DELETE" : "POST";
+    try {
+      const res = await fetch(`/api/heritages/${hid}/bookmarks`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setHeritageBookmarked((v) => !v);
+    } catch {
+      /* ignore */
+    } finally {
+      setBookmarkBusy(false);
+    }
+  }, [selectedPin?.id, heritageBookmarked]);
   useEffect(() => {
     // 지역이 선택된 경우 항상 테마 바 표시
     setShowTagBar(selectedSet.size > 0);
@@ -1438,14 +1790,15 @@ function MapWithGoogle({ apiKey, mapConfig }) {
               overflow: "hidden",
             }}
           >
-            {/* 닫기 버튼 */}
+            {/* 닫기 (히어로 우측 북마크와 겹치지 않게 좌측 상단) */}
             <button
+              type="button"
               onClick={() => setSelectedPin(null)}
               style={{
                 position: "absolute",
-                top: "10px",
-                right: "10px",
-                zIndex: 10,
+                top: "12px",
+                left: "12px",
+                zIndex: 20,
                 width: "28px",
                 height: "28px",
                 borderRadius: "50%",
@@ -1461,49 +1814,163 @@ function MapWithGoogle({ apiKey, mapConfig }) {
               }}
             >✕</button>
 
-            {/* 이미지 */}
-            {selectedPin.thumbnail ? (
-              <div style={{ width: "100%", height: "180px", flexShrink: 0, overflow: "hidden" }}>
+            {/* 히어로 이미지 + 그라데이션 + 우측 북마크 + 좌측 하단 지정 뱃지 */}
+            <div
+              style={{
+                position: "relative",
+                height: 220,
+                background: PANEL_C.heroBg,
+                flexShrink: 0,
+              }}
+            >
+              {selectedPin.thumbnail ? (
                 <img
                   src={selectedPin.thumbnail}
-                  alt={selectedPin.nameKo || selectedPin.nameJa}
+                  alt={selectedPin.nameKo || selectedPin.nameJa || ""}
                   style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 />
-              </div>
-            ) : (
-              <div style={{
-                width: "100%", height: "120px", flexShrink: 0,
-                background: "linear-gradient(135deg, #000D57 0%, #001a8c 100%)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{ fontSize: "36px" }}>📍</span>
-              </div>
-            )}
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(135deg, #000D57 0%, #001a8c 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span style={{ fontSize: "40px" }}>📍</span>
+                </div>
+              )}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)",
+                  pointerEvents: "none",
+                }}
+              />
+              {selectedPin.id && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "12px",
+                    right: "12px",
+                    zIndex: 15,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  {typeof window !== "undefined" && localStorage.getItem("token") && (
+                    <button
+                      type="button"
+                      onClick={handleHeritageBookmarkToggle}
+                      disabled={bookmarkStatusLoading || bookmarkBusy}
+                      title={heritageBookmarked ? "ブックマーク解除" : "ブックマーク"}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.92)",
+                        border: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: bookmarkStatusLoading || bookmarkBusy ? "wait" : "pointer",
+                        boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill={heritageBookmarked ? PANEL_C.navy : "none"} stroke={PANEL_C.navy} strokeWidth="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleHeritageLikeToggle}
+                    disabled={
+                      Boolean(typeof window !== "undefined" && localStorage.getItem("token")) &&
+                      (likeBusy || likeStatusLoading)
+                    }
+                    title={
+                      typeof window !== "undefined" && localStorage.getItem("token")
+                        ? heritageLiked
+                          ? "いいねを取り消す"
+                          : "いいね"
+                        : "ログインしていいね"
+                    }
+                    style={{
+                      height: 36,
+                      padding: "0 12px",
+                      borderRadius: 18,
+                      background: "rgba(255,255,255,0.92)",
+                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      cursor:
+                        typeof window !== "undefined" && localStorage.getItem("token")
+                          ? likeBusy || likeStatusLoading
+                            ? "wait"
+                            : "pointer"
+                          : "pointer",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+                      opacity: likeBusy || likeStatusLoading ? 0.85 : 1,
+                    }}
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill={
+                        typeof window !== "undefined" &&
+                        localStorage.getItem("token") &&
+                        heritageLiked
+                          ? "#e53e3e"
+                          : "none"
+                      }
+                      stroke={
+                        typeof window !== "undefined" && localStorage.getItem("token") && heritageLiked
+                          ? "#e53e3e"
+                          : TAG_COLORS.gray3
+                      }
+                      strokeWidth="2"
+                    >
+                      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                    </svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: TAG_COLORS.gray2 }}>
+                      {pinMapPanel?.likeCount ?? 0}
+                    </span>
+                  </button>
+                </div>
+              )}
+              {pinMapPanel?.gcodeName && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "14px",
+                    left: "14px",
+                    zIndex: 15,
+                    borderRadius: 8,
+                    padding: "5px 14px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                    ...(() => {
+                      const b = getGcodeBadgeStyle(pinMapPanel.gcodeName);
+                      return { background: b.bg, color: b.color };
+                    })(),
+                  }}
+                >
+                  <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'Noto Sans KR', sans-serif" }}>
+                    {pinMapPanel.gcodeName}
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* 본문 */}
             <div style={{ padding: "16px", overflowY: "auto", flex: 1 }}>
-              {/* 배지 */}
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                backgroundColor: "rgba(255,255,255,0.95)",
-                padding: "4px 10px",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-                backdropFilter: "blur(8px)",
-                marginBottom: "10px",
-              }}>
-                <span style={{ fontSize: "13px" }}>📍</span>
-                <span style={{
-                  fontSize: "12px",
-                  fontWeight: "600",
-                  color: "#000D57",
-                  fontFamily: "'Noto Sans KR', sans-serif",
-                }}>文化遺産</span>
-              </div>
-
               {/* 제목 */}
               <h3 style={{
                 fontSize: "17px",
@@ -1529,43 +1996,290 @@ function MapWithGoogle({ apiKey, mapConfig }) {
               {/* 구분선 */}
               <div style={{ height: "1px", background: "#f0f0f0", margin: "0 0 14px" }} />
 
-              {/* 지역 */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                <span style={{ fontSize: "14px" }}>🗺️</span>
-                <span style={{
-                  fontSize: "13px",
-                  color: "#374151",
-                  fontFamily: "'Noto Sans KR', sans-serif",
-                }}>{selectedPin.regionKey || "—"}</span>
-              </div>
+              {/* GET /api/maps/heritages/{id}/panel — 세로 리스트 (가독성) */}
+              {pinMapPanel && (
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: 12,
+                    padding: "4px 14px 12px",
+                    marginBottom: 14,
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  {[
+                    {
+                      Icon: MapPinIcon,
+                      label: "詳細所在地",
+                      value: pinMapPanel.ccbaLcad?.trim() ? pinMapPanel.ccbaLcad : "—",
+                    },
+                    {
+                      Icon: ClockIcon,
+                      label: "時代",
+                      value: pinMapPanel.ccceNameSimple?.trim() ? pinMapPanel.ccceNameSimple : "—",
+                    },
+                    {
+                      Icon: CalendarIcon,
+                      label: "指定日",
+                      value: formatPanelAsdt(pinMapPanel.ccbaAsdt),
+                    },
+                    {
+                      Icon: TagIcon,
+                      label: "分類",
+                      value: formatPanelTypeLabel(pinMapPanel.type),
+                    },
+                  ].map((row, idx) => {
+                    const RowIcon = row.Icon;
+                    return (
+                    <div
+                      key={row.label}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 12,
+                        padding: "12px 0",
+                        borderBottom: idx < 3 ? "1px solid #f0f0f0" : "none",
+                      }}
+                    >
+                      <span
+                        style={{
+                          lineHeight: 1,
+                          flexShrink: 0,
+                          width: 26,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: 2,
+                        }}
+                      >
+                        <RowIcon />
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            color: TAG_COLORS.gray3,
+                            margin: "0 0 6px",
+                            letterSpacing: "0.02em",
+                            fontFamily: "'Noto Sans KR', sans-serif",
+                          }}
+                        >
+                          {row.label}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: PANEL_C.navy,
+                            margin: 0,
+                            lineHeight: 1.55,
+                            wordBreak: "break-word",
+                            fontFamily: "'Noto Sans KR', sans-serif",
+                          }}
+                        >
+                          {row.value}
+                        </p>
+                      </div>
+                    </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* 구분선 */}
               <div style={{ height: "1px", background: "#f0f0f0", margin: "0 0 16px" }} />
 
-              {/* Google マップで開く 버튼 */}
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${selectedPin.latitude},${selectedPin.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  width: "100%",
-                  padding: "10px 0",
-                  borderRadius: "10px",
-                  background: "linear-gradient(135deg, #000D57 0%, #001a8c 100%)",
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  textDecoration: "none",
-                  fontFamily: "'Noto Sans KR', sans-serif",
-                  boxShadow: "0 4px 12px rgba(0,13,87,0.25)",
-                }}
-              >
-                <span>🗾</span> Googleマップで開く
-              </a>
+              {selectedPin.id && (
+                <>
+                  <Link
+                    to={`/heritage/${encodeURIComponent(selectedPin.id)}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      width: "100%",
+                      padding: "10px 0",
+                      borderRadius: "10px",
+                      background: "linear-gradient(135deg, #000D57 0%, #001a8c 100%)",
+                      color: "#fff",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      textDecoration: "none",
+                      fontFamily: "'Noto Sans KR', sans-serif",
+                      boxShadow: "0 4px 12px rgba(0,13,87,0.25)",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    文化遺産の詳細を見る
+                  </Link>
+                  {typeof window !== "undefined" && localStorage.getItem("token") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const name = selectedPin.nameJa || selectedPin.nameKo || "";
+                        navigate(
+                          `/route/create?heritageId=${encodeURIComponent(selectedPin.id)}&heritageName=${encodeURIComponent(name)}`,
+                        );
+                      }}
+                      style={{
+                        border: `2px solid ${PANEL_C.red}`,
+                        borderRadius: 12,
+                        padding: "14px",
+                        width: "100%",
+                        background: "white",
+                        color: PANEL_C.red,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        cursor: "pointer",
+                        transition: "background 0.2s, color 0.2s",
+                        fontFamily: "'Noto Sans KR', sans-serif",
+                        marginBottom: "10px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = PANEL_C.red;
+                        e.currentTarget.style.color = "white";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "white";
+                        e.currentTarget.style.color = PANEL_C.red;
+                      }}
+                    >
+                      + 新しい探訪路を作る
+                    </button>
+                  )}
+                  {typeof window !== "undefined" && !localStorage.getItem("token") && (
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        margin: 0,
+                        textAlign: "center",
+                        fontFamily: "'Noto Sans KR', sans-serif",
+                      }}
+                    >
+                      ログインすると上部のいいね・ブックマークが使えます
+                    </p>
+                  )}
+
+                  {/* 口コミ — 헤더는 항상 표시, 본문은 로딩/목록/없음 */}
+                  <div style={{ marginTop: 18 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <h4
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: PANEL_C.navy,
+                          margin: 0,
+                          fontFamily: "'Noto Sans KR', sans-serif",
+                        }}
+                      >
+                        口コミ
+                      </h4>
+                      <Link
+                        to={`/heritage/${encodeURIComponent(selectedPin.id)}`}
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: "#fff",
+                          background: PANEL_C.red,
+                          textDecoration: "none",
+                          fontFamily: "'Noto Sans KR', sans-serif",
+                          padding: "8px 14px",
+                          borderRadius: 6,
+                          boxShadow: "0 2px 6px rgba(110,0,0,0.25)",
+                        }}
+                      >
+                        口コミを書く
+                      </Link>
+                    </div>
+                    {reviewsLoading && (
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          margin: "0 0 8px",
+                          fontFamily: "'Noto Sans KR', sans-serif",
+                        }}
+                      >
+                        読み込み中…
+                      </p>
+                    )}
+                    {!reviewsLoading && pinReviews.length === 0 && (
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "#9ca3af",
+                          margin: "0 0 4px",
+                          fontFamily: "'Noto Sans KR', sans-serif",
+                        }}
+                      >
+                        まだ口コミがありません
+                      </p>
+                    )}
+                    {!reviewsLoading && pinReviews.length > 0 && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {pinReviews.map((r) => (
+                          <div
+                            key={r.id}
+                            style={{
+                              background: "#fff",
+                              borderRadius: 8,
+                              padding: "10px 12px",
+                              border: "1px solid #e5e7eb",
+                              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: "#374151",
+                                fontFamily: "'Noto Sans KR', sans-serif",
+                              }}
+                            >
+                              {r.nickname || "ユーザー"}
+                            </div>
+                            <p
+                              style={{
+                                fontSize: 12,
+                                color: "#4b5563",
+                                margin: "6px 0 0",
+                                lineHeight: 1.5,
+                                fontFamily: "'Noto Sans KR', sans-serif",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {r.content}
+                            </p>
+                            <div
+                              style={{
+                                fontSize: 10,
+                                color: "#9ca3af",
+                                marginTop: 6,
+                                fontFamily: "'Noto Sans KR', sans-serif",
+                              }}
+                            >
+                              {formatReviewDate(r.createdAt)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -87,8 +87,15 @@ function AppLayout() {
           {/* 9. 문화유산 상세 */}
           <Route path="/heritage/:heritageId" element={<HeritageDetail />} />
 
-          {/* 10. 탐방로 만들기 (전체화면 - Navbar/Footer 숨김) */}
-          <Route path="/route/create" element={<RouteCreate />} />
+          {/* 10. 탐방로 만들기 (로그인 필요 · 전체화면 - Navbar/Footer 숨김) */}
+          <Route
+            path="/route/create"
+            element={
+              <ProtectedRoute>
+                <RouteCreate />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 11. 커뮤니티 글쓰기 (보호된 경로) */}
           <Route
