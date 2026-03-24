@@ -7,7 +7,9 @@ import React from "react";
  * @param {function} onPageChange - 페이지 변경 콜백 (page: number) => void
  */
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
-  if (totalPages <= 1) return null;
+  // 데이터가 없거나 1페이지여도 항상 표시 (비활성 상태)
+  const safeTotalPages = Math.max(1, totalPages);
+  const safeCurrent = Math.max(1, currentPage);
 
   return (
     <div
@@ -21,37 +23,37 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
     >
       {/* 이전 버튼 */}
       <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        style={arrowBtnStyle(currentPage === 1)}
+        onClick={() => onPageChange(safeCurrent - 1)}
+        disabled={safeCurrent === 1}
+        style={arrowBtnStyle(safeCurrent === 1)}
         aria-label="前のページ"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke={currentPage === 1 ? "#c8ccd4" : "#000D57"}
+          stroke={safeCurrent === 1 ? "#c8ccd4" : "#000D57"}
           strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
 
       {/* 페이지 번호 */}
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+      {Array.from({ length: safeTotalPages }, (_, i) => i + 1).map(n => (
         <PageBtn
           key={n}
           n={n}
-          active={currentPage === n}
+          active={safeCurrent === n}
           onClick={() => onPageChange(n)}
         />
       ))}
 
       {/* 다음 버튼 */}
       <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        style={arrowBtnStyle(currentPage === totalPages)}
+        onClick={() => onPageChange(safeCurrent + 1)}
+        disabled={safeCurrent === safeTotalPages}
+        style={arrowBtnStyle(safeCurrent === safeTotalPages)}
         aria-label="次のページ"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke={currentPage === totalPages ? "#c8ccd4" : "#000D57"}
+          stroke={safeCurrent === safeTotalPages ? "#c8ccd4" : "#000D57"}
           strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="9 18 15 12 9 6" />
         </svg>

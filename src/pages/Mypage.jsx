@@ -681,9 +681,7 @@ export default function MyPage() {
                         </div>
 
                         {/* 페이지네이션 */}
-                        {currentTabData.totalPages > 1 && (
-                            <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
-                        )}
+                        <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
                     </div>
 
                     {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
@@ -743,10 +741,7 @@ export default function MyPage() {
                         })()}
                     </div>
                 </div>
-
-                        {/* 공용 페이지네이션 */}
-                        {currentTabData.totalPages > 1 && <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />}
-                    </div>
+                </div>
 
                     {/* ── 4. 업적 갤러리 ── */}
                     <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
