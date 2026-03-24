@@ -10,7 +10,7 @@ const PinIcon = () => (
 
 export default function HeritageCard({ item }) {
   const navigate        = useNavigate();
-  const badge           = BADGE_STYLE[item.category] || { bg: C.navy, color: "white" };
+  const badge           = BADGE_STYLE[item.type] || { bg: C.navy, color: "white" };
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -28,7 +28,7 @@ export default function HeritageCard({ item }) {
       {/* 썸네일 */}
       <div style={{ position: "relative", height: 220, overflow: "hidden", background: "#e5e7eb" }}>
         <img
-          src={item.img} alt={item.nameKo}
+          src={item.thumbnail} alt={item.nameKo}
           style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.35s", transform: hovered ? "scale(1.05)" : "scale(1)" }}
         />
         <span style={{
@@ -36,15 +36,15 @@ export default function HeritageCard({ item }) {
           background: badge.bg, color: badge.color,
           fontSize: 13, fontWeight: 600, padding: "5px 14px", borderRadius: 999, fontFamily: font,
         }}>
-          {item.category}
+          {item.type}
         </span>
       </div>
 
       {/* 텍스트 */}
       <div style={{ padding: "20px 22px 18px" }}>
-        <h3 style={{ fontSize: 20, fontWeight: 700, color: C.navy, margin: "0 0 2px", fontFamily: font }}>{item.nameKo}</h3>
-        <p style={{ fontSize: 13, color: C.textSub, margin: "0 0 4px", fontFamily: "'Noto Sans KR', sans-serif" }}>{item.nameKr}</p>
-        <p style={{ fontSize: 12, color: C.textSub, margin: "0 0 12px", opacity: 0.7, fontFamily: font }}>{item.nameEn}</p>
+        <h3 style={{ fontSize: 20, fontWeight: 700, color: C.navy, margin: "0 0 2px", fontFamily: font }}>{item.nameJa}</h3>
+        <p style={{ fontSize: 13, color: C.textSub, margin: "0 0 4px", fontFamily: "'Noto Sans KR', sans-serif" }}>{item.nameKo}</p>
+        <p style={{ fontSize: 12, color: C.textSub, margin: "0 0 12px", opacity: 0.7, fontFamily: font }}>{item.era}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14 }}>
           <PinIcon />
           <span style={{ fontSize: 13, color: C.textBody, fontFamily: font }}>{item.region}</span>
