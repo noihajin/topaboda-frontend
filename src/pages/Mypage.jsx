@@ -127,7 +127,7 @@ export default function MyPage() {
         //   : DELETE /api/heritages/{cancelModal.item.heritageId}/likes
         setCancelModal({ open: false, item: null });
     };
-    const ROUTE_SIZE = 2;
+    const ROUTE_SIZE = 3;
 
     // localStorage에서 사용자 저장 루트 불러오기
     const savedRoutes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
@@ -401,13 +401,49 @@ export default function MyPage() {
                             )}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                            {displayedHt.map((item) => (
+                            {/* 데이터 카드 */}
+                            {displayedHt.slice(0, 4).map((item) => (
                                 <HeritageCard
                                     key={item.heritageId}
                                     item={item}
                                     type={heritageTab}
                                     onCancel={handleCancelRequest}
                                 />
+                            ))}
+                            {/* 빈 슬롯: 4개 고정 */}
+                            {Array.from({ length: Math.max(0, 4 - displayedHt.length) }).map((_, i) => (
+                                <div
+                                    key={`empty-${i}`}
+                                    onClick={() => navigate("/heritage")}
+                                    style={{
+                                        borderRadius: 16,
+                                        height: 170,
+                                        border: `2px dashed ${C.border}`,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 8,
+                                        cursor: "pointer",
+                                        background: "#fafafa",
+                                        transition: "background 0.2s, border-color 0.2s",
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = "#f0f0f0"; e.currentTarget.style.borderColor = C.navy; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = "#fafafa"; e.currentTarget.style.borderColor = C.border; }}
+                                >
+                                    <div style={{
+                                        width: 40, height: 40, borderRadius: "50%",
+                                        background: C.border,
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                    }}>
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 4v12M4 10h12" stroke={C.gray3} strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                    </div>
+                                    <span style={{ fontSize: 12, color: C.gray3, fontWeight: 600 }}>
+                                        {heritageTab === "bookmark" ? "ブックマーク追加" : "いいね追加"}
+                                    </span>
+                                </div>
                             ))}
                         </div>
                     </div>
