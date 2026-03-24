@@ -730,13 +730,24 @@ export default function MyPage() {
                                             ))
                                         )}
                                     </div>
-                                    {saveData.totalPages > 1 && (
-                                        <Pagination
-                                            currentPage={savePage + 1}
-                                            totalPages={saveData.totalPages}
-                                            onPageChange={(p) => setPage(p - 1)}
-                                        />
-                                    )}
+                                    {/* 항상 표시되는 화살표 페이지네이션 */}
+                                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
+                                        <button
+                                            disabled={savePage === 0}
+                                            onClick={() => setPage((p) => p - 1)}
+                                            style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: savePage === 0 ? "default" : "pointer", opacity: savePage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                        >
+                                            <ChevronLeft />
+                                        </button>
+                                        <span style={{ fontSize: 13, color: C.gray3 }}>{savePage + 1} / {Math.max(1, saveData.totalPages)}</span>
+                                        <button
+                                            disabled={savePage >= Math.max(1, saveData.totalPages) - 1}
+                                            onClick={() => setPage((p) => p + 1)}
+                                            style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: savePage >= Math.max(1, saveData.totalPages) - 1 ? "default" : "pointer", opacity: savePage >= Math.max(1, saveData.totalPages) - 1 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                                        >
+                                            <ChevronRight />
+                                        </button>
+                                    </div>
                                 </>
                             );
                         })()}
