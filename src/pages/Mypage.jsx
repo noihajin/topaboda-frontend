@@ -697,15 +697,23 @@ export default function MyPage() {
                                 );
                             })()
                         ) : (
-                            displayedAct.map((item) => {
-                                if (postTab === "posts") {
-                                    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
-                                }
-                                if (postTab === "comments") {
-                                    return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                }
-                                return <ReviewRow key={item.id} item={item} />;
-                            })
+                            displayedAct.length === 0 ? (
+                                <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
+                                    {postTab === "posts"    && "投稿した記事がありません。"}
+                                    {postTab === "comments" && "コメントがありません。"}
+                                    {postTab === "reviews"  && "レビューがありません。"}
+                                </p>
+                            ) : (
+                                displayedAct.map((item) => {
+                                    if (postTab === "posts") {
+                                        return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
+                                    }
+                                    if (postTab === "comments") {
+                                        return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
+                                    }
+                                    return <ReviewRow key={item.id} item={item} />;
+                                })
+                            )
                         )}
                     </div>
 
