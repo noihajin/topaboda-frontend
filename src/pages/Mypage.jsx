@@ -233,7 +233,16 @@ export default function MyPage() {
                 headers: { Authorization: `Bearer ${token}` },
                 params: params,
             });
-            setData(response.data);
+
+            const data = response.data;
+
+            setData({
+                contents: data.contents ?? data.content ?? [],
+                currentPage: data.currentPage ?? data.number ?? 0,
+                pageSize: data.pageSize ?? data.size ?? 10,
+                totalElements: data.totalElements ?? 0,
+                totalPages: data.totalPages ?? 0,
+            });
         } catch (error) {
             console.error(`${url} 로드 실패:`, error);
         }
@@ -362,7 +371,26 @@ export default function MyPage() {
 
     useEffect(() => {
         const id = localStorage.getItem("id");
-        fetchData(`/users/profile/${id}`, {}, setUser);
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            console.error("인증 정보가 없습니다.");
+            return;
+        }
+
+        const fetchUserProfile = async () => {
+            try {
+                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                console.log("profile response:", response.data);
+                setUser(response.data);
+            } catch (error) {
+                console.error("프로필 로드 실패:", error);
+            }
+        };
+
+        fetchUserProfile();
     }, []);
 
     useEffect(() => {
@@ -721,7 +749,6 @@ export default function MyPage() {
                     </div>
 
                     {/* ── 4. 업적 갤러리 ── */}
-                    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px", width: "100%" }}>
                     <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         {/* 헤더 */}
                         <div style={{ marginBottom: 32 }}>
@@ -793,7 +820,6 @@ export default function MyPage() {
                                 </div>
                             );
                         })()}
-                    </div>
                     </div>
                 </div>
 
