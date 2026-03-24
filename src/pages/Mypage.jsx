@@ -633,12 +633,12 @@ export default function MyPage() {
                     </div>
 
                 {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "start" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "stretch" }}>
 
                     {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
                         {/* 탭 + 새 글 작성 버튼 */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                                 {[
                                     { key: "posts",    label: "投稿した記事", count: postData.totalElements },
@@ -650,7 +650,7 @@ export default function MyPage() {
                                         <button
                                             key={key}
                                             onClick={() => setPostTab(key)}
-                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
+                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
                                         >
                                             {label}
                                             <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
@@ -658,13 +658,13 @@ export default function MyPage() {
                                     );
                                 })}
                             </div>
-                            <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "12px 24px", fontWeight: 700, cursor: "pointer", transition: "0.2s", flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
+                            <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 700, fontSize: 15, lineHeight: 1, cursor: "pointer", transition: "0.2s", flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
                                 <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
                             </button>
                         </div>
 
                         {/* 리스트 */}
-                        <div style={{ minHeight: 500 }}>
+                        <div style={{ minHeight: 500, flex: 1 }}>
                             {displayedAct.length === 0 ? (
                                 <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                     {postTab === "posts"    && "投稿した記事がありません。"}
@@ -685,9 +685,9 @@ export default function MyPage() {
                     </div>
 
                     {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
                         {/* 탭 헤더 */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                             <div style={{ display: "flex", gap: 8 }}>
                                 {[
                                     { key: "bookmark", label: "ブックマーク", count: postBkData.totalElements },
@@ -698,10 +698,10 @@ export default function MyPage() {
                                         <button
                                             key={key}
                                             onClick={() => setPostSaveTab(key)}
-                                            style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 14, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
+                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
                                         >
                                             {label}
-                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 7px", fontSize: 12 }}>{count}</span>
+                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
                                         </button>
                                     );
                                 })}
@@ -715,7 +715,7 @@ export default function MyPage() {
                             const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
                             return (
                                 <>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 500 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 500, flex: 1 }}>
                                         {saveData.contents.length === 0 ? (
                                             <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                                 {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
@@ -740,7 +740,6 @@ export default function MyPage() {
                             );
                         })()}
                     </div>
-                </div>
                 </div>
 
                     {/* ── 4. 업적 갤러리 ── */}
@@ -817,6 +816,7 @@ export default function MyPage() {
                         })()}
                     </div>
                 </div>
+            </div>
 
         {/* 북마크 / 좋아요 취소 확인 모달 */}
         <TopaModal
