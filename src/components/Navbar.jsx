@@ -21,6 +21,7 @@ export default function Navbar() {
     const [isHovered, setIsHovered] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [hoverLogout, setHoverLogout] = useState(false);
     const isAuthenticated = Boolean(localStorage.getItem("token"));
 
     const location = useLocation();
@@ -245,8 +246,24 @@ export default function Navbar() {
                                             </svg>
                                             My Page
                                         </button>
-                                        <button className="gnb-btn" onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                            <img src={imgIconLogout} alt="" style={{ width: 16, height: 17, filter: isActive ? "none" : "brightness(0) invert(1)" }} />
+                                        <button
+                                            className="gnb-btn"
+                                            onClick={handleLogout}
+                                            onMouseEnter={() => setHoverLogout(true)}
+                                            onMouseLeave={() => setHoverLogout(false)}
+                                            style={{ display: "flex", alignItems: "center", gap: 6 }}
+                                        >
+                                            <img
+                                                src={imgIconLogout}
+                                                alt=""
+                                                style={{
+                                                    width: 16, height: 17,
+                                                    filter: hoverLogout
+                                                        ? "brightness(0) saturate(100%) invert(74%) sepia(98%) saturate(490%) hue-rotate(19deg) brightness(95%)"
+                                                        : isActive ? "none" : "brightness(0) invert(1)",
+                                                    transition: "filter 0.2s",
+                                                }}
+                                            />
                                             Logout
                                         </button>
                                     </>
