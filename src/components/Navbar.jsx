@@ -8,7 +8,6 @@ import imgLogoBlk from "../assets/logo_black.svg";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 import imgIconLoginWht from "../assets/icon_login_white.svg";
 import imgIconLoginBlk from "../assets/icon_login_black.svg";
-import imgIconHome from "../assets/icon_home.svg";
 import imgIconLogout from "../assets/icon_logout.svg";
 
 const NAV_LINKS = [
@@ -240,7 +239,10 @@ export default function Navbar() {
                                 {isAuthenticated ? (
                                     <>
                                         <button className="gnb-btn" onClick={handleMyPageClick} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                            <img src={imgIconHome} alt="" style={{ width: 15, height: 15, filter: isActive ? "none" : "brightness(0) invert(1)" }} />
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="12" cy="7" r="4"/>
+                                            </svg>
                                             My Page
                                         </button>
                                         <button className="gnb-btn" onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 6 }}>
