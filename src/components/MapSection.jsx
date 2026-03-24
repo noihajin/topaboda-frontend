@@ -26,7 +26,7 @@ const mapFocusPreset = {
 
 const API_URL = "/api/maps/config";
 const HERITAGE_SESSION_CACHE_PREFIX = "map-heritage-pins-theme-";
-const GOOGLE_MAP_LIBRARIES = ["marker"];
+const GOOGLE_MAP_LIBRARIES = ["marker", "geometry"];
 const DEFAULT_MAP_ID = "DEMO_MAP_ID";
 const FIT_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
 const INIT_ZOOM = 8;          // 초기 표시 줌
