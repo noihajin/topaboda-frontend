@@ -180,6 +180,8 @@ export default function MyPage() {
 
     const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
     const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
+    // 항상 마지막에 +1 가상 페이지(추가 슬롯 전용)
+    const totalHtPagesWithAdd = totalHtPages + 1;
     const displayedHt = currentHtData;
 
     const fetchData = async (url, params, setData) => {
@@ -516,7 +518,7 @@ export default function MyPage() {
                                     いいね
                                 </button>
                             </div>
-                            {totalHtPages > 1 && (
+                            {totalHtPagesWithAdd >= 1 && (
                                 <div style={{ display: "flex", gap: 8 }}>
                                     {/* 이전 */}
                                     <button
@@ -534,7 +536,7 @@ export default function MyPage() {
 
                                     {/* 다음 */}
                                     <button
-                                        disabled={heritageTab === "bookmark" ? htBkPage >= htBkData.totalPages - 1 : htLkPage >= htLkData.totalPages - 1}
+                                        disabled={heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1}
                                         onClick={() => {
                                             if (heritageTab === "bookmark") {
                                                 setHtBkPage((p) => p + 1);
