@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 import Pagination from "../components/Pagination";
-import { C, font, MOCK_HERITAGES, PAGE_SIZE } from "../components/heritagelist/constants";
+import { C, font, PAGE_SIZE } from "../components/heritagelist/constants";
 import HeritageHero    from "../components/heritagelist/HeritageHero";
 import HeritageFilters from "../components/heritagelist/HeritageFilters";
 import HeritageCard    from "../components/heritagelist/HeritageCard";
@@ -11,15 +12,38 @@ export default function HeritageList() {
   const [activeCategory, setActiveCategory] = useState("すべて");
   const [activeRegion, setActiveRegion]     = useState("すべての地域");
   const [currentPage, setCurrentPage]       = useState(0);
+  const [heritages, setHeritages]           = useState([]);
+
+  useEffect(() => {
+  const fetchHeritages = async () => {
+    try {
+      const response = await axios.get("http://localhost:9990/topaboda/api/heritages", {
+        params: {
+          page: 0,
+          size: 100,
+        },
+      });
+      setHeritages(response.data);
+    } catch (e) {
+      console.error("국가유산 리스트 불러오기 실패:", e);
+    }
+  };
+
+  fetchHeritages();
+  }, []);
 
   const filtered = useMemo(() => {
-    return MOCK_HERITAGES.filter(h => {
-      const matchCat    = activeCategory === "すべて" || h.category === activeCategory;
+    return heritages.filter(h => {
+      const matchCat    = activeCategory === "すべて" || h.type === activeCategory;
       const matchRegion = activeRegion === "すべての地域" || h.region === activeRegion;
-      const matchQuery  = !query || h.nameKo.includes(query) || h.nameEn.toLowerCase().includes(query.toLowerCase());
+      const matchQuery  =
+        !query ||
+        h.nameKo?.includes(query) ||
+        h.nameJa?.includes(query);
+
       return matchCat && matchRegion && matchQuery;
-    });
-  }, [activeCategory, activeRegion, query]);
+  });
+  }, [heritages, activeCategory, activeRegion, query]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const displayed  = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
