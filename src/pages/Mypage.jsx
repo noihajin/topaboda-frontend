@@ -11,7 +11,7 @@ import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
 import TopaModal from "../components/TopaModal";
 
-const API_ROUTE = "/api/route";
+const API_ROUTES = "/api/routes";
 
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
 const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
@@ -432,7 +432,7 @@ export default function MyPage() {
         }
         let cancelled = false;
         setRoutesLoading(true);
-        fetch(API_ROUTE, { headers: { Authorization: `Bearer ${token}` } })
+        fetch(API_ROUTES, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (!res.ok) throw new Error("fail");
                 return res.json();
