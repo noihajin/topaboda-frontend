@@ -2,10 +2,24 @@ import { C, font, fontSerif } from "./constants";
 import { IconMapPin, IconBookmark, IconHeart, IconShare } from "./DetailUI";
 
 export default function HeritageHero({ data, isLiked, isBookmarked, isLiking, isBookmarking, likeCount, onLike, onBookmark }) {
+    const handleShareClick = () => {
+        const currentUrl = window.location.href;
+
+        navigator.clipboard
+            .writeText(currentUrl)
+            .then(() => {
+                alert("URLがクリップボードにコピーされました！");
+            })
+            .catch((err) => {
+                console.error("복사 실패:", err);
+                alert("복사에 실패했습니다.");
+            });
+    };
+
     const actionBtns = [
         { icon: <IconBookmark active={isBookmarked} />, label: "保存", onClick: onBookmark, disabled: isBookmarking },
         { icon: <IconHeart active={isLiked} />, label: likeCount.toLocaleString(), onClick: onLike, disabled: isLiking },
-        { icon: <IconShare />, label: "共有", onClick: () => {} },
+        { icon: <IconShare />, label: "共有", onClick: handleShareClick },
     ];
 
     return (
