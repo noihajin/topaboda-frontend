@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TopaModal from "../components/TopaModal";
-import { useModal } from "../hooks/useModal";
+import useModal from "../hooks/useModal";
 import { DELETE_ACCOUNT } from "../constants/modalConfigs";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
