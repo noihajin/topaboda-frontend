@@ -176,7 +176,7 @@ export default function MyPage() {
         //   : DELETE /api/heritages/{cancelModal.item.heritageId}/likes
         setCancelModal({ open: false, item: null });
     };
-    const ROUTE_SIZE = 3;
+    const ROUTE_SIZE = 2;
 
     const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
     const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
@@ -511,39 +511,43 @@ export default function MyPage() {
                                 </button>
                             </div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12, minHeight: 120 }}>
+                        {/* 항상 3칸 고정: 최대 2개 경로 + 마지막 칸 = 새 경로 버튼 */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             {routesLoading ? (
-                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>読み込み中…</p>
-                            ) : !localStorage.getItem("token") ? (
-                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>ログインすると保存した探訪路が表示されます。</p>
-                            ) : displayedRoutes.length === 0 ? (
-                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>まだ探訪路がありません。</p>
+                                <>
+                                    <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
+                                    <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
+                                </>
                             ) : (
-                                displayedRoutes.map((r) => (
-                                    <RouteCard
-                                        key={r.id}
-                                        route={r}
-                                        onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)}
-                                    />
-                                ))
+                                <>
+                                    {/* 경로 카드 (최대 2개) */}
+                                    {displayedRoutes.slice(0, 2).map((r) => (
+                                        <RouteCard
+                                            key={r.id}
+                                            route={r}
+                                            onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)}
+                                        />
+                                    ))}
+                                    {/* 빈 슬롯: 경로 2개 미만이면 채우기 */}
+                                    {Array.from({ length: Math.max(0, 2 - displayedRoutes.length) }).map((_, i) => (
+                                        <div key={`route-empty-${i}`} style={{
+                                            height: 72, borderRadius: 12,
+                                            border: `1.5px dashed ${C.border}`,
+                                            background: "#fafafa",
+                                        }} />
+                                    ))}
+                                    {/* 마지막 칸: 항상 새 경로 버튼 */}
+                                    <button
+                                        onClick={() => navigate("/route/create")}
+                                        style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = C.red; e.currentTarget.style.color = "white"; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = "white"; e.currentTarget.style.color = C.red; }}
+                                    >
+                                        + 新しい探訪路を作る
+                                    </button>
+                                </>
                             )}
                         </div>
-                        {typeof window !== "undefined" && localStorage.getItem("token") && (
-                            <button
-                                onClick={() => navigate("/route/create")}
-                                style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = C.red;
-                                    e.currentTarget.style.color = "white";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = "white";
-                                    e.currentTarget.style.color = C.red;
-                                }}
-                            >
-                                + 新しい探訪路を作る
-                            </button>
-                        )}
                     </div>
 
                     {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
@@ -602,19 +606,29 @@ export default function MyPage() {
                             )}
                         </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
-                            {/* 데이터 카드 (최대 4개) */}
-                            {displayedHt.slice(0, 4).map((item) => (
-                                <HeritageCard
-                                    key={item.heritageId}
-                                    item={item}
-                                    type={heritageTab}
-                                    onCancel={handleCancelRequest}
-                                />
-                            ))}
-                            {/* 추가 슬롯 — 빈 칸 있을 때만 표시 */}
-                            {displayedHt.length < 4 && (
-                                <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
-                            )}
+                            {Array.from({ length: 4 }).map((_, i) => {
+                                const item = displayedHt[i];
+                                if (item) return (
+                                    <HeritageCard
+                                        key={item.heritageId}
+                                        item={item}
+                                        type={heritageTab}
+                                        onCancel={handleCancelRequest}
+                                    />
+                                );
+                                // AddSlot은 항목 바로 다음 칸에만 표시
+                                if (i === displayedHt.length) return (
+                                    <AddSlot key="add-slot" type={heritageTab} onClick={() => navigate("/heritage")} />
+                                );
+                                // 나머지는 빈 회색 칸
+                                return (
+                                    <div key={`ht-empty-${i}`} style={{
+                                        borderRadius: 16, height: 170,
+                                        background: "#f5f5f5",
+                                        border: `1.5px dashed ${C.border}`,
+                                    }} />
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
