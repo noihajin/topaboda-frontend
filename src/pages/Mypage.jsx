@@ -202,7 +202,7 @@ export default function MyPage() {
         }
     };
 
-    // 게시글 편집 메서드
+    // 게시글 편집
     const handleEditPost = async (postId) => {
     try {
         const token = localStorage.getItem("token");
