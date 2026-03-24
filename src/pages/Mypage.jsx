@@ -503,7 +503,7 @@ export default function MyPage() {
                                     onClick={() => {
                                         setHeritageTab("bookmark");
                                     }}
-                                    style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "bookmark" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}
+                                    style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
                                 >
                                     <BookmarkIcon active={heritageTab === "bookmark"} />
                                     ブックマーク
@@ -512,7 +512,7 @@ export default function MyPage() {
                                     onClick={() => {
                                         setHeritageTab("like");
                                     }}
-                                    style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: heritageTab === "like" ? `3px solid ${C.navy}` : "3px solid transparent", display: "flex", alignItems: "center", gap: 7 }}
+                                    style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
                                 >
                                     <HeartIcon active={heritageTab === "like"} />
                                     いいね
@@ -561,7 +561,7 @@ export default function MyPage() {
                                 />
                             ))}
                             {/* 추가 슬롯 — 빈 칸 있을 때만 표시 */}
-                            {displayedHt.length < 4 && (
+                            {displayedHt.length === 0 && (
                                 <AddSlot type={heritageTab} onClick={() => navigate("/heritage")} />
                             )}
                         </div>
