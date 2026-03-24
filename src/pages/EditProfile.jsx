@@ -1,5 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import TopaModal from "../components/TopaModal";
+import { useModal } from "../hooks/useModal";
+import { DELETE_ACCOUNT } from "../constants/modalConfigs";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
 const C = {
@@ -57,6 +60,7 @@ export default function EditProfile() {
   const [hoverPw,     setHoverPw]     = useState(false);
   const [hoverDel,    setHoverDel]    = useState(false);
   const [hoverCheck,  setHoverCheck]  = useState(false);
+  const deleteModal = useModal();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -312,7 +316,7 @@ export default function EditProfile() {
 
             {/* 계정 삭제 */}
             <button
-              onClick={() => navigate("/mypage/delete")}
+              onClick={deleteModal.open}
               onMouseEnter={() => setHoverDel(true)}
               onMouseLeave={() => setHoverDel(false)}
               style={{
@@ -331,6 +335,18 @@ export default function EditProfile() {
         </div>
 
       </div>
+
+      {/* 계정 탈퇴 확인 모달 */}
+      <TopaModal
+        {...DELETE_ACCOUNT}
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.close}
+        onConfirm={() => {
+          // TODO: DELETE /api/users/me
+          deleteModal.close();
+          navigate("/");
+        }}
+      />
     </div>
   );
 }
