@@ -11,12 +11,7 @@ import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
 import TopaModal from "../components/TopaModal";
 
-// ── 데이터 ─────────────────────────────────────────────────────────
-const ROUTES = [
-    { id: 1, title: "ソウル宮殿ツアー", region: "ソウル", date: "2024.02.15", spots: 5 },
-    { id: 2, title: "慶州の歴史探訪", region: "慶尚北道", date: "2024.02.15", spots: 4 },
-    { id: 3, title: "扶余の百済遺跡", region: "忠清南道", date: "2024.02.15", spots: 6 },
-];
+const API_ROUTE = "/api/route";
 
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
 const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
@@ -87,9 +82,20 @@ function AddSlot({ type, onClick }) {
     );
 }
 
-function RouteCard({ route }) {
+function RouteCard({ route, onClick }) {
     return (
-        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: "pointer" }}>
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={onClick}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick?.();
+                }
+            }}
+            style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
+        >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontWeight: 700, color: C.navy }}>{route.title}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -149,6 +155,9 @@ export default function MyPage() {
 
     const [achievements, setAchievements] = useState({ contents: [] });
 
+    const [savedRoutes, setSavedRoutes] = useState([]);
+    const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
+
     const currentTabData = postTab === "posts" ? postData : postTab === "comments" ? commentData : reviewData;
     const currentSetPage = postTab === "posts" ? setPostPage : postTab === "comments" ? setCommentPage : setReviewPage;
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
@@ -169,11 +178,8 @@ export default function MyPage() {
     };
     const ROUTE_SIZE = 3;
 
-    // localStorage에서 사용자 저장 루트 불러오기
-    const savedRoutes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
-    const allRoutes = [...savedRoutes, ...ROUTES];
-    const totalRoutePages = Math.ceil(allRoutes.length / ROUTE_SIZE);
-    const displayedRoutes = allRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
+    const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
+    const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
 
     const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
     const displayedAct = currentActData;
@@ -417,6 +423,39 @@ export default function MyPage() {
         fetchAchievements();
     }, []);
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setSavedRoutes([]);
+            setRoutesLoading(false);
+            return;
+        }
+        let cancelled = false;
+        setRoutesLoading(true);
+        fetch(API_ROUTE, { headers: { Authorization: `Bearer ${token}` } })
+            .then((res) => {
+                if (!res.ok) throw new Error("fail");
+                return res.json();
+            })
+            .then((data) => {
+                if (!cancelled) setSavedRoutes(Array.isArray(data) ? data : []);
+            })
+            .catch(() => {
+                if (!cancelled) setSavedRoutes([]);
+            })
+            .finally(() => {
+                if (!cancelled) setRoutesLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        const maxPage = Math.max(0, Math.ceil(savedRoutes.length / ROUTE_SIZE) - 1);
+        if (routePage > maxPage) setRoutePage(maxPage);
+    }, [savedRoutes.length, routePage]);
+
     return (
         <>
         <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
@@ -472,10 +511,22 @@ export default function MyPage() {
                                 </button>
                             </div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                            {displayedRoutes.map((r) => (
-                                <RouteCard key={r.id} route={r} />
-                            ))}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12, minHeight: 120 }}>
+                            {routesLoading ? (
+                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>読み込み中…</p>
+                            ) : !localStorage.getItem("token") ? (
+                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>ログインすると保存した探訪路が表示されます。</p>
+                            ) : displayedRoutes.length === 0 ? (
+                                <p style={{ fontSize: 13, color: C.gray3, margin: 0 }}>まだ探訪路がありません。</p>
+                            ) : (
+                                displayedRoutes.map((r) => (
+                                    <RouteCard
+                                        key={r.id}
+                                        route={r}
+                                        onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)}
+                                    />
+                                ))
+                            )}
                         </div>
                         {typeof window !== "undefined" && localStorage.getItem("token") && (
                             <button

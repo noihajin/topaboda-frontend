@@ -5,6 +5,7 @@ import logoBlack from "../assets/logo_black.svg";
 
 const API_MAP_CONFIG = "/api/maps/config";
 const API_HERITAGE_BOOKMARKS = "/api/heritages/bookmarks";
+const API_ROUTE = "/api/route";
 const DEFAULT_MAP_ID = "DEMO_MAP_ID";
 const ROUTE_MAP_DEFAULT_CENTER = { lat: 36.5, lng: 127.8 };
 const GOOGLE_MAP_LIBRARIES = ["marker"];
@@ -104,7 +105,7 @@ const MapPinSmallIcon = () => (
 );
 
 // ── 저장 모달 ──────────────────────────────────────────────────
-function SaveModal({ count, onClose, onSave }) {
+function SaveModal({ count, onClose, onSave, saving }) {
   const [routeName, setRouteName] = useState("");
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -120,15 +121,16 @@ function SaveModal({ count, onClose, onSave }) {
           style={{ width: "100%", padding: "12px 16px", border: `1.5px solid ${C.border}`, borderRadius: 10, fontSize: 15, fontFamily: font, outline: "none", boxSizing: "border-box", marginBottom: 24 }}
           onFocus={e => e.target.style.borderColor = C.navy}
           onBlur={e => e.target.style.borderColor = C.border}
-          onKeyDown={e => e.key === "Enter" && routeName.trim() && onSave(routeName.trim())}
+          onKeyDown={e => e.key === "Enter" && routeName.trim() && !saving && onSave(routeName.trim())}
         />
         <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "12px", border: `1.5px solid ${C.border}`, borderRadius: 10, background: "white", color: C.gray3, fontWeight: 600, fontSize: 15, cursor: "pointer", fontFamily: font }}>キャンセル</button>
+          <button type="button" onClick={onClose} disabled={saving} style={{ flex: 1, padding: "12px", border: `1.5px solid ${C.border}`, borderRadius: 10, background: "white", color: C.gray3, fontWeight: 600, fontSize: 15, cursor: saving ? "default" : "pointer", fontFamily: font, opacity: saving ? 0.6 : 1 }}>キャンセル</button>
           <button
+            type="button"
             onClick={() => routeName.trim() && onSave(routeName.trim())}
-            disabled={!routeName.trim()}
-            style={{ flex: 2, padding: "12px", border: "none", borderRadius: 10, background: routeName.trim() ? C.navy : C.border, color: "white", fontWeight: 700, fontSize: 15, cursor: routeName.trim() ? "pointer" : "default", fontFamily: font, transition: "background 0.2s" }}
-          >保存する</button>
+            disabled={!routeName.trim() || saving}
+            style={{ flex: 2, padding: "12px", border: "none", borderRadius: 10, background: routeName.trim() && !saving ? C.navy : C.border, color: "white", fontWeight: 700, fontSize: 15, cursor: routeName.trim() && !saving ? "pointer" : "default", fontFamily: font, transition: "background 0.2s" }}
+          >{saving ? "保存中…" : "保存する"}</button>
         </div>
       </div>
     </div>
@@ -645,6 +647,12 @@ export default function RouteCreate() {
   const [searchParams] = useSearchParams();
   const heritageIdFromMap = searchParams.get("heritageId");
   const heritageNameFromMap = searchParams.get("heritageName") || "";
+  const routeIdFromQuery = searchParams.get("routeId");
+  const appliedRouteIdQueryRef = useRef(null);
+
+  useEffect(() => {
+    if (!routeIdFromQuery) appliedRouteIdQueryRef.current = null;
+  }, [routeIdFromQuery]);
 
   useEffect(() => {
     if (heritageIdFromMap) {
@@ -667,6 +675,10 @@ export default function RouteCreate() {
   const [bookmarkPlaces, setBookmarkPlaces] = useState([]);
   const [bookmarksLoading, setBookmarksLoading] = useState(() => !!localStorage.getItem("token"));
   const [bookmarksError, setBookmarksError] = useState(false);
+  const [savedRoutes, setSavedRoutes] = useState([]);
+  const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
+  const [routesError, setRoutesError] = useState(false);
+  const [saveSubmitting, setSaveSubmitting] = useState(false);
   /** 사이드바에서 선택 시 지도 핀( URL ?heritageId 보다 우선 ) */
   const [mapFocusHeritageId, setMapFocusHeritageId] = useState(null);
 
@@ -713,6 +725,52 @@ export default function RouteCreate() {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setSavedRoutes([]);
+      setRoutesLoading(false);
+      setRoutesError(false);
+      return;
+    }
+    let cancelled = false;
+    setRoutesLoading(true);
+    setRoutesError(false);
+    fetch(API_ROUTE, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        if (res.status === 401) throw new Error("unauthorized");
+        if (!res.ok) throw new Error("fail");
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) setSavedRoutes(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSavedRoutes([]);
+          setRoutesError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setRoutesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** 마이페이지 등에서 ?routeId= 로 진입 시: 저장 루트 탭 + 해당 카드 펼침(동일 쿼리로는 한 번만) */
+  useEffect(() => {
+    if (!routeIdFromQuery || routesLoading) return;
+    const id = Number(routeIdFromQuery);
+    if (Number.isNaN(id)) return;
+    if (!savedRoutes.some((r) => r.id === id)) return;
+    if (appliedRouteIdQueryRef.current === routeIdFromQuery) return;
+    appliedRouteIdQueryRef.current = routeIdFromQuery;
+    setNavTab("routes");
+    setOpenRouteId(id);
+  }, [routeIdFromQuery, routesLoading, savedRoutes]);
+
+  useEffect(() => {
     if (!heritageIdFromMap || bookmarkPlaces.length === 0) return;
     const has = bookmarkPlaces.some((p) => p.heritageId === heritageIdFromMap);
     if (!has) return;
@@ -737,9 +795,6 @@ export default function RouteCreate() {
     };
   }, []);
 
-  // localStorage에서 저장된 루트 읽기
-  const savedRoutes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
-
   const toggle = (id) => {
     setAdded((prev) => {
       const next = new Set(prev);
@@ -756,31 +811,42 @@ export default function RouteCreate() {
     });
   };
 
-  const handleSave = (name) => {
-    const existing = JSON.parse(localStorage.getItem("myRoutes") || "[]");
+  const handleSave = async (name) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
     const selected = bookmarkPlaces.filter((p) => added.has(p.heritageId));
-    const selectedPlaces = selected.map((p) => ({
-      id: p.heritageId,
-      nameJa: p.heritageName || p.heritageId,
-      nameEn: "",
-      address: "",
-      duration: "",
-      category: "文化財",
-      latitude: p.latitude,
-      longitude: p.longitude,
-      imageUrl: p.imageUrl,
-    }));
-    const newRoute = {
-      id: Date.now(),
-      title: name,
-      region: "ソウル",
-      date: new Date().toLocaleDateString("ja-JP").replace(/\//g, "."),
-      spots: selectedPlaces.length,
-      places: selectedPlaces,
-    };
-    localStorage.setItem("myRoutes", JSON.stringify([...existing, newRoute]));
-    setShowModal(false);
-    navigate("/mypage");
+    const heritageIds = selected.map((p) => p.heritageId);
+    setSaveSubmitting(true);
+    try {
+      const res = await fetch(API_ROUTE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          directionName: name,
+          transportType: 0,
+          heritageIds,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        window.alert("ログインの有効期限が切れた可能性があります。再度ログインしてください。");
+        return;
+      }
+      if (!res.ok) {
+        const msg = typeof data?.message === "string" ? data.message : "保存に失敗しました。";
+        window.alert(msg);
+        return;
+      }
+      setSavedRoutes((prev) => [data, ...prev]);
+      setShowModal(false);
+    } catch {
+      window.alert("保存に失敗しました。ネットワークを確認してください。");
+    } finally {
+      setSaveSubmitting(false);
+    }
   };
 
   const addedCount = added.size;
@@ -790,8 +856,7 @@ export default function RouteCreate() {
   /** 북마크 탭: 선택한 북마크 핀 / 保存ルート 탭: 펼친 카드 1件の places だけ */
   const routePins = useMemo(() => {
     if (navTab === "routes" && openRouteId != null) {
-      const routes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
-      const r = routes.find((x) => x.id === openRouteId);
+      const r = savedRoutes.find((x) => x.id === openRouteId);
       if (!r?.places?.length) return [];
       return r.places
         .filter(
@@ -824,7 +889,7 @@ export default function RouteCreate() {
         heritageName: p.heritageName,
         imageUrl: p.imageUrl,
       }));
-  }, [navTab, openRouteId, bookmarkPlaces, added]);
+  }, [navTab, openRouteId, bookmarkPlaces, added, savedRoutes]);
 
   const lonelyUrlHeritage =
     navTab === "bookmark" &&
@@ -845,8 +910,7 @@ export default function RouteCreate() {
       setMapFocusHeritageId(null);
       return;
     }
-    const routes = JSON.parse(localStorage.getItem("myRoutes") || "[]");
-    const r = routes.find((x) => x.id === openRouteId);
+    const r = savedRoutes.find((x) => x.id === openRouteId);
     const first = r?.places?.find(
       (p) =>
         p != null &&
@@ -855,7 +919,7 @@ export default function RouteCreate() {
     );
     if (first) setMapFocusHeritageId(String(first.id));
     else setMapFocusHeritageId(null);
-  }, [navTab, openRouteId]);
+  }, [navTab, openRouteId, savedRoutes]);
 
   const mapPinHighlightId = mapFocusHeritageId ?? heritageIdFromMap;
 
@@ -1060,7 +1124,35 @@ export default function RouteCreate() {
                 <p style={{ fontSize: 14, color: C.gray4, margin: 0 }}>ルートをタップして場所を確認</p>
               </div>
               <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                {savedRoutes.length === 0 ? (
+                {!localStorage.getItem("token") ? (
+                  <div style={{ padding: "24px 12px", textAlign: "center" }}>
+                    <p style={{ fontSize: 14, color: C.gray3, margin: "0 0 16px", lineHeight: 1.6 }}>
+                      保存ルートを表示するにはログインが必要です。
+                    </p>
+                    <Link
+                      to="/login"
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 20px",
+                        borderRadius: 10,
+                        background: C.navy,
+                        color: C.white,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        textDecoration: "none",
+                        fontFamily: font,
+                      }}
+                    >
+                      ログインへ
+                    </Link>
+                  </div>
+                ) : routesLoading ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px" }}>読み込み中…</p>
+                ) : routesError ? (
+                  <p style={{ fontSize: 14, color: C.red, margin: 0, padding: "8px 4px" }}>
+                    ルート一覧の取得に失敗しました。しばらくしてから再度お試しください。
+                  </p>
+                ) : savedRoutes.length === 0 ? (
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "40px 20px", textAlign: "center" }}>
                     <div style={{ fontSize: 48 }}>🗺️</div>
                     <p style={{ fontSize: 15, fontWeight: 700, color: C.gray3, margin: 0 }}>保存したルートがありません</p>
@@ -1115,8 +1207,9 @@ export default function RouteCreate() {
       {showModal && (
         <SaveModal
           count={addedCount}
-          onClose={() => setShowModal(false)}
+          onClose={() => !saveSubmitting && setShowModal(false)}
           onSave={handleSave}
+          saving={saveSubmitting}
         />
       )}
     </div>
