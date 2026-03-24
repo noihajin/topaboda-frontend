@@ -5,7 +5,7 @@ import logoBlack from "../assets/logo_black.svg";
 
 const API_MAP_CONFIG = "/api/maps/config";
 const API_HERITAGE_BOOKMARKS = "/api/heritages/bookmarks";
-const API_ROUTE = "/api/route";
+const API_ROUTES = "/api/routes";
 const DEFAULT_MAP_ID = "DEMO_MAP_ID";
 const ROUTE_MAP_DEFAULT_CENTER = { lat: 36.5, lng: 127.8 };
 const GOOGLE_MAP_LIBRARIES = ["marker"];
@@ -103,6 +103,25 @@ const MapPinSmallIcon = () => (
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
   </svg>
 );
+const TrashIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+);
+
+/** 장소 배열에서 해당 유산을 맨 앞(순서 1·최우선 경유)으로 옮긴 heritageId 배열 */
+function moveHeritageIdsToTop(places, heritageId) {
+  const ids = places.map((p) => p.id);
+  const idx = ids.indexOf(heritageId);
+  if (idx <= 0) return ids;
+  const next = [...ids];
+  next.splice(idx, 1);
+  next.unshift(heritageId);
+  return next;
+}
 
 // ── 저장 모달 ──────────────────────────────────────────────────
 function SaveModal({ count, onClose, onSave, saving }) {
@@ -577,26 +596,36 @@ function RouteMapPane({
 }
 
 // ── 저장된 루트 카드 (루트 탭) ────────────────────────────────
-function SavedRouteCard({ route, isOpen, onClick }) {
+function SavedRouteCard({ route, isOpen, onClick, onDelete, deleting, onMovePlaceToTop, onOptimizeDistance, reordering }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{ borderRadius: 14, overflow: "hidden", border: `2px solid ${isOpen ? C.navy : hovered ? "#c0c4d0" : C.border}`, transition: "border-color 0.18s" }}>
-      {/* 루트 헤더 */}
+      {/* 루트 헤더: 좌측=펼침, 우측=삭제+치브론 */}
       <div
-        onClick={onClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
           padding: "14px 16px",
           background: isOpen ? "rgba(0,13,87,0.04)" : C.white,
-          cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
           transition: "background 0.18s",
         }}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClick();
+            }
+          }}
+          style={{ flex: 1, minWidth: 0, cursor: "pointer", outline: "none" }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: C.navy }}>{route.title}</span>
             <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 99, background: "rgba(0,13,87,0.08)", color: C.navy, fontWeight: 600, whiteSpace: "nowrap" }}>{route.spots}か所</span>
@@ -608,25 +637,135 @@ function SavedRouteCard({ route, isOpen, onClick }) {
             <span style={{ fontSize: 12, color: C.gray4 }}>{route.date}</span>
           </div>
         </div>
-        <ChevronDownIcon open={isOpen} />
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+          <button
+            type="button"
+            aria-label="ルートを削除"
+            title="削除"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(e);
+            }}
+            disabled={deleting}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              border: `1.5px solid ${deleting ? C.border : "rgba(110,0,0,0.35)"}`,
+              background: deleting ? "#f1f5f9" : "white",
+              color: deleting ? C.gray4 : C.red,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: deleting ? "default" : "pointer",
+              flexShrink: 0,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!deleting) {
+                e.currentTarget.style.background = "rgba(110,0,0,0.08)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = deleting ? "#f1f5f9" : "white";
+            }}
+          >
+            <TrashIcon />
+          </button>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={onClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }}
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", color: C.navy, padding: 4 }}
+          >
+            <ChevronDownIcon open={isOpen} />
+          </div>
+        </div>
       </div>
 
       {/* 포함 장소 목록 (펼쳐짐) */}
       {isOpen && route.places && route.places.length > 0 && (
         <div style={{ background: "#f8fafc", borderTop: `1px solid ${C.border}`, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.gray3, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>含まれる場所</p>
+          <div style={{ marginBottom: 2 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: C.gray3, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>含まれる場所</p>
+              {route.places.length >= 2 ? (
+                <button
+                  type="button"
+                  title="1番目を出発点として、2番目以降を直線距離で近い順に並べ替え"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOptimizeDistance?.();
+                  }}
+                  disabled={reordering}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    border: `1.5px solid ${reordering ? C.border : C.gold}`,
+                    background: reordering ? "#f1f5f9" : "rgba(202,202,0,0.12)",
+                    color: reordering ? C.gray4 : "#7a6f00",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: reordering ? "default" : "pointer",
+                    fontFamily: font,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  距離で最適化
+                </button>
+              ) : null}
+            </div>
+            <p style={{ fontSize: 11, color: C.gray4, margin: "6px 0 0", lineHeight: 1.45 }}>
+              1番目はそのまま。2〜は直線距離の近い順（道路・交通は含みません）。
+            </p>
+          </div>
           {route.places.map((place, i) => {
             const badge = BADGE[place.category] || { bg: "#e2e8f0", color: "#6a7282" };
             return (
               <div key={place.id ?? i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: C.white, borderRadius: 10, border: `1px solid ${C.border}` }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: "#a08c00", minWidth: 18, textAlign: "center" }}>{i + 1}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{place.nameJa}</span>
                     <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 99, background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}>{place.category}</span>
+                    {i === 0 ? (
+                      <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 99, background: "rgba(0,13,87,0.1)", color: C.navy, fontWeight: 700, whiteSpace: "nowrap" }}>最優先</span>
+                    ) : null}
                   </div>
                   <span style={{ fontSize: 11, color: C.gray4 }}>{place.duration}</span>
                 </div>
+                {i > 0 ? (
+                  <button
+                    type="button"
+                    title="この場所を先頭（最優先）にする"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMovePlaceToTop?.(place.id);
+                    }}
+                    disabled={reordering}
+                    style={{
+                      flexShrink: 0,
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      border: `1.5px solid ${reordering ? C.border : C.navy}`,
+                      background: reordering ? "#f1f5f9" : "white",
+                      color: reordering ? C.gray4 : C.navy,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: reordering ? "default" : "pointer",
+                      fontFamily: font,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    先頭へ
+                  </button>
+                ) : null}
               </div>
             );
           })}
@@ -679,6 +818,8 @@ export default function RouteCreate() {
   const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
   const [routesError, setRoutesError] = useState(false);
   const [saveSubmitting, setSaveSubmitting] = useState(false);
+  const [deletingRouteId, setDeletingRouteId] = useState(null);
+  const [reorderingRouteId, setReorderingRouteId] = useState(null);
   /** 사이드바에서 선택 시 지도 핀( URL ?heritageId 보다 우선 ) */
   const [mapFocusHeritageId, setMapFocusHeritageId] = useState(null);
 
@@ -735,7 +876,7 @@ export default function RouteCreate() {
     let cancelled = false;
     setRoutesLoading(true);
     setRoutesError(false);
-    fetch(API_ROUTE, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(API_ROUTES, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         if (res.status === 401) throw new Error("unauthorized");
         if (!res.ok) throw new Error("fail");
@@ -818,7 +959,7 @@ export default function RouteCreate() {
     const heritageIds = selected.map((p) => p.heritageId);
     setSaveSubmitting(true);
     try {
-      const res = await fetch(API_ROUTE, {
+      const res = await fetch(API_ROUTES, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -846,6 +987,104 @@ export default function RouteCreate() {
       window.alert("保存に失敗しました。ネットワークを確認してください。");
     } finally {
       setSaveSubmitting(false);
+    }
+  };
+
+  const handleDeleteRoute = async (routeId) => {
+    if (!window.confirm("このルートを削除しますか？\n保存データから完全に削除されます。")) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    setDeletingRouteId(routeId);
+    try {
+      const res = await fetch(`${API_ROUTES}/${encodeURIComponent(routeId)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        window.alert("ログインの有効期限が切れた可能性があります。再度ログインしてください。");
+        return;
+      }
+      if (res.status === 404) {
+        setSavedRoutes((prev) => prev.filter((r) => r.id !== routeId));
+        setOpenRouteId((prev) => (prev === routeId ? null : prev));
+        return;
+      }
+      if (!res.ok) {
+        window.alert("削除に失敗しました。");
+        return;
+      }
+      setSavedRoutes((prev) => prev.filter((r) => r.id !== routeId));
+      setOpenRouteId((prev) => (prev === routeId ? null : prev));
+    } catch {
+      window.alert("削除に失敗しました。ネットワークを確認してください。");
+    } finally {
+      setDeletingRouteId(null);
+    }
+  };
+
+  const handleMovePlaceToTop = async (routeId, heritageId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const route = savedRoutes.find((r) => r.id === routeId);
+    if (!route?.places?.length) return;
+    const heritageIds = moveHeritageIdsToTop(route.places, heritageId);
+    const before = route.places.map((p) => p.id).join(",");
+    const after = heritageIds.join(",");
+    if (before === after) return;
+    setReorderingRouteId(routeId);
+    try {
+      const res = await fetch(`${API_ROUTES}/${encodeURIComponent(routeId)}/order`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ heritageIds }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        window.alert("ログインの有効期限が切れた可能性があります。再度ログインしてください。");
+        return;
+      }
+      if (!res.ok) {
+        const msg = typeof data?.message === "string" ? data.message : "順序の更新に失敗しました。";
+        window.alert(msg);
+        return;
+      }
+      setSavedRoutes((prev) => prev.map((r) => (r.id === routeId ? data : r)));
+    } catch {
+      window.alert("順序の更新に失敗しました。ネットワークを確認してください。");
+    } finally {
+      setReorderingRouteId(null);
+    }
+  };
+
+  const handleOptimizeDistance = async (routeId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const route = savedRoutes.find((r) => r.id === routeId);
+    if (!route?.places || route.places.length < 2) return;
+    setReorderingRouteId(routeId);
+    try {
+      const res = await fetch(`${API_ROUTES}/${encodeURIComponent(routeId)}/optimize-distance`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        window.alert("ログインの有効期限が切れた可能性があります。再度ログインしてください。");
+        return;
+      }
+      if (!res.ok) {
+        const msg = typeof data?.message === "string" ? data.message : "距離最適化に失敗しました。";
+        window.alert(msg);
+        return;
+      }
+      setSavedRoutes((prev) => prev.map((r) => (r.id === routeId ? data : r)));
+    } catch {
+      window.alert("距離最適化に失敗しました。ネットワークを確認してください。");
+    } finally {
+      setReorderingRouteId(null);
     }
   };
 
@@ -1169,6 +1408,11 @@ export default function RouteCreate() {
                       route={route}
                       isOpen={openRouteId === route.id}
                       onClick={() => setOpenRouteId(prev => prev === route.id ? null : route.id)}
+                      onDelete={() => handleDeleteRoute(route.id)}
+                      deleting={deletingRouteId === route.id}
+                      onMovePlaceToTop={(heritageId) => handleMovePlaceToTop(route.id, heritageId)}
+                      onOptimizeDistance={() => handleOptimizeDistance(route.id)}
+                      reordering={reorderingRouteId === route.id}
                     />
                   ))
                 )}
