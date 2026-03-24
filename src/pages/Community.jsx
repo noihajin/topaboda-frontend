@@ -61,6 +61,13 @@ export default function Community() {
   setKeyword(searchInput.trim());
   };
 
+  const handleSearchKeyDown = (e) => {
+  if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
 useEffect(() => {
     const params = {
     page: currentPage - 1,
@@ -183,7 +190,7 @@ useEffect(() => {
 
           {/* 검색바 - 완전 타원 + 호버 레드 */}
           <div style={{ flex: 1, position: "relative" }}>
-            <input value={searchInput} onChange={e => setSearchInput(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
+            <input value={searchInput} onChange={e => setSearchInput(e.target.value)} onKeyDown={handleSearchKeyDown} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 28px", border: `1px solid ${C.border}`, borderRadius: 9999, background: "#ffffff", fontSize: 15, outline: "none", boxShadow: "none", boxSizing: "border-box", fontWeight: 500 }} />
             <button
               onClick={handleSearch}
               style={{ position: "absolute", right: 6, top: 6, bottom: 6, width: 44, background: C.navy, border: "none", borderRadius: 9999, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background 0.2s" }}
