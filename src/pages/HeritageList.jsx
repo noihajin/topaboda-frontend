@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Pagination from "../components/Pagination";
-import { C, font, PAGE_SIZE } from "../components/heritagelist/constants";
+import { C, font, PAGE_SIZE, TYPE_CODE_MAP, REGION_CODE_MAP } from "../components/heritagelist/constants";
 import HeritageHero    from "../components/heritagelist/HeritageHero";
 import HeritageFilters from "../components/heritagelist/HeritageFilters";
 import HeritageCard    from "../components/heritagelist/HeritageCard";
@@ -11,43 +11,54 @@ export default function HeritageList() {
   const [query, setQuery]                   = useState("");
   const [activeCategory, setActiveCategory] = useState("すべて");
   const [activeRegion, setActiveRegion]     = useState("すべての地域");
-  const [currentPage, setCurrentPage]       = useState(0);
-  const [heritages, setHeritages]           = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [heritages, setHeritages] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-  const fetchHeritages = async () => {
-    try {
-      const response = await axios.get("http://localhost:9990/topaboda/api/heritages", {
-        params: {
-          page: 0,
-          size: 1000,
-        },
-      });
-      setHeritages(response.data);
-    } catch (e) {
-      console.error("국가유산 리스트 불러오기 실패:", e);
-    }
-  };
+    const fetchHeritages = async () => {
+      try {
+        setLoading(true);
 
-  fetchHeritages();
-  }, []);
+        const response = await axios.get(
+          "http://localhost:9990/topaboda/api/heritages",
+          {
+            params: {
+              page: currentPage,
+              size: PAGE_SIZE,
+              keyword: query || undefined,
+              region:
+              activeRegion === "すべての地域"
+              ? undefined
+              : REGION_CODE_MAP[activeRegion],
 
-  const filtered = useMemo(() => {
-    return heritages.filter((h) => {
-      const matchCat = activeCategory === "すべて" || h.type === activeCategory;
-      const matchRegion = activeRegion === "すべての地域" || h.region === activeRegion;
+              type:
+              activeCategory === "すべて"
+              ? undefined
+              : TYPE_CODE_MAP[activeCategory],
+            },
+          }
+        );
+        console.log("activeRegion =", activeRegion);
+console.log("region code =", REGION_CODE_MAP[activeRegion]);
+console.log("activeCategory =", activeCategory);
+console.log("type code =", TYPE_CODE_MAP[activeCategory]);
 
-      const matchQuery =
-        !query ||
-        h.nameKo?.includes(query) ||
-        h.nameJa?.includes(query);
+        setHeritages(response.data.content ?? []);
+        setTotalPages(response.data.totalPages ?? 0);
+        setTotalElements(response.data.totalElements ?? 0);
 
-      return matchCat && matchRegion && matchQuery;
-    });
-  }, [heritages, activeCategory, activeRegion, query]);
+      } catch (e) {
+        console.error("국가유산 리스트 불러오기 실패:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const displayed  = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+    fetchHeritages();
+  }, [currentPage, query, activeCategory, activeRegion]);
 
   const handleSearch   = () => { setQuery(searchInput); setCurrentPage(0); };
   const handleKeyDown  = (e) => { if (e.key === "Enter") handleSearch(); };
@@ -74,13 +85,17 @@ export default function HeritageList() {
       {/* 카드 그리드 */}
       <div style={{ padding: "40px 6% 60px", maxWidth: 1280, margin: "0 auto" }}>
         <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, marginBottom: 24, fontFamily: font }}>
-          {filtered.length}<span style={{ fontWeight: 400, color: C.textSub }}>件の遺産</span>
+          {totalElements}<span style={{ fontWeight: 400, color: C.textSub }}>件の遺産</span>
         </p>
-        {displayed.length > 0 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
-            {displayed.map(item => <HeritageCard key={item.id} item={item} />)}
-          </div>
-        ) : (
+        {loading ? (
+        <div style={{ textAlign: "center", padding: "80px 0", color: C.textSub, fontSize: 16, fontFamily: font }}>
+          読み込み中です。
+      </div>
+      ) : heritages.length > 0 ? (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+        {heritages.map(item => <HeritageCard key={item.id} item={item} />)}
+      </div>
+      ) : (
           <div style={{ textAlign: "center", padding: "80px 0", color: C.textSub, fontSize: 16, fontFamily: font }}>
             検索結果がありません。
           </div>
