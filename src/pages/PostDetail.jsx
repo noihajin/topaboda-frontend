@@ -215,6 +215,14 @@ if (!post) {
       console.error("data:", error.response?.data);
     }
   };
+
+  const handleCommentKeyDown = async (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      await handleCommentSubmit();
+    }
+  };
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", paddingTop: "11.9rem", paddingBottom: "8rem" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
@@ -335,6 +343,7 @@ if (!post) {
               <textarea
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
+                onKeyDown={handleCommentKeyDown}
                 placeholder="コメントを入力してください···"
                 rows={3}
                 style={{
@@ -388,6 +397,9 @@ if (!post) {
                 </div>
                 {/* 댓글 내용 */}
                 <p style={{
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.6,
+                wordBreak: "break-word",
                   margin: "0 0 0 60px", fontSize: 15, lineHeight: 1.8,
                   color: C.gray1, fontFamily: font,
                 }}>
