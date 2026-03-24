@@ -19,6 +19,7 @@ export default function HeritageList() {
 
   useEffect(() => {
     const fetchHeritages = async () => {
+      console.log(TYPE_CODE_MAP[activeCategory])
       try {
         setLoading(true);
 
@@ -33,7 +34,6 @@ export default function HeritageList() {
               activeRegion === "すべての地域"
               ? undefined
               : REGION_CODE_MAP[activeRegion],
-
               type:
               activeCategory === "すべて"
               ? undefined
@@ -42,9 +42,6 @@ export default function HeritageList() {
           }
         );
         console.log("activeRegion =", activeRegion);
-console.log("region code =", REGION_CODE_MAP[activeRegion]);
-console.log("activeCategory =", activeCategory);
-console.log("type code =", TYPE_CODE_MAP[activeCategory]);
 
         setHeritages(response.data.content ?? []);
         setTotalPages(response.data.totalPages ?? 0);
