@@ -129,19 +129,27 @@ export default function PostDetail() {
   const [post,        setPost]        = useState(null);
   const [liked,       setLiked]       = useState(false);
   const [likeCount,   setLikeCount]   = useState(0);
-  const [helpful,     setHelpful]     = useState(false);
+  // const [helpful,     setHelpful]     = useState(false);
   const [bookmarked,  setBookmarked]  = useState(false);
   const [comments,    setComments]    = useState([]);
   const [commentText, setCommentText] = useState("");
   const [submitHover, setSubmitHover] = useState(false);
 
+  const getAuthHeader = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  return { Authorization: `Bearer ${token}` };
+  };
 
-  const fetchPostDetail = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:9990/topaboda/api/boards/${postId}`,
-        { withCredentials: true }
-      );
+
+const fetchPostDetail = async () => {
+  try {
+    const headers = getAuthHeader();
+
+    const res = await axios.get(
+      `http://localhost:9990/topaboda/api/boards/${postId}`,
+      headers ? { headers } : {}
+    );
 
     const mappedPost = {
       id: res.data.id,
@@ -170,8 +178,39 @@ export default function PostDetail() {
   }
 };
 
+const fetchInteractionStatus = async () => {
+  const headers = getAuthHeader();
+
+  if (!headers) {
+    setBookmarked(false);
+    setLiked(false);
+    return;
+  }
+
+  try {
+    const [bookmarkRes, likeRes] = await Promise.all([
+      axios.get(
+        `http://localhost:9990/topaboda/api/boards/${postId}/bookmarks`,
+        { headers }
+      ),
+      axios.get(
+        `http://localhost:9990/topaboda/api/boards/${postId}/likes`,
+        { headers }
+      ),
+    ]);
+
+    setBookmarked(bookmarkRes.data === true);
+    setLiked(likeRes.data === true);
+  } catch (error) {
+    console.error("북마크/좋아요 상태 조회 실패:", error);
+    console.error("status:", error.response?.status);
+    console.error("data:", error.response?.data);
+  }
+};
+
 useEffect(() => {
   fetchPostDetail();
+  fetchInteractionStatus();
 }, [postId]);
 
 if (!post) {
@@ -180,7 +219,67 @@ if (!post) {
 
   const catColor = CAT_COLORS[post.category] ?? { bg: "#f3f4f6", color: C.gray3 };
 
-  const handleLike = () => { setLiked(v => !v); setLikeCount(v => liked ? v - 1 : v + 1); };
+const handleLike = async () => {
+  const headers = getAuthHeader();
+
+  if (!headers) {
+    alert("ログイン情報がありません。");
+    return;
+  }
+
+  try {
+    if (liked) {
+      await axios.delete(
+        `http://localhost:9990/topaboda/api/boards/${postId}/likes`,
+        { headers }
+      );
+    } else {
+      await axios.post(
+        `http://localhost:9990/topaboda/api/boards/${postId}/likes`,
+        {},
+        { headers }
+      );
+    }
+
+    await fetchPostDetail();
+    await fetchInteractionStatus();
+  } catch (error) {
+    console.error("좋아요 처리 실패:", error);
+    console.error("status:", error.response?.status);
+    console.error("data:", error.response?.data);
+  }
+};
+
+const handleBookmark = async () => {
+  const headers = getAuthHeader();
+
+  if (!headers) {
+    alert("ログイン情報がありません。");
+    return;
+  }
+
+  try {
+    if (bookmarked) {
+      await axios.delete(
+        `http://localhost:9990/topaboda/api/boards/${postId}/bookmarks`,
+        { headers }
+      );
+    } else {
+      await axios.post(
+        `http://localhost:9990/topaboda/api/boards/${postId}/bookmarks`,
+        {},
+        { headers }
+      );
+    }
+
+    await fetchPostDetail();
+    await fetchInteractionStatus();
+  } catch (error) {
+    console.error("북마크 처리 실패:", error);
+    console.error("status:", error.response?.status);
+    console.error("data:", error.response?.data);
+  }
+};
 
   const handleCommentSubmit = async () => {
   const trimmed = commentText.trim();
@@ -244,7 +343,7 @@ if (!post) {
                 {post.category}
               </span>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setBookmarked(v => !v)} style={iconBtnStyle}>
+                <button onClick={handleBookmark} style={iconBtnStyle}>
                   <BookmarkIcon active={bookmarked} />
                 </button>
                 <button style={iconBtnStyle}><ShareIcon /></button>
@@ -265,15 +364,18 @@ if (!post) {
               <MetaItem icon={<UserIcon />} text={post.author} />
               <MetaItem icon={<CalendarIcon />} text={post.date} />
               <MetaItem icon={<EyeIcon />} text={post.views.toLocaleString()} />
-              <button
-                onClick={handleLike}
-                style={{ display: "flex", alignItems: "center", gap: 6, border: "none", background: "transparent", cursor: "pointer", padding: 0 }}
-              >
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: 0 }}>
                 <HeartIcon filled={liked} />
-                <span style={{ fontSize: 14, fontWeight: liked ? 700 : 400, color: liked ? C.red : C.gray3, fontFamily: font }}>
+                <span
+                  style={{
+                  fontSize: 14,
+                  fontWeight: liked ? 700 : 400,
+                  color: liked ? C.red : C.gray3,
+                  fontFamily: font
+                  }}>
                   {likeCount.toLocaleString()}
                 </span>
-              </button>
+              </div>
             </div>
           </div>
 
@@ -302,20 +404,27 @@ if (!post) {
 
           {/* "この記事が役に立ちました" 버튼 */}
           <div style={{ display: "flex", justifyContent: "center", padding: "0 45px 45px" }}>
-            <button
-              onClick={() => setHelpful(v => !v)}
-              style={{
-                display: "flex", alignItems: "center", gap: 14,
-                padding: "20px 40px", borderRadius: 14,
-                background: helpful ? `${C.red}10` : "#f3f4f6",
-                border: helpful ? `1.5px solid ${C.red}40` : "1.5px solid transparent",
-                cursor: "pointer", transition: "all 0.2s", fontFamily: font,
-              }}
-            >
-              <HeartLgIcon filled={helpful} />
-              <span style={{ fontSize: 16, fontWeight: 700, color: helpful ? C.red : C.gray2, fontFamily: font }}>
-                この記事が役に立ちました
-              </span>
+            <button onClick={handleLike} style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              padding: "20px 40px",
+              borderRadius: 14,
+              background: liked ? `${C.red}10` : "#f3f4f6",
+              border: liked ? `1.5px solid ${C.red}40` : "1.5px solid transparent",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              fontFamily: font,
+            }}>
+            <HeartLgIcon filled={liked} />
+            <span style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: liked ? C.red : C.gray2,
+              fontFamily: font,
+            }}>
+            この記事が役に立ちました
+            </span>
             </button>
           </div>
         </div>
