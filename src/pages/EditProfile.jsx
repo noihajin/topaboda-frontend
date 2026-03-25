@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TopaModal from "../components/TopaModal";
 import useModal from "../hooks/useModal";
 import { DELETE_ACCOUNT } from "../constants/modalConfigs";
+import axios from "axios";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
 const C = {
@@ -49,6 +50,29 @@ export default function EditProfile() {
     const [hoverCheck, setHoverCheck] = useState(false);
     const deleteModal = useModal();
 
+    useEffect(() => {
+        const id = localStorage.getItem("id");
+        const token = localStorage.getItem("token");
+
+        if (!id || !token) {
+            console.error("인증 정보가 없습니다.");
+            return;
+        }
+
+        const fetchUserProfile = async () => {
+            try {
+                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setPreviewImg(response.data.icon);
+            } catch (error) {
+                console.error("프로필 로드 실패:", error);
+            }
+        };
+
+        fetchUserProfile();
+    }, []);
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -59,19 +83,63 @@ export default function EditProfile() {
 
     const handleNicknameCheck = async () => {
         if (!newNickname.trim()) return;
-        // TODO: GET /api/users/check-nickname?nickname=...
-        // 임시 목 처리 (API 연동 시 교체)
-        setNickCheck("ok");
+
+        try {
+            const response = await axios.post(`http://localhost:9990/topaboda/api/auth/signUp/nickname`, {
+                nickname: newNickname,
+            });
+
+            // 서버가 중복이 아닐 때 200 OK를 보낸다고 가정
+            if (response.status === 200) {
+                setNickCheck("ok");
+            }
+        } catch (e) {
+            // Axios 에러 객체에서 응답 코드를 확인
+            if (e.response && (e.response.status === 409 || e.response.status === 400)) {
+                setNickCheck("dup");
+            } else {
+                console.error("닉네임 변경 중 서버 오류 발생", e);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            }
+        }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (newNickname && nickCheck !== "ok") {
             alert("ニックネームの重複確認をしてください。");
             return;
         }
-        // TODO: PATCH /api/users/profile  { nickname: newNickname || nickname, profileImage }
-        alert("変更を保存しました！");
-        navigate("/mypage");
+
+        const token = localStorage.getItem("token");
+        const formData = new FormData();
+
+        const file = fileInputRef.current?.files?.[0];
+        if (file) {
+            formData.append("icon", file);
+        }
+
+        const profileData = {
+            nickname: newNickname || null,
+            icon: file ? file.name : previewImg === null ? "0" : null,
+        };
+
+        formData.append("data", new Blob([JSON.stringify(profileData)], { type: "application/json" }));
+
+        try {
+            const response = await axios.patch(`http://localhost:9990/topaboda/api/users/profile`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 200) {
+                alert("変更を保存しました！");
+                navigate("/mypage");
+            }
+        } catch (e) {
+            console.error("프로필 수정 실패:", e);
+            alert("저장 중 오류가 발생했습니다.");
+        }
     };
 
     return (
@@ -173,9 +241,7 @@ export default function EditProfile() {
                     <div>
                         {/* 닉네임 변경 + 중복확인 */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>
-                                ニックネーム変更
-                            </label>
+                            <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>ニックネーム変更</label>
                             <div style={{ display: "flex", gap: 8 }}>
                                 <input
                                     type="text"
