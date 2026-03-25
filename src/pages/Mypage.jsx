@@ -11,14 +11,11 @@ import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
 import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
-
 const API_ROUTES = "/api/routes";
-
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
 const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
 const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
 const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
-
 // ── 서브 컴포넌트: 업적/탐방로 복구 ──────────────────────────────────────
 function AchievementProgressBar({ progress }) {
     return (
@@ -30,7 +27,6 @@ function AchievementProgressBar({ progress }) {
         </div>
     );
 }
-
 function AchievementCard({ item }) {
     return (
         <div style={{ textAlign: "center", animation: "fadeSlideIn 0.3s ease both" }}>
@@ -42,7 +38,6 @@ function AchievementCard({ item }) {
         </div>
     );
 }
-
 function AddSlot({ type, onClick }) {
     const [hovered, setHovered] = React.useState(false);
     return (
@@ -83,7 +78,6 @@ function AddSlot({ type, onClick }) {
         </div>
     );
 }
-
 function RouteCard({ route, onClick }) {
     return (
         <div
@@ -115,14 +109,12 @@ function RouteCard({ route, onClick }) {
         </div>
     );
 }
-
 // ── 메인 컴포넌트 ──────────────────────────────────────────────────
 export default function MyPage() {
     const navigate = useNavigate();
     const [postTab, setPostTab] = useState("posts");
     const [heritageTab, setHeritageTab] = useState("bookmark");
     const [routePage, setRoutePage] = useState(0);
-
     const [user, setUser] = useState({
         id: "",
         email: "",
@@ -131,7 +123,6 @@ export default function MyPage() {
         createdAt: "",
         visitCount: 0,
     });
-
     const initialPageData = {
         contents: [],
         currentPage: 0,
@@ -139,73 +130,30 @@ export default function MyPage() {
         totalElements: 0,
         totalPages: 0,
     };
-
     const [htBkData, setHtBkData] = useState(initialPageData);
     const [htBkPage, setHtBkPage] = useState(0);
-
     const [htLkData, setHtLkData] = useState(initialPageData);
     const [htLkPage, setHtLkPage] = useState(0);
-
     const [postData, setPostData] = useState(initialPageData);
     const [postPage, setPostPage] = useState(0);
-
     const [postBkData, setPostBkData] = useState(initialPageData);
     const [postBkPage, setPostBkPage] = useState(0);
     const [postLkData, setPostLkData] = useState(initialPageData);
     const [postLkPage, setPostLkPage] = useState(0);
     const [postSaveTab, setPostSaveTab] = useState("bookmark"); // "bookmark" | "like"
     const [postSaveCancelModal, setPostSaveCancelModal] = useState({ open: false, item: null });
-
     const [commentData, setCommentData] = useState(initialPageData);
     const [commentPage, setCommentPage] = useState(0);
-
     const [reviewData, setReviewData] = useState(initialPageData);
     const [reviewPage, setReviewPage] = useState(0);
-
     const [achievements, setAchievements] = useState({ contents: [] });
-
     const [savedRoutes, setSavedRoutes] = useState([]);
     const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
-
     const currentTabData = postTab === "posts" ? postData : postTab === "comments" ? commentData : reviewData;
     const currentSetPage = postTab === "posts" ? setPostPage : postTab === "comments" ? setCommentPage : setReviewPage;
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
-
     const PAGE_SIZE = 5;
     const HT_SIZE = 4;
-
-    const handlePostSaveCancelClose = () => {
-    setPostSaveCancelModal({ open: false, item: null });
-    };
-
-    const handlePostSaveCancelConfirm = async () => {
-        const token = localStorage.getItem("token");
-
-        if (!token || !postSaveCancelModal.item) {
-            console.error("인증 정보 또는 삭제 대상이 없습니다.");
-            return;
-        }
-
-        const boardId = postSaveCancelModal.item.id;
-        const url = `http://localhost:9990/topaboda/api/boards/${boardId}/${postSaveCancelModal.item.type === "bookmark" ? "bookmarks" : "likes"}`;
-
-        try {
-            await axios.delete(url, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (postSaveCancelModal.item.type === "bookmark") {
-                fetchData("/boards/bookmarks/snippet", { page: postBkPage, size: PAGE_SIZE }, setPostBkData);
-            } else {
-                fetchData("/boards/likes/snippet", { page: postLkPage, size: PAGE_SIZE }, setPostLkData);
-            }
-        } catch (error) {
-            console.error(`${url} 삭제 실패:`, error);
-        }
-
-        setPostSaveCancelModal({ open: false, item: null });
-    };
-
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -213,61 +161,50 @@ export default function MyPage() {
     const handleCancelConfirm = async () => {
         const id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
-
         if (!id || !token) {
             console.error("인증 정보가 없습니다.");
             return;
         }
-
         const url = `http://localhost:9990/topaboda/api/heritages/${cancelModal.item.heritageId}/${heritageTab === "bookmark" ? "bookmarks" : "likes"}`;
-
         try {
             await axios.delete(url, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
             if (heritageTab === "bookmark") {
                 fetchData("/heritages/bookmarks/snippet", { page: htBkPage, size: HT_SIZE }, setHtBkData);
             } else {
                 fetchData("/heritages/likes/snippet", { page: htLkPage, size: HT_SIZE }, setHtLkData);
             }
-        } catch (error) {
-            console.error(`${url} 삭제 실패:`, error);
+        } catch (e) {
+            console.error(`${url} 삭제 실패:`, e);
         }
-
         setCancelModal({ open: false, item: null });
     };
     const ROUTE_SIZE = 3;
-
     const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
     const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
-
     const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
     const displayedAct = currentActData;
-
     const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
     const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
-    // 항상 마지막에 +1 가상 페이지(추가 슬롯 전용)
-    const totalHtPagesWithAdd = totalHtPages + 1;
+    const currentHtTotal = heritageTab === "bookmark" ? htBkData.totalElements : htLkData.totalElements;
+    // 마지막 페이지가 꽉 찬 경우에만 +버튼 전용 가상 페이지 추가 (아니면 인라인으로 표시)
+    const lastPageIsFull = currentHtTotal > 0 && currentHtTotal % HT_SIZE === 0;
+    const totalHtPagesWithAdd = totalHtPages + (lastPageIsFull ? 1 : 0);
     const displayedHt = currentHtData;
-
     const fetchData = async (url, params, setData) => {
         const id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
-
         if (!id || !token) {
             console.error("인증 정보가 없습니다.");
             return;
         }
-
         try {
             const response = await axios.get(`http://localhost:9990/topaboda/api${url}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: params,
             });
-
             const data = response.data;
-
             setData({
                 contents: data.contents ?? data.content ?? [],
                 currentPage: data.currentPage ?? data.number ?? 0,
@@ -279,23 +216,19 @@ export default function MyPage() {
             console.error(`${url} 로드 실패:`, error);
         }
     };
-
     // 게시글 편집
     const handleEditPost = async (postId) => {
         try {
             const token = localStorage.getItem("token");
-
             if (!token) {
                 alert("ログイン情報がありません。");
                 return;
             }
-
             const res = await axios.get(`http://localhost:9990/topaboda/api/boards/${postId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             navigate("/community/write", {
                 state: {
                     isEdit: true,
@@ -312,25 +245,20 @@ export default function MyPage() {
             alert("記事情報を読み込めませんでした。");
         }
     };
-
     // 게시글 삭제
     const handleDeletePost = async (postId) => {
         const token = localStorage.getItem("token");
-
         if (!token) {
             alert("ログイン情報がありません。");
             return;
         }
-
         try {
             await axios.delete(`http://localhost:9990/topaboda/api/boards/${postId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             alert("記事が削除されました。");
-
             // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
         } catch (error) {
@@ -340,16 +268,13 @@ export default function MyPage() {
             alert("記事の削除に失敗しました。");
         }
     };
-
     // 댓글 수정
     const handleEditComment = async (commentId, newContent) => {
         const token = localStorage.getItem("token");
-
         if (!token) {
             alert("ログイン情報がありません。");
             return;
         }
-
         try {
             await axios.patch(
                 `http://localhost:9990/topaboda/api/comments/${commentId}`,
@@ -361,9 +286,7 @@ export default function MyPage() {
                     },
                 },
             );
-
             alert("コメントが修正されました。");
-
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
         } catch (error) {
             console.error("댓글 수정 실패:", error);
@@ -372,25 +295,20 @@ export default function MyPage() {
             alert("コメントの修正に失敗しました。");
         }
     };
-
     // 댓글 삭제
     const handleDeleteComment = async (commentId) => {
         const token = localStorage.getItem("token");
-
         if (!token) {
             alert("ログイン情報がありません。");
             return;
         }
-
         try {
             await axios.delete(`http://localhost:9990/topaboda/api/comments/${commentId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             alert("コメントが削除されました。");
-
             // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
         } catch (error) {
@@ -400,16 +318,58 @@ export default function MyPage() {
             alert("コメントの削除に失敗しました。");
         }
     };
-
+    // 리뷰 수정
+    const handleEditReview = async (reviewId, newContent) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("ログイン情報がありません。");
+            return;
+        }
+        try {
+            await axios.patch(
+                `http://localhost:9990/topaboda/api/reviews/${reviewId}`,
+                { content: newContent },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+            alert("レビューが修正されました。");
+            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+        } catch (error) {
+            console.error("리뷰 수정 실패:", error);
+            alert("レビューの修正に失敗しました。");
+        }
+    };
+    // 리뷰 삭제
+    const handleDeleteReview = async (reviewId) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("ログイン情報がありません。");
+            return;
+        }
+        try {
+            await axios.delete(`http://localhost:9990/topaboda/api/reviews/${reviewId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            alert("レビューが削除されました。");
+            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+        } catch (error) {
+            console.error("리뷰 삭제 실패:", error);
+            alert("レビューの削除に失敗しました。");
+        }
+    };
     useEffect(() => {
         const id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
-
         if (!id || !token) {
             console.error("인증 정보가 없습니다.");
             return;
         }
-
         const fetchUserProfile = async () => {
             try {
                 const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
@@ -421,58 +381,44 @@ export default function MyPage() {
                 console.error("프로필 로드 실패:", error);
             }
         };
-
         fetchUserProfile();
     }, []);
-
     useEffect(() => {
         fetchData("/heritages/likes/snippet", { page: htLkPage, size: HT_SIZE }, setHtLkData);
     }, [htLkPage]);
-
     useEffect(() => {
         fetchData("/heritages/bookmarks/snippet", { page: htBkPage, size: HT_SIZE }, setHtBkData);
     }, [htBkPage]);
-
     useEffect(() => {
         fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
     }, [postPage]);
-
     useEffect(() => {
         fetchData("/boards/bookmarks/snippet", { page: postBkPage, size: PAGE_SIZE }, setPostBkData);
     }, [postBkPage]);
-
     useEffect(() => {
         fetchData("/boards/likes/snippet", { page: postLkPage, size: PAGE_SIZE }, setPostLkData);
     }, [postLkPage]);
-
     useEffect(() => {
         fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
     }, [commentPage]);
-
     useEffect(() => {
         fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
     }, [reviewPage]);
-
     useEffect(() => {
         const MEDAL_MAP = {
             金: MEDAL_GOLD,
             銀: MEDAL_SILVER,
             銅: MEDAL_BRONZE,
         };
-
         const fetchAchievements = async () => {
             const id = localStorage.getItem("id");
             const token = localStorage.getItem("token");
-
             if (!id || !token) return;
-
             try {
                 const response = await axios.get(`http://localhost:9990/topaboda/api/users/achievements/snippet`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
                 const rawData = response.data.contents || response.data;
-
                 const mappedData = rawData.map((item) => ({
                     id: item.id,
                     title: item.title || item.name,
@@ -481,24 +427,19 @@ export default function MyPage() {
                     achieved: !!item.achieved,
                     progress: item.progress,
                 }));
-
                 mappedData.sort((a, b) => {
                     if (a.achieved !== b.achieved) {
                         return b.achieved - a.achieved;
                     }
-
                     return b.progress - a.progress;
                 });
-
                 setAchievements({ contents: mappedData });
             } catch (error) {
                 console.error("업적 로드 실패:", error);
             }
         };
-
         fetchAchievements();
     }, []);
-
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -526,12 +467,10 @@ export default function MyPage() {
             cancelled = true;
         };
     }, []);
-
     useEffect(() => {
         const maxPage = Math.max(0, Math.ceil(savedRoutes.length / ROUTE_SIZE) - 1);
         if (routePage > maxPage) setRoutePage(maxPage);
     }, [savedRoutes.length, routePage]);
-
     return (
         <>
             <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
@@ -540,13 +479,12 @@ export default function MyPage() {
         .ht-card .overlay { opacity: 0; transition: opacity 0.3s ease; background: rgba(0,0,0,0.75); }
         .ht-card:hover .overlay { opacity: 1; }
       `}</style>
-
                 <div style={{ maxWidth: 1100, margin: "0 auto", padding: "140px 20px", display: "flex", flexDirection: "column", gap: 32 }}>
                     {/* ── 1. 프로필 ── */}
                     <div style={{ background: C.white, borderRadius: 24, padding: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
                             <div style={{ width: 120, height: 120, borderRadius: "50%", border: `4px solid ${C.red}`, overflow: "hidden" }}>
-                                <img src={user?.icon || "/default.png"} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <img src={user?.icon || "/default-profile.png"} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 28, fontWeight: 900, color: C.navy, margin: "0 0 4px" }}>{user?.nickname || "ゲスト"}</h1>
@@ -567,7 +505,6 @@ export default function MyPage() {
                             プロフィール編集
                         </button>
                     </div>
-
                     {/* ── 2. 탐방로 & 북마크 (2열 레이아웃) ── */}
                     <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
                         {/* 나의 탐방로 */}
@@ -585,12 +522,7 @@ export default function MyPage() {
                                 </div>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-                                {routesLoading ? (
-                                    <>
-                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
-                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
-                                    </>
-                                ) : savedRoutes.length === 0 ? (
+                                {!routesLoading && savedRoutes.length === 0 ? (
                                     /* 목록 없을 때 */
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
                                         <p style={{ fontSize: 14, color: C.gray3, margin: 0 }}>探訪路がありません</p>
@@ -616,7 +548,6 @@ export default function MyPage() {
                                 + 新しい探訪路を作る
                             </button>
                         </div>
-
                         {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
                         <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
@@ -663,10 +594,8 @@ export default function MyPage() {
                             </div>
                         </div>
                     </div>
-
                 {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "stretch" }}>
-
                     {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
                     <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
                         {/* 탭 + 새 글 작성 버튼 */}
@@ -694,9 +623,8 @@ export default function MyPage() {
                                 <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
                             </button>
                         </div>
-
                         {/* 리스트 */}
-                        <div style={{ minHeight: 500, flex: 1 }}>
+                        <div style={{ minHeight: 320, flex: 1 }}>
                             {displayedAct.length === 0 ? (
                                 <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                     {postTab === "posts"    && "投稿した記事がありません。"}
@@ -707,17 +635,15 @@ export default function MyPage() {
                                 displayedAct.map((item) => {
                                     if (postTab === "posts")    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
                                     if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                    return <ReviewRow key={item.id} item={item} />;
+                                    return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReview} />;
                                 })
                             )}
                         </div>
-
                         {/* 페이지네이션 */}
                         <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
                     </div>
-
                     {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
                         {/* 탭 헤더 */}
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                             <div style={{ display: "flex", gap: 8 }}>
@@ -739,7 +665,6 @@ export default function MyPage() {
                                 })}
                             </div>
                         </div>
-
                         {/* 리스트 */}
                         {(() => {
                             const saveData = postSaveTab === "bookmark" ? postBkData : postLkData;
@@ -747,7 +672,7 @@ export default function MyPage() {
                             const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
                             return (
                                 <>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 500, flex: 1 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 320, flex: 1 }}>
                                         {saveData.contents.length === 0 ? (
                                             <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                                 {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
@@ -773,7 +698,6 @@ export default function MyPage() {
                         })()}
                     </div>
                 </div>
-
                     {/* ── 4. 업적 갤러리 ── */}
                     <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         {/* 헤더 */}
@@ -781,14 +705,12 @@ export default function MyPage() {
                             <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
                             <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
                         </div>
-
                         {/* 16개 메달 그리드 */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px", justifyItems: "center" }}>
                             {achievements.contents.map((item) => (
                                 <AchievementCard key={item.id} item={item} />
                             ))}
                         </div>
-
                         {/* 피그마 1767-2214 하단 바 */}
                         {(() => {
                             const achievedCount = achievements.contents.filter((a) => a.achieved).length;
@@ -814,7 +736,6 @@ export default function MyPage() {
                                             <span style={{ fontSize: 13, fontWeight: 800, color: C.gray3 }}>{notStartedCount}</span>
                                         </div>
                                     </div>
-
                                     {/* 実績ページへ → ボタン */}
                                     <button
                                         onClick={() => navigate("/achievements")}
@@ -849,7 +770,6 @@ export default function MyPage() {
                     </div>
                 </div>
             </div>
-
         {/* 북마크 / 좋아요 취소 확인 모달 */}
         <TopaModal
             isOpen={cancelModal.open}
@@ -870,12 +790,14 @@ export default function MyPage() {
                     : " のいいねを解除しますか？"}
             </p>
         </TopaModal>
-
         {/* 게시글 북마크 / 좋아요 취소 확인 모달 */}
         <TopaModal
             isOpen={postSaveCancelModal.open}
-            onClose={handlePostSaveCancelClose}
-            onConfirm={handlePostSaveCancelConfirm}
+            onClose={() => setPostSaveCancelModal({ open: false, item: null })}
+            onConfirm={() => {
+                // TODO: DELETE /api/boards/bookmarks/{id} or DELETE /api/boards/{id}/likes
+                setPostSaveCancelModal({ open: false, item: null });
+            }}
             variant={postSaveCancelModal.item?.type === "bookmark" ? "info" : "danger"}
             title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
             confirmLabel="解除する"
