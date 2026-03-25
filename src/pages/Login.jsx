@@ -203,7 +203,7 @@ export default function LoginPage() {
                         color: C.gray3,
                     }}
                 >
-                    <span style={{ cursor: "pointer" }}>ID検索</span>
+                    <Link to="/find-id" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>ID検索</Link>
                     <span style={{ color: C.divider }}>|</span>
                     <span style={{ cursor: "pointer" }}>パスワード検索</span>
                 </div>

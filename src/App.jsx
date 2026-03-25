@@ -29,6 +29,7 @@ import RouteCreate from "./pages/RouteCreate";
 import PostDetail from "./pages/PostDetail";
 import EditProfile from "./pages/EditProfile";
 import ChangePassword from "./pages/ChangePassword";
+import FindId from "./pages/FindId";
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -68,6 +69,9 @@ function AppLayout() {
 
           {/* 3. 로그인 */}
           <Route path="/login" element={<Login />} />
+
+          {/* 3-1. 아이디 찾기 */}
+          <Route path="/find-id" element={<FindId />} />
 
           {/* 4. 회원가입 선택 */}
           <Route path="/register" element={<RegisterSelect />} />
