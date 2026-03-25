@@ -86,6 +86,9 @@ useEffect(() => {
   axios
     .get(`http://localhost:9990/topaboda/api/boards`,{ params })
     .then((res) => {
+      console.log("list raw data:", res.data);
+console.log("first thumbnailUrl:", res.data.content?.[0]?.thumbnailUrl);
+console.log("first item:", res.data.content?.[0]);
       const mapped = res.data.content.map((item) => ({
         id: item.id,
         category: item.categories,        // 이름 바꿔줌
@@ -95,6 +98,7 @@ useEffect(() => {
         views: item.viewCount,
         likes: item.likeCount ?? 0,      // null 방지
         comments: item.commentCount ?? 0,
+        thumbnailUrl: item.thumbnailUrl ?? null,
       }));
 
       setPosts(mapped);
@@ -159,11 +163,19 @@ useEffect(() => {
             </div>
             <h2 style={{ color: C.navy, fontSize: isMobile ? 22 : 28, fontWeight: 900 }}>人気のレビュー</h2>
           </div>
-          <div style={{ display: "flex", gap: isMobile ? 16 : 32, flexDirection: isMobile ? "column" : "row" }}>
-            {popularPosts.map((p, index) => (
-              <PopularCard key={p.id} post={p} rank={index + 1} />
-            ))}
-          </div>
+<div
+  style={{
+    display: "flex",
+    gap: isMobile ? 16 : 36,
+    flexDirection: isMobile ? "column" : "row",
+    alignItems: "flex-start",
+    justifyContent: isMobile ? "flex-start" : "center",
+  }}
+>
+  {popularPosts.map((p, index) => (
+    <PopularCard key={p.id} post={p} rank={index + 1} />
+  ))}
+</div>
         </section>
 
         {/* 필터 및 검색 바 */}
@@ -260,24 +272,124 @@ useEffect(() => {
 
 function PopularCard({ post, rank }) {
   const navigate = useNavigate();
+
   return (
-    <motion.div whileHover={{ y: -8 }} onClick={() => navigate(`/community/${post.id}`)} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
-      <div style={{ height: 160, background: "#f1f3f7", position: "relative" }}>
-        <div style={{ position: "absolute", top: 16, left: 16, width: 36, height: 36, borderRadius: 12, background: `linear-gradient(135deg, ${C.gold}, ${C.goldD})`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, color: C.navy, letterSpacing: "-0.05em" }}>{rank}</div>
-      </div>
-      <div style={{ padding: 20 }}>
-        <h4 style={{ margin: "0 0 12px", color: C.navy, fontWeight: 900, fontSize: 17, lineHeight: 1.5, letterSpacing: "-0.01em" }}>{post.title}</h4>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontSize: 13, color: C.gray2, fontWeight: 700 }}>{post.author}</span>
-          <div style={{ display: "flex", gap: 10 }}>
-            {/* 숫자는 Roboto 볼드체로 가독성 극대화 */}
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.red, fontWeight: 800 }}><img src={icHeart} style={{ width: 14 }} alt="" /> {post.likes}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.navy, fontWeight: 800 }}><img src={icComment} style={{ width: 13 }} alt="" /> {post.comments}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray2, fontWeight: 800 }}><img src={icEye} style={{ width: 15, opacity: 0.5 }} alt="" /> {post.views}</span>
-          </div>
+    <div
+      onClick={() => navigate(`/community/${post.id}`)}
+      style={{
+        width: 300,
+        borderRadius: 20,
+        overflow: "hidden",
+        background: C.white,
+        border: `1px solid ${C.border}`,
+        boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+        cursor: "pointer",
+        transition: "transform 0.18s ease, box-shadow 0.18s ease",
+        flexShrink: 0,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-4px)";
+        e.currentTarget.style.boxShadow = "0 12px 28px rgba(0,0,0,0.10)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.06)";
+      }}
+    >
+      {/* 이미지 영역 */}
+      <div
+        style={{
+          position: "relative",
+          height: 158,
+          background: "#eef1f6",
+          overflow: "hidden",
+        }}
+      >
+        <img
+          src={post.thumbnailUrl || "http://localhost:9990/topaboda/boards/default-board-thumbnail.png"}
+          alt={post.title}
+          onError={(e) => {
+            e.currentTarget.src = "http://localhost:9990/topaboda/boards/default-board-thumbnail.png";
+          }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+
+        {/* 순위 배지 */}
+        <div
+          style={{
+            position: "absolute",
+            top: 14,
+            left: 14,
+            minWidth: 40,
+            height: 40,
+            padding: "0 10px",
+            borderRadius: 14,
+            background: C.gold,
+            color: C.navy,
+            fontSize: 18,
+            fontWeight: 900,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+          }}
+        >
+          {rank}
         </div>
       </div>
-    </motion.div>
+
+      {/* 텍스트 영역 */}
+      <div style={{ padding: "16px 16px 18px" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            color: "#8a5a00",
+            marginBottom: 8,
+          }}
+        >
+          レビュー
+        </div>
+
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 900,
+            color: C.navy,
+            lineHeight: 1.35,
+            marginBottom: 10,
+            wordBreak: "break-word",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            minHeight: 43,
+          }}
+        >
+          {post.title}
+        </div>
+
+        <div
+          style={{
+            fontSize: 13,
+            color: C.gray1,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexWrap: "wrap",
+          }}
+        >
+          <span>{post.author}</span>
+          <span style={{ color: C.gray3 }}>·</span>
+          <span>{post.date}</span>
+        </div>
+      </div>
+    </div>
   );
 }
 

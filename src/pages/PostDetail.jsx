@@ -155,6 +155,12 @@ const fetchPostDetail = async () => {
       headers ? { headers } : {}
     );
 
+    console.log("detail raw data:", res.data);
+console.log("detail mediaList:", res.data.mediaList);
+console.log("first fileUrl:", res.data.mediaList?.[0]?.fileUrl);
+console.log("first savedName:", res.data.mediaList?.[0]?.savedName);
+console.log("first orgName:", res.data.mediaList?.[0]?.orgName);
+
     const mappedPost = {
       id: res.data.id,
       category: res.data.categories,
@@ -164,6 +170,9 @@ const fetchPostDetail = async () => {
       views: res.data.viewCount ?? 0,
       likes: res.data.likeCount ?? 0,
       content: res.data.content ?? "",
+      mediaList: (res.data.mediaList ?? []).sort(
+        (a, b) => (a.displayOrder ?? 9999) - (b.displayOrder ?? 9999)
+      ),
     };
 
     const mappedComments = (res.data.comments ?? []).map((comment) => ({
@@ -392,22 +401,68 @@ const handleBookmark = async () => {
           </div>
 
           {/* 이미지 영역 */}
-          <div style={{ display: "flex", gap: 10, height: 380 }}>
-            <div style={{ flex: "0 0 41%", overflow: "hidden", background: C.border }}>
-              <img
-                src={`https://picsum.photos/seed/heritage${post.id}a/800/600`}
-                alt=""
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-            <div style={{ flex: "0 0 59%", overflow: "hidden", background: C.border }}>
-              <img
-                src={`https://picsum.photos/seed/heritage${post.id}b/1200/600`}
-                alt=""
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
+{post.mediaList && post.mediaList.length > 0 && (
+  <div style={{ padding: "24px 45px 0" }}>
+    {/* 첫 번째 이미지는 크게 */}
+    <div
+      style={{
+        width: "100%",
+        borderRadius: 14,
+        overflow: "hidden",
+        background: C.border,
+        marginBottom: post.mediaList.length > 1 ? 10 : 0,
+      }}
+    >
+<img
+  src={post.mediaList[0].fileUrl || "http://localhost:9990/topaboda/boards/default-board-thumbnail.png"}
+  alt={post.mediaList[0].orgName || post.title}
+  onError={(e) => {
+    console.log("main image load failed:", post.mediaList[0].fileUrl);
+    e.currentTarget.src = "http://localhost:9990/topaboda/boards/default-board-thumbnail.png";
+  }}
+  style={{
+    width: "100%",
+    maxHeight: 420,
+    objectFit: "cover",
+    display: "block",
+  }}
+/>
+    </div>
+
+    {/* 나머지 이미지는 썸네일 */}
+    {post.mediaList.length > 1 && (
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {post.mediaList.slice(1).map((media) => (
+          <div
+            key={media.id}
+            style={{
+              width: 140,
+              height: 100,
+              borderRadius: 10,
+              overflow: "hidden",
+              background: C.border,
+            }}
+          >
+<img
+  src={media.fileUrl || "http://localhost:9990/topaboda/boards/default-board-thumbnail.png"}
+  alt={media.orgName || post.title}
+  onError={(e) => {
+    console.log("sub image load failed:", media.fileUrl);
+    e.currentTarget.src = "http://localhost:9990/topaboda/boards/default-board-thumbnail.png";
+  }}
+  style={{
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    display: "block",
+  }}
+/>
           </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
           {/* 본문 */}
           <div style={{ padding: "45px 45px 32px" }}>
