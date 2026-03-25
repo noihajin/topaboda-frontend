@@ -569,7 +569,7 @@ export default function MyPage() {
                     <div style={{ background: C.white, borderRadius: 24, padding: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
                             <div style={{ width: 120, height: 120, borderRadius: "50%", border: `4px solid ${C.red}`, overflow: "hidden" }}>
-                                <img src={user?.icon || "/default-profile.png"} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <img src={user?.icon || "/default.png"} alt="profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 28, fontWeight: 900, color: C.navy, margin: "0 0 4px" }}>{user?.nickname || "ゲスト"}</h1>

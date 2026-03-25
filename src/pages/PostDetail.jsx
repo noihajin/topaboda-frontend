@@ -164,8 +164,8 @@ const fetchPostDetail = async () => {
 
     const mappedComments = (res.data.comments ?? []).map((comment) => ({
       id: comment.id,
-      initial: comment.nickname?.[0] ?? "匿",
       author: comment.nickname,
+      profileImageUrl: `${comment.profileImageUrl}`,
       date: comment.createAt?.slice(0, 16).replace("T", " ").replace(/-/g, "."),
       content: comment.content,
     }));
@@ -491,14 +491,32 @@ const handleBookmark = async () => {
                 {/* 댓글 헤더 */}
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
                   <div style={{
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: C.navy, flexShrink: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <span style={{ fontSize: 17, fontWeight: 700, color: C.white, fontFamily: font }}>
-                      {c.initial}
-                    </span>
-                  </div>
+  width: 44,
+  height: 44,
+  borderRadius: "50%",
+  overflow: "hidden",
+  background: C.navy,
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}}>
+  {c.profileImageUrl ? (
+    <img
+      src={c.profileImageUrl}
+      alt={c.author}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      }}
+    />
+  ) : (
+    <span style={{ fontSize: 17, fontWeight: 700, color: C.white, fontFamily: font }}>
+      {c.author?.[0] ?? "匿"}
+    </span>
+  )}
+</div>
                   <div>
                     <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.navy, fontFamily: font }}>{c.author}</p>
                     <p style={{ margin: 0, fontSize: 13, color: C.gray3, fontFamily: font }}>{c.date}</p>
