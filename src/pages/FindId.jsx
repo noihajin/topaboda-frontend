@@ -25,6 +25,12 @@ export default function FindIdPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // 인터랙션 상태
+    const [inputFocused, setInputFocused] = useState(false);
+    const [loginHover, setLoginHover] = useState(false);
+    const [pwHover, setPwHover] = useState(false);
+    const [kochiraHover, setKochiraHover] = useState(false);
+
     const handleFindId = async (e) => {
         e.preventDefault();
         setError("");
@@ -110,14 +116,20 @@ export default function FindIdPage() {
                 >
                     <input
                         type="email"
-                        placeholder="メールアドレスを入力してください。"
+                        placeholder={inputFocused ? "" : "メールアドレスを入力してください。"}
                         value={email}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
                         onChange={(e) => {
                             setEmail(e.target.value);
                             setError("");
                             setResult(null);
                         }}
-                        style={inputStyle}
+                        style={{
+                            ...inputStyle,
+                            border: `1px solid ${inputFocused ? C.navy : "#d4d4d4"}`,
+                            transition: "border-color 0.2s",
+                        }}
                     />
 
                     {/* 에러 메시지 */}
@@ -209,11 +221,33 @@ export default function FindIdPage() {
                         fontWeight: 500,
                     }}
                 >
-                    <Link to="/login" style={{ color: C.gray3, textDecoration: "none" }}>
+                    <Link
+                        to="/login"
+                        onMouseEnter={() => setLoginHover(true)}
+                        onMouseLeave={() => setLoginHover(false)}
+                        style={{
+                            color: C.gray3,
+                            textDecoration: loginHover ? "underline" : "none",
+                            textUnderlineOffset: "3px",
+                            transition: "text-decoration 0.15s",
+                            cursor: "pointer",
+                        }}
+                    >
                         ログイン
                     </Link>
                     <span style={{ color: C.divider }}>|</span>
-                    <span style={{ cursor: "pointer" }}>パスワード検索</span>
+                    <span
+                        onMouseEnter={() => setPwHover(true)}
+                        onMouseLeave={() => setPwHover(false)}
+                        style={{
+                            cursor: "pointer",
+                            textDecoration: pwHover ? "underline" : "none",
+                            textUnderlineOffset: "3px",
+                            transition: "text-decoration 0.15s",
+                        }}
+                    >
+                        パスワード検索
+                    </span>
                 </div>
 
                 {/* 신규 가입 링크 */}
@@ -228,11 +262,14 @@ export default function FindIdPage() {
                     初めてご利用の方は
                     <Link
                         to="/register"
+                        onMouseEnter={() => setKochiraHover(true)}
+                        onMouseLeave={() => setKochiraHover(false)}
                         style={{
-                            color: C.navy,
+                            color: kochiraHover ? C.red : C.navy,
                             fontWeight: 700,
                             textDecoration: "none",
                             marginLeft: 2,
+                            transition: "color 0.2s",
                         }}
                     >
                         こちら
