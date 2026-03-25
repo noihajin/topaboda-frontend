@@ -157,6 +157,9 @@ export default function FindIdPage() {
                     >
                         ID検索
                     </p>
+                    <p style={{ fontSize: 13, color: C.gray3, margin: "8px 0 0", fontWeight: 500 }}>
+                        登録済みのメールアドレスに認証番号をお送りします
+                    </p>
                 </div>
 
                 {/* ── STEP 1: 이메일 입력 ── */}
@@ -201,7 +204,7 @@ export default function FindIdPage() {
                                 marginTop: 8,
                             }}
                         >
-                            {loading ? "送信中..." : "ID検索"}
+                            {loading ? "送信中..." : "認証番号を送信"}
                         </button>
                     </form>
                 )}
