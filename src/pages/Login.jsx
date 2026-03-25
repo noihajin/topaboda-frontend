@@ -38,6 +38,7 @@ const SNS_ITEMS = [
         border: "none",
         icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
         lines: ["LINEで", "ログイン"],
+        url: "http://localhost:9990/topaboda/api/auth/line/login",
     },
     {
         key: "google",
@@ -45,6 +46,7 @@ const SNS_ITEMS = [
         border: "1px solid #e2e8f0",
         icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
         lines: ["Googleで", "ログイン"],
+        url: "",
     },
     {
         key: "x",
@@ -56,6 +58,7 @@ const SNS_ITEMS = [
             </svg>
         ),
         lines: ["Xで", "ログイン"],
+        url: "",
     },
 ];
 
@@ -203,9 +206,13 @@ export default function LoginPage() {
                         color: C.gray3,
                     }}
                 >
-                    <Link to="/find-id" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>ID検索</Link>
+                    <Link to="/find-id" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>
+                        ID検索
+                    </Link>
                     <span style={{ color: C.divider }}>|</span>
-                    <Link to="/find-password" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>パスワード検索</Link>
+                    <Link to="/find-password" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>
+                        パスワード検索
+                    </Link>
                 </div>
 
                 {/* SNS LOGIN 구분선 */}
@@ -265,6 +272,9 @@ export default function LoginPage() {
                                     justifyContent: "center",
                                     boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                                     transition: "all 0.2s",
+                                }}
+                                onClick={() => {
+                                    window.location.href = item.url;
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.transform = "translateY(-2px)";
