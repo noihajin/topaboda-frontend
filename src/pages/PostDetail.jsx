@@ -1,6 +1,7 @@
 import { useEffect ,useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
 /* ── 색상 토큰 ── */
 const C = {
@@ -135,6 +136,9 @@ export default function PostDetail() {
   const [commentText, setCommentText] = useState("");
   const [submitHover, setSubmitHover] = useState(false);
 
+  const [commentPage, setCommentPage] = useState(1);
+  const COMMENTS_PER_PAGE = 5;
+
   const getAuthHeader = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -216,6 +220,13 @@ useEffect(() => {
 if (!post) {
   return <div style={{ paddingTop: "11.9rem", textAlign: "center" }}>ローディング中...</div>;
 }
+
+const totalCommentPages = Math.max(1, Math.ceil(comments.length / COMMENTS_PER_PAGE));
+
+const pagedComments = comments.slice(
+  (commentPage - 1) * COMMENTS_PER_PAGE,
+  commentPage * COMMENTS_PER_PAGE
+);
 
   const catColor = CAT_COLORS[post.category] ?? { bg: "#f3f4f6", color: C.gray3 };
 
@@ -308,6 +319,7 @@ const handleBookmark = async () => {
 
     setCommentText("");
     await fetchPostDetail();
+    setCommentPage(1);
     } catch (error) {
       console.error("댓글 작성 실패:", error);
       console.error("status:", error.response?.status);
@@ -483,11 +495,11 @@ const handleBookmark = async () => {
 
           {/* 댓글 목록 */}
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {comments.map((c, idx) => (
-              <div key={c.id} style={{
-                padding: "22px 0",
-                borderBottom: idx < comments.length - 1 ? `1.4px solid ${C.borderL}` : "none",
-              }}>
+            {pagedComments.map((c, idx) => (
+            <div key={c.id} style={{
+              padding: "22px 0",
+              borderBottom: idx < pagedComments.length - 1 ? `1.4px solid ${C.borderL}` : "none",
+            }}>
                 {/* 댓글 헤더 */}
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
                   <div style={{
@@ -538,6 +550,14 @@ const handleBookmark = async () => {
             ))}
           </div>
         </div>
+
+        {comments.length > 0 && (
+          <Pagination
+          currentPage={commentPage}
+          totalPages={totalCommentPages}
+          onPageChange={setCommentPage}
+          />
+        )}
 
         {/* ── 하단 뒤로가기 ── */}
         <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
