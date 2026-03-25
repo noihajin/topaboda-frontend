@@ -205,7 +205,7 @@ export default function LoginPage() {
                 >
                     <Link to="/find-id" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>ID検索</Link>
                     <span style={{ color: C.divider }}>|</span>
-                    <span style={{ cursor: "pointer" }}>パスワード検索</span>
+                    <Link to="/find-password" style={{ color: C.gray3, textDecoration: "none", cursor: "pointer" }}>パスワード検索</Link>
                 </div>
 
                 {/* SNS LOGIN 구분선 */}

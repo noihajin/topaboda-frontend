@@ -474,10 +474,12 @@ export default function FindIdPage() {
                         ログイン
                     </Link>
                     <span style={{ color: C.divider }}>|</span>
-                    <span
+                    <Link
+                        to="/find-password"
                         onMouseEnter={() => setPwHover(true)}
                         onMouseLeave={() => setPwHover(false)}
                         style={{
+                            color: C.gray3,
                             cursor: "pointer",
                             textDecoration: pwHover ? "underline" : "none",
                             textUnderlineOffset: "3px",
@@ -485,7 +487,7 @@ export default function FindIdPage() {
                         }}
                     >
                         パスワード検索
-                    </span>
+                    </Link>
                 </div>
 
                 {/* 신규 가입 링크 */}

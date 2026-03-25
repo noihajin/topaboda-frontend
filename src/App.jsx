@@ -30,6 +30,8 @@ import PostDetail from "./pages/PostDetail";
 import EditProfile from "./pages/EditProfile";
 import ChangePassword from "./pages/ChangePassword";
 import FindId from "./pages/FindId";
+import FindPassword from "./pages/FindPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // ── [인증 가드 컴포넌트] ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -72,6 +74,12 @@ function AppLayout() {
 
           {/* 3-1. 아이디 찾기 */}
           <Route path="/find-id" element={<FindId />} />
+
+          {/* 3-2. 비밀번호 찾기 */}
+          <Route path="/find-password" element={<FindPassword />} />
+
+          {/* 3-3. 비밀번호 재설정 (이메일 링크) */}
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* 4. 회원가입 선택 */}
           <Route path="/register" element={<RegisterSelect />} />
