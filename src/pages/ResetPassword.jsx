@@ -281,7 +281,7 @@ const pageStyle = {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "center",
-    padding: "180px 20px 60px",
+    padding: "120px 20px 60px",
 };
 
 const cardStyle = {

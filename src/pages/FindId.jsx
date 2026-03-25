@@ -110,7 +110,7 @@ export default function FindIdPage() {
                     display: "flex",
                     alignItems: "flex-start",
                     justifyContent: "center",
-                    padding: "180px 20px 60px",
+                    padding: "120px 20px 60px",
                 }}
             >
                 <div
@@ -237,7 +237,7 @@ export default function FindIdPage() {
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "center",
-                padding: "180px 20px 60px",
+                padding: "120px 20px 60px",
             }}
         >
             <div
