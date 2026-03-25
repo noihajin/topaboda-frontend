@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } fr
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, useGoogleMap } from "@react-google-maps/api";
 import logoBlack from "../assets/logo_black.svg";
+import { KOREA_MAP_RESTRICTION } from "../constants/mapKoreaBounds";
 
 const API_MAP_CONFIG = "/api/maps/config";
 const API_TMAP_ROUTE = "/api/maps/tmap-route";
@@ -1383,6 +1384,7 @@ function RouteMapPane({
             backgroundColor: "#e8f4ff",
             disableDefaultUI: true,
             gestureHandling: "greedy",
+            restriction: KOREA_MAP_RESTRICTION,
           }}
         >
           {allMarkers.map((m) => {
