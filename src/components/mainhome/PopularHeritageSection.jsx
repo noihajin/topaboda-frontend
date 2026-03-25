@@ -76,7 +76,7 @@ export default function PopularHeritageSection() {
     return (
         <section
             ref={sectionRef}
-            className="w-full bg-[#F8F9FC] pt-44 pb-32 px-[10%]"
+            className="w-full bg-white pt-44 pb-32 px-[10%]"
             style={{
                 opacity: sectionVisible ? 1 : 0,
                 transition: "opacity 0.8s ease",
