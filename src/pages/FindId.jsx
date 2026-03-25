@@ -44,6 +44,7 @@ export default function FindIdPage() {
     // 버튼 hover
     const [btnHover, setBtnHover] = useState(false);
     const [verifyBtnHover, setVerifyBtnHover] = useState(false);
+    const [loginBtnHover, setLoginBtnHover] = useState(false);
 
     // 인터랙션 상태
     const [inputFocused, setInputFocused] = useState(false);
@@ -107,6 +108,133 @@ export default function FindIdPage() {
             setVerifying(false);
         }
     };
+
+    /* ── 결과 카드 (피그마 디자인) ── */
+    if (step === "done" && result) {
+        return (
+            <div
+                style={{
+                    minHeight: "100vh",
+                    background: C.bg,
+                    fontFamily: font,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    padding: "180px 20px 60px",
+                }}
+            >
+                <div
+                    style={{
+                        width: "100%",
+                        maxWidth: 480,
+                        background: C.white,
+                        borderRadius: 16,
+                        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)",
+                        border: `1px solid ${C.border}`,
+                        overflow: "hidden",
+                    }}
+                >
+                    {/* 헤더 */}
+                    <div
+                        style={{
+                            padding: "28px 28px 24px",
+                            borderBottom: `1.25px solid #e5e7eb`,
+                        }}
+                    >
+                        <p
+                            style={{
+                                fontSize: 20,
+                                fontWeight: 700,
+                                color: C.navy,
+                                margin: 0,
+                                fontFamily: "'Noto Sans KR', 'Noto Sans JP', sans-serif",
+                            }}
+                        >
+                            ID検索結果
+                        </p>
+                    </div>
+
+                    {/* 바디 */}
+                    <div
+                        style={{
+                            padding: "48px 40px 40px",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 0,
+                        }}
+                    >
+                        {/* ID 표시 */}
+                        <p
+                            style={{
+                                fontSize: 16,
+                                color: C.gray1,
+                                fontWeight: 400,
+                                margin: "0 0 32px",
+                                fontFamily: "'Noto Sans KR', sans-serif",
+                                letterSpacing: "0.02em",
+                            }}
+                        >
+                            ID：{result.id}
+                        </p>
+
+                        {/* ログイン 버튼 */}
+                        <button
+                            onClick={() => navigate("/login")}
+                            onMouseEnter={() => setLoginBtnHover(true)}
+                            onMouseLeave={() => setLoginBtnHover(false)}
+                            style={{
+                                width: "100%",
+                                maxWidth: 306,
+                                height: 50,
+                                borderRadius: 14,
+                                border: `1.25px solid ${C.navy}`,
+                                background: loginBtnHover ? C.navy : C.white,
+                                color: loginBtnHover ? C.white : "#364153",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                fontFamily: "'Noto Sans KR', sans-serif",
+                                cursor: "pointer",
+                                transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+                                transform: loginBtnHover ? "translateY(-1px)" : "none",
+                                boxShadow: loginBtnHover ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
+                                marginBottom: 36,
+                            }}
+                        >
+                            ログイン
+                        </button>
+
+                        {/* 구분선 */}
+                        <div
+                            style={{
+                                width: "100%",
+                                height: "1.25px",
+                                background: "#d3d3d3",
+                                marginBottom: 20,
+                            }}
+                        />
+
+                        {/* 안내 문구 */}
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: "#6a7282",
+                                fontWeight: 400,
+                                textAlign: "center",
+                                lineHeight: 1.7,
+                                margin: 0,
+                                fontFamily: "'Noto Sans KR', 'Noto Sans JP', sans-serif",
+                            }}
+                        >
+                            IDをお忘れた方は<br />
+                            会員登録時に登録したメールアドレスに<br />
+                            IDを発送いたします。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -315,56 +443,6 @@ export default function FindIdPage() {
                             {verifying ? "確認中..." : "認証番号確認"}
                         </button>
                     </form>
-                )}
-
-                {/* ── STEP 3: ID 표시 ── */}
-                {step === "done" && result && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                        <div
-                            style={{
-                                background: "#f0f4ff",
-                                border: `1px solid ${C.navy}22`,
-                                borderRadius: 12,
-                                padding: "18px 20px",
-                                textAlign: "left",
-                            }}
-                        >
-                            <p
-                                style={{
-                                    fontSize: 12,
-                                    color: C.gray3,
-                                    fontWeight: 600,
-                                    margin: "0 0 6px",
-                                    letterSpacing: "0.05em",
-                                }}
-                            >
-                                登録されたIDは：
-                            </p>
-                            <p
-                                style={{
-                                    fontSize: 20,
-                                    fontWeight: 700,
-                                    color: C.navy,
-                                    margin: 0,
-                                    letterSpacing: "0.5px",
-                                }}
-                            >
-                                {result.id}
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => navigate("/login")}
-                            style={{
-                                ...actionBtnBase,
-                                border: `1.2px solid ${C.navy}`,
-                                background: C.navy,
-                                color: C.white,
-                                cursor: "pointer",
-                            }}
-                        >
-                            ログインへ
-                        </button>
-                    </div>
                 )}
 
                 {/* 하단 링크 */}
