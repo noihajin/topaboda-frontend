@@ -18,19 +18,15 @@ const CATEGORY_STYLE = {
 };
 const DEFAULT_BADGE = { bg: "#f3f4f6", color: "#374151" };
 
-// 북마크 해제 아이콘 (채워진 북마크 + X)
-const IconBookmarkOff = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" fill="white" fillOpacity="0.4"/>
-        <line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>
+const IconBookmarkFill = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={C.navy} stroke={C.navy} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
     </svg>
 );
 
-// 좋아요 해제 아이콘 (채워진 하트 + X)
-const IconHeartOff = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="white" fillOpacity="0.4"/>
-        <line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>
+const IconHeartFill = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={C.red} stroke={C.red} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
     </svg>
 );
 
@@ -96,22 +92,22 @@ export default function PostSaveCard({ item, type = "bookmark", onCancel }) {
                 title={type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
                 style={{
                     flexShrink: 0,
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
+                    width: 28,
+                    height: 28,
                     border: "none",
-                    background: type === "bookmark" ? C.navy : C.red,
+                    background: "none",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: "pointer",
-                    transition: "opacity 0.2s, transform 0.2s",
-                    opacity: 0.85,
+                    transition: "transform 0.2s, opacity 0.2s",
+                    opacity: 0.8,
+                    padding: 0,
                 }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "scale(1.15)"; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "scale(1)"; }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.2)"; e.currentTarget.style.opacity = "1"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.opacity = "0.8"; }}
             >
-                {type === "bookmark" ? <IconBookmarkOff /> : <IconHeartOff />}
+                {type === "bookmark" ? <IconBookmarkFill /> : <IconHeartFill />}
             </button>
         </div>
     );

@@ -39,8 +39,6 @@ export default function EditProfile() {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
-    const [newUserId, setNewUserId] = useState("");
-    const [userIdCheck, setUserIdCheck] = useState(null); // null | "ok" | "dup"
     const [newNickname, setNewNickname] = useState("");
     const [nickCheck, setNickCheck] = useState(null); // null | "ok" | "dup"
     const [previewImg, setPreviewImg] = useState(null);
@@ -49,7 +47,6 @@ export default function EditProfile() {
     const [hoverPw, setHoverPw] = useState(false);
     const [hoverDel, setHoverDel] = useState(false);
     const [hoverCheck, setHoverCheck] = useState(false);
-    const [hoverIdCheck, setHoverIdCheck] = useState(false);
     const deleteModal = useModal();
 
     const handleImageChange = (e) => {
@@ -60,13 +57,6 @@ export default function EditProfile() {
         reader.readAsDataURL(file);
     };
 
-    const handleUserIdCheck = async () => {
-        if (!newUserId.trim()) return;
-        // TODO: GET /api/users/check-id?userId=...
-        // 임시 목 처리 (API 연동 시 교체)
-        setUserIdCheck("ok");
-    };
-
     const handleNicknameCheck = async () => {
         if (!newNickname.trim()) return;
         // TODO: GET /api/users/check-nickname?nickname=...
@@ -75,10 +65,6 @@ export default function EditProfile() {
     };
 
     const handleSave = () => {
-        if (newUserId && userIdCheck !== "ok") {
-            alert("ユーザーIDの重複確認をしてください。");
-            return;
-        }
         if (newNickname && nickCheck !== "ok") {
             alert("ニックネームの重複確認をしてください。");
             return;
@@ -96,7 +82,7 @@ export default function EditProfile() {
                 <p style={{ fontSize: 15, color: C.gray, margin: 0 }}>あなたの情報を更新してください</p>
             </div>
 
-            <div style={{ maxWidth: 820, margin: "0 auto", padding: "0 20px", display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ maxWidth: 520, margin: "0 auto", padding: "0 20px", display: "flex", flexDirection: "column", gap: 24 }}>
                 {/* ── 프로필 편집 카드 ── */}
                 <div
                     style={{
@@ -184,60 +170,7 @@ export default function EditProfile() {
                     </div>
 
                     {/* 입력 필드 */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                        {/* 유저 아이디 변경 + 중복확인 */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>
-                                ユーザーID変更
-                            </label>
-                            <div style={{ display: "flex", gap: 8 }}>
-                                <input
-                                    type="text"
-                                    value={newUserId}
-                                    onChange={(e) => {
-                                        setNewUserId(e.target.value);
-                                        setUserIdCheck(null);
-                                    }}
-                                    placeholder="新しいIDを入力"
-                                    style={{
-                                        flex: 1,
-                                        border: `1.2px solid ${userIdCheck === "ok" ? "#16a34a" : userIdCheck === "dup" ? "#dc2626" : C.border}`,
-                                        borderRadius: 13,
-                                        padding: "12px 16px",
-                                        fontSize: 14,
-                                        fontFamily: font,
-                                        outline: "none",
-                                        color: "#0a0a0a",
-                                        transition: "border-color 0.2s",
-                                    }}
-                                    onFocus={(e) => { if (!userIdCheck) e.target.style.borderColor = C.navy; }}
-                                    onBlur={(e) => { if (!userIdCheck) e.target.style.borderColor = C.border; }}
-                                />
-                                <button
-                                    onClick={handleUserIdCheck}
-                                    onMouseEnter={() => setHoverIdCheck(true)}
-                                    onMouseLeave={() => setHoverIdCheck(false)}
-                                    style={{
-                                        padding: "0 10px",
-                                        borderRadius: 8,
-                                        fontSize: 12,
-                                        fontWeight: 500,
-                                        border: `1px solid ${C.border}`,
-                                        background: hoverIdCheck ? "#e5e7eb" : "#f3f4f6",
-                                        color: C.gray,
-                                        cursor: "pointer",
-                                        transition: "all 0.2s",
-                                        whiteSpace: "nowrap",
-                                        fontFamily: font,
-                                    }}
-                                >
-                                    重複確認
-                                </button>
-                            </div>
-                            {userIdCheck === "ok" && <p style={{ fontSize: 12, color: "#16a34a", margin: 0, fontFamily: font }}>✓ 使用可能なIDです。</p>}
-                            {userIdCheck === "dup" && <p style={{ fontSize: 12, color: "#dc2626", margin: 0, fontFamily: font }}>✗ すでに使用されているIDです。</p>}
-                        </div>
-
+                    <div>
                         {/* 닉네임 변경 + 중복확인 */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>
