@@ -15,6 +15,7 @@ const TYPE_OPTIONS = [
     { value: "17", label: "無形遺産" },
     { value: "18", label: "民俗文化財" },
 ];
+
 function SearchFilter() {
     const [isVisible, setIsVisible] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +38,6 @@ function SearchFilter() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // 외부 클릭 시 드롭다운 닫기
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (typeRef.current && !typeRef.current.contains(e.target)) setIsTypeOpen(false);
@@ -50,7 +50,6 @@ function SearchFilter() {
         const searchData = {
             search: searchQuery.trim(),
             type: heritageType,
-            typeName: TYPE_OPTIONS.find((o) => o.value === heritageType)?.label,
         };
 
         navigate("/heritage", { state: searchData });
