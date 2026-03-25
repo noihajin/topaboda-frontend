@@ -3,10 +3,24 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, useGoogleMap } from "@react-google-maps/api";
 import logoBlack from "../assets/logo_black.svg";
 import { KOREA_MAP_RESTRICTION } from "../constants/mapKoreaBounds";
+import {
+  REGIONS,
+  REGION_CODE_MAP,
+  CATEGORIES,
+  TYPE_CODE_MAP,
+  matchesThemeCode,
+} from "../constants/heritageFilters";
 
 const API_MAP_CONFIG = "/api/maps/config";
 const API_TMAP_ROUTE = "/api/maps/tmap-route";
+/** 지도와 동일 핀 목록 — regionCode=ZZ → 서버에서 전체(ALL) 로드 (MapHeritageCacheService) */
+const API_MAPS_HERITAGE = "/api/maps/heritage";
+const SESSION_MAP_HERITAGE_PINS = "routeCreate_mapHeritagePins_v6";
+/** 「すべての遺産」一覧 — DOM 負荷軽減のため 100 件ずつ表示 */
+const ALL_HERITAGE_PAGE_SIZE = 100;
 const API_HERITAGE_BOOKMARKS = "/api/heritages/bookmarks";
+const apiHeritageBookmark = (heritageId) =>
+  `/api/heritages/${encodeURIComponent(String(heritageId))}/bookmarks`;
 const API_ROUTES = "/api/routes";
 const DEFAULT_MAP_ID = "DEMO_MAP_ID";
 const ROUTE_MAP_DEFAULT_CENTER = { lat: 36.5, lng: 127.8 };
@@ -61,6 +75,53 @@ function formatBookmarkDate(iso) {
   }
 }
 
+function stripHtml(html) {
+  if (html == null || html === "") return "";
+  const d = document.createElement("div");
+  d.innerHTML = String(html);
+  return (d.textContent || "").trim();
+}
+
+/** GET /api/maps/heritage 응답(MapHeritagePin) → 북마크 카드와 동일 필드 */
+function normalizeMapPinToPlace(pin) {
+  if (!pin || pin.id == null) return null;
+  const lat = pin.latitude;
+  const lng = pin.longitude;
+  const rawAddr = pin.address != null ? stripHtml(String(pin.address)).trim() : "";
+  const rawTc = pin.themeCode ?? pin.themeMask;
+  const themeCode =
+    typeof rawTc === "number" && !Number.isNaN(rawTc)
+      ? rawTc
+      : rawTc != null
+        ? Number(rawTc)
+        : undefined;
+  const kd = pin.ccbaKdcd;
+  return {
+    heritageId: String(pin.id),
+    heritageName: pin.nameJa || pin.nameKo || String(pin.id),
+    imageUrl: pin.thumbnail || null,
+    latitude: typeof lat === "number" && !Number.isNaN(lat) ? lat : undefined,
+    longitude: typeof lng === "number" && !Number.isNaN(lng) ? lng : undefined,
+    regionLabel: pin.regionKey || pin.regionCode || "",
+    address: rawAddr || undefined,
+    regionCode: pin.regionCode != null ? String(pin.regionCode).trim() : undefined,
+    themeCode: themeCode != null && !Number.isNaN(themeCode) ? themeCode : undefined,
+    ccbaKdcd: kd != null && String(kd).trim() !== "" ? String(kd).trim() : undefined,
+  };
+}
+
+function readSessionMapHeritagePins() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_MAP_HERITAGE_PINS);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.map(normalizeMapPinToPlace).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 // ── SVG 아이콘 ─────────────────────────────────────────────────
 const PinIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -72,18 +133,15 @@ const ClockIcon = () => (
     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
   </svg>
 );
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
-const CheckIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
+/** 북마크 해제 버튼 — ルート選択はカードクリック、右は解除のみ */
+const BookmarkOffIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+    <line x1="3" y1="3" x2="21" y2="21" />
   </svg>
 );
 const LayersIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.gray3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
   </svg>
 );
@@ -100,6 +158,11 @@ const ArrowLeftIcon = () => (
 const BookmarkFillIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
     <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+  </svg>
+);
+const BookmarkOutlineIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
   </svg>
 );
 const RouteIcon = () => (
@@ -223,15 +286,34 @@ function SaveModal({ count, onClose, onSave, saving }) {
 }
 
 // ── 장소 카드 (GET /api/heritages/bookmarks 응답 기준) ────────────
-/** 카드 전체 클릭 = + 버튼과 동일(ルートに追加/外す). +는 시각·터치 타깃용으로 동일 핸들러 */
-function BookmarkPlaceCard({ place, added, onToggle, isHighlightedOnMap }) {
+/** 카드 클릭 = ルートに追加/外す。右はブックマーク解除（全遺産タブでは非表示） */
+function BookmarkPlaceCard({
+  place,
+  added,
+  onToggle,
+  onRemoveBookmark,
+  removeBusy,
+  showRemoveBookmark = true,
+  hideThumbnail = false,
+  bookmarkToggle = false,
+  isBookmarked = false,
+  onBookmarkToggle,
+  bookmarkToggleBusy = false,
+  isHighlightedOnMap,
+}) {
   const [hovered, setHovered] = useState(false);
   const badge = BADGE["文化財"] || { bg: "#e2e8f0", color: "#6a7282" };
   const title = place.heritageName || place.heritageId;
-  const subLine =
-    typeof place.latitude === "number" && typeof place.longitude === "number"
-      ? `${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`
-      : "";
+  const subLine = (() => {
+    const addrRaw = place.address != null ? String(place.address).trim() : "";
+    const addr = addrRaw ? stripHtml(addrRaw) : "";
+    if (addr) return addr;
+    const reg = place.regionLabel != null && String(place.regionLabel).trim();
+    if (reg) return reg;
+    if (typeof place.latitude === "number" && typeof place.longitude === "number")
+      return `${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`;
+    return "";
+  })();
   const dateLine = formatBookmarkDate(place.createdAt);
   const mapRing = isHighlightedOnMap ? `2px solid ${C.navy}` : null;
   return (
@@ -241,6 +323,10 @@ function BookmarkPlaceCard({ place, added, onToggle, isHighlightedOnMap }) {
       aria-pressed={added}
       aria-label={added ? "ルートから外す" : "ルートに追加"}
       onClick={() => onToggle()}
+      onMouseDown={(e) => {
+        if (e.target.closest("button")) return;
+        e.preventDefault();
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -273,7 +359,7 @@ function BookmarkPlaceCard({ place, added, onToggle, isHighlightedOnMap }) {
           pointerEvents: "none",
         }}
       >
-        {place.imageUrl ? (
+        {!hideThumbnail && place.imageUrl ? (
           <img
             src={place.imageUrl}
             alt=""
@@ -299,26 +385,83 @@ function BookmarkPlaceCard({ place, added, onToggle, isHighlightedOnMap }) {
           ) : null}
         </div>
       </div>
-      <span
-        role="presentation"
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: "50%",
-          flexShrink: 0,
-          touchAction: "manipulation",
-          WebkitTapHighlightColor: "transparent",
-          background: added ? C.navy : C.border,
-          color: added ? C.white : C.gray3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-        }}
-        aria-hidden
-      >
-        {added ? <CheckIcon /> : <PlusIcon />}
-      </span>
+      {showRemoveBookmark ? (
+        <button
+          type="button"
+          title="ブックマークを解除"
+          aria-label="ブックマークを解除"
+          disabled={removeBusy}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveBookmark?.();
+          }}
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: "50%",
+            flexShrink: 0,
+            touchAction: "manipulation",
+            WebkitTapHighlightColor: "transparent",
+            background: removeBusy ? "#f1f5f9" : "white",
+            color: removeBusy ? C.gray4 : C.red,
+            border: `1.5px solid ${removeBusy ? C.border : "rgba(110,0,0,0.35)"}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: removeBusy ? "wait" : "pointer",
+            padding: 0,
+            boxSizing: "border-box",
+            transition: "background 0.15s, border-color 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            if (!removeBusy) e.currentTarget.style.background = "rgba(110,0,0,0.08)";
+          }}
+          onMouseLeave={(e) => {
+            if (!removeBusy) e.currentTarget.style.background = "white";
+          }}
+        >
+          <BookmarkOffIcon />
+        </button>
+      ) : bookmarkToggle ? (
+        <button
+          type="button"
+          title={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
+          aria-label={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
+          disabled={bookmarkToggleBusy}
+          onClick={(e) => {
+            e.stopPropagation();
+            onBookmarkToggle?.();
+          }}
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: "50%",
+            flexShrink: 0,
+            touchAction: "manipulation",
+            WebkitTapHighlightColor: "transparent",
+            background: bookmarkToggleBusy ? "#f1f5f9" : isBookmarked ? "rgba(0,13,87,0.12)" : "white",
+            color: bookmarkToggleBusy ? C.gray4 : isBookmarked ? C.navy : C.gray3,
+            border: `1.5px solid ${bookmarkToggleBusy ? C.border : isBookmarked ? C.navy : C.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: bookmarkToggleBusy ? "wait" : "pointer",
+            padding: 0,
+            boxSizing: "border-box",
+            transition: "background 0.15s, border-color 0.15s, color 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            if (!bookmarkToggleBusy) e.currentTarget.style.background = isBookmarked ? "rgba(0,13,87,0.18)" : "#f3f4f6";
+          }}
+          onMouseLeave={(e) => {
+            if (!bookmarkToggleBusy) e.currentTarget.style.background = isBookmarked ? "rgba(0,13,87,0.12)" : "white";
+          }}
+        >
+          {isBookmarked ? <BookmarkFillIcon /> : <BookmarkOutlineIcon />}
+        </button>
+      ) : (
+        <span style={{ width: 34, height: 34, flexShrink: 0 }} aria-hidden />
+      )}
     </div>
   );
 }
@@ -353,13 +496,6 @@ function TmapPolylineOverlay({ path, strokeColor = C.navy, strokeOpacity = 0.88,
     };
   }, [map, path, strokeColor, strokeOpacity, strokeWeight, zIndex]);
   return null;
-}
-
-function stripHtml(html) {
-  if (html == null || html === "") return "";
-  const d = document.createElement("div");
-  d.innerHTML = String(html);
-  return (d.textContent || "").trim();
 }
 
 /** Directions API overview_path → { lat, lng }[] */
@@ -1584,8 +1720,18 @@ function SavedRouteCard({
   useEffect(() => {
     if (!isOpen) setHoveredPlaceId(null);
   }, [isOpen]);
+  /** outer border 14px → inner radius 12px (2px border) — overflow:hidden は長い一覧を欠けるので使わない */
+  const rIn = 12;
   return (
-    <div style={{ borderRadius: 14, overflow: "hidden", border: `2px solid ${isOpen ? C.navy : hovered ? "#c0c4d0" : C.border}`, transition: "border-color 0.18s" }}>
+    <div
+      style={{
+        borderRadius: 14,
+        overflow: "visible",
+        border: `2px solid ${isOpen ? C.navy : hovered ? "#c0c4d0" : C.border}`,
+        transition: "border-color 0.18s",
+        background: C.white,
+      }}
+    >
       {/* 루트 헤더: 좌측=펼침, 우측=삭제+치브론 */}
       <div
         onMouseEnter={() => setHovered(true)}
@@ -1597,6 +1743,7 @@ function SavedRouteCard({
           flexDirection: "column",
           gap: 0,
           transition: "background 0.18s",
+          borderRadius: isOpen ? `${rIn}px ${rIn}px 0 0` : rIn,
         }}
       >
         {/* 1행: 제목·뱃지 | 이동수단 | 삭제·펼침 · 2행: 날짜만(왼쪽 정렬) */}
@@ -1655,7 +1802,7 @@ function SavedRouteCard({
                   flexShrink: 0,
                 }}
               >
-                {route.spots}か所
+                {(Array.isArray(route.places) ? route.places.length : route.spots) ?? 0}か所
               </span>
             </div>
             <div
@@ -1735,7 +1882,18 @@ function SavedRouteCard({
 
       {/* 포함 장소 목록 (펼쳐짐) */}
       {isOpen && route.places && route.places.length > 0 && (
-        <div style={{ background: "#f8fafc", borderTop: `1px solid ${C.border}`, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div
+          style={{
+            background: "#f8fafc",
+            borderTop: `1px solid ${C.border}`,
+            padding: "12px 16px 14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            borderBottomLeftRadius: rIn,
+            borderBottomRightRadius: rIn,
+          }}
+        >
           <div style={{ marginBottom: 2 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: C.gray3, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>含まれる場所</p>
@@ -1789,7 +1947,7 @@ function SavedRouteCard({
             const rowBorder = isMapFocused ? `1.5px solid ${C.navy}` : `1px solid ${C.border}`;
             return (
               <div
-                key={place.id ?? i}
+                key={`place-row-${route.id}-${i}-${place.id ?? "x"}`}
                 role={canFocusMap ? "button" : undefined}
                 tabIndex={canFocusMap ? 0 : undefined}
                 title={canFocusMap ? "地図のこの位置へ移動" : undefined}
@@ -1867,7 +2025,16 @@ function SavedRouteCard({
         </div>
       )}
       {isOpen && (!route.places || route.places.length === 0) && (
-        <div style={{ background: "#f8fafc", borderTop: `1px solid ${C.border}`, padding: "16px", textAlign: "center" }}>
+        <div
+          style={{
+            background: "#f8fafc",
+            borderTop: `1px solid ${C.border}`,
+            padding: "16px",
+            textAlign: "center",
+            borderBottomLeftRadius: rIn,
+            borderBottomRightRadius: rIn,
+          }}
+        >
           <p style={{ fontSize: 13, color: C.gray4, margin: 0 }}>場所情報がありません</p>
         </div>
       )}
@@ -1903,12 +2070,31 @@ export default function RouteCreate() {
 
   const [added, setAdded] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
-  const [navTab, setNavTab] = useState("bookmark"); // "bookmark" | "routes"
+  const [navTab, setNavTab] = useState("bookmark"); // "all" | "bookmark" | "routes"
   const [openRouteId, setOpenRouteId] = useState(null);
   const [mapConfig, setMapConfig] = useState(null);
   const [bookmarkPlaces, setBookmarkPlaces] = useState([]);
   const [bookmarksLoading, setBookmarksLoading] = useState(() => !!localStorage.getItem("token"));
   const [bookmarksError, setBookmarksError] = useState(false);
+  const [removingBookmarkId, setRemovingBookmarkId] = useState(null);
+  const [bookmarkToggleBusyId, setBookmarkToggleBusyId] = useState(null);
+  /** GET /api/maps/heritage?regionCode=ZZ — 세션 SESSION_MAP_HERITAGE_PINS + 지도 핀과 동일 */
+  const [allHeritagePlaces, setAllHeritagePlaces] = useState(readSessionMapHeritagePins);
+  const [allHeritageVisibleCount, setAllHeritageVisibleCount] = useState(() =>
+    Math.min(ALL_HERITAGE_PAGE_SIZE, readSessionMapHeritagePins().length),
+  );
+  const allHeritageScrollRef = useRef(null);
+  const allHeritageSentinelRef = useRef(null);
+  const allHeritageIoPrevIntersectingRef = useRef(false);
+  const [allHeritageLoading, setAllHeritageLoading] = useState(false);
+  const [allHeritageError, setAllHeritageError] = useState(false);
+  /** 「すべての遺産」一覧フィルタ — heritagelist/constants と同一の地域コード */
+  const [allFilterRegion, setAllFilterRegion] = useState("すべての地域");
+  /** 国宝/史跡など — GET /heritages と同じ ccba_kdcd（TYPE_CODE_MAP） */
+  const [allFilterCategory, setAllFilterCategory] = useState("すべて");
+  /** DB heritage.theme 単一コードと一致（themeCode）／空＝すべて */
+  const [allFilterTheme, setAllFilterTheme] = useState("");
+  const [allFilterName, setAllFilterName] = useState("");
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
   const [routesError, setRoutesError] = useState(false);
@@ -1919,6 +2105,17 @@ export default function RouteCreate() {
   const [transportByRouteId, setTransportByRouteId] = useState({});
   /** 사이드바에서 선택 시 지도 핀( URL ?heritageId 보다 우선 ) */
   const [mapFocusHeritageId, setMapFocusHeritageId] = useState(null);
+
+  /** 지도에서 「探訪路を作る」로 진입 시: すべての遺産 탭 + 이름 검색만 반영（地域·種別·テーマはすべて） */
+  useEffect(() => {
+    if (!heritageIdFromMap) return;
+    setNavTab("all");
+    setAllFilterRegion("すべての地域");
+    setAllFilterCategory("すべて");
+    setAllFilterTheme("");
+    const n = (heritageNameFromMap || "").trim();
+    if (n) setAllFilterName(n);
+  }, [heritageIdFromMap, heritageNameFromMap]);
 
   useEffect(() => {
     setMapFocusHeritageId(null);
@@ -2009,8 +2206,10 @@ export default function RouteCreate() {
   }, [routeIdFromQuery, routesLoading, savedRoutes]);
 
   useEffect(() => {
-    if (!heritageIdFromMap || bookmarkPlaces.length === 0) return;
-    const has = bookmarkPlaces.some((p) => p.heritageId === heritageIdFromMap);
+    if (!heritageIdFromMap) return;
+    const has =
+      bookmarkPlaces.some((p) => p.heritageId === heritageIdFromMap) ||
+      allHeritagePlaces.some((p) => p.heritageId === heritageIdFromMap);
     if (!has) return;
     setAdded((prev) => {
       if (prev.has(heritageIdFromMap)) return prev;
@@ -2018,7 +2217,7 @@ export default function RouteCreate() {
       next.add(heritageIdFromMap);
       return next;
     });
-  }, [heritageIdFromMap, bookmarkPlaces]);
+  }, [heritageIdFromMap, bookmarkPlaces, allHeritagePlaces]);
 
   useEffect(() => {
     let cancelled = false;
@@ -2032,6 +2231,163 @@ export default function RouteCreate() {
       cancelled = true;
     };
   }, []);
+
+  /** 지도 API 핀 전체 — sessionStorage + Strict Mode 대응(ref로 재실행 막지 않음) */
+  useEffect(() => {
+    if (allHeritagePlaces.length > 0) return;
+    let cancelled = false;
+    setAllHeritageLoading(true);
+    setAllHeritageError(false);
+    fetch(`${API_MAPS_HERITAGE}?regionCode=ZZ`)
+      .then((res) => {
+        if (!res.ok) throw new Error("fail");
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const list = Array.isArray(data) ? data : [];
+        try {
+          sessionStorage.setItem(SESSION_MAP_HERITAGE_PINS, JSON.stringify(list));
+        } catch {
+          /* quota */
+        }
+        const normalized = list.map(normalizeMapPinToPlace).filter(Boolean);
+        setAllHeritagePlaces(normalized);
+        setAllHeritageVisibleCount(Math.min(ALL_HERITAGE_PAGE_SIZE, normalized.length));
+      })
+      .catch(() => {
+        if (!cancelled) setAllHeritageError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setAllHeritageLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      setAllHeritageLoading(false);
+    };
+  }, [allHeritagePlaces.length]);
+
+  const filteredAllHeritagePlaces = useMemo(() => {
+    let list = allHeritagePlaces;
+    if (allFilterRegion && allFilterRegion !== "すべての地域") {
+      const code = REGION_CODE_MAP[allFilterRegion];
+      if (code) {
+        list = list.filter((p) => String(p.regionCode || "").trim() === code);
+      }
+    }
+    if (allFilterCategory && allFilterCategory !== "すべて") {
+      const kd = TYPE_CODE_MAP[allFilterCategory];
+      if (kd) {
+        list = list.filter((p) => String(p.ccbaKdcd || "").trim() === kd);
+      }
+    }
+    if (allFilterTheme !== "") {
+      const idx = Number.parseInt(allFilterTheme, 10);
+      if (!Number.isNaN(idx) && idx >= 1) {
+        list = list.filter((p) => matchesThemeCode(p, idx));
+      }
+    }
+    const q = (allFilterName || "").trim().toLowerCase();
+    if (q) {
+      list = list.filter((p) => {
+        const name = (p.heritageName || "").toLowerCase();
+        const addr = (p.address || "").toLowerCase();
+        return name.includes(q) || addr.includes(q);
+      });
+    }
+    return list;
+  }, [allHeritagePlaces, allFilterRegion, allFilterCategory, allFilterTheme, allFilterName]);
+
+  /** ルートに追加した遺産を常に一覧の先頭へ（すべての遺産・ブックマーク共通） */
+  const sortedFilteredAllHeritagePlaces = useMemo(() => {
+    const arr = [...filteredAllHeritagePlaces];
+    arr.sort((a, b) => {
+      const aSel = added.has(a.heritageId) ? 1 : 0;
+      const bSel = added.has(b.heritageId) ? 1 : 0;
+      if (aSel !== bSel) return bSel - aSel;
+      return 0;
+    });
+    return arr;
+  }, [filteredAllHeritagePlaces, added]);
+
+  const sortedBookmarkPlaces = useMemo(() => {
+    const arr = [...bookmarkPlaces];
+    arr.sort((a, b) => {
+      const aSel = added.has(a.heritageId) ? 1 : 0;
+      const bSel = added.has(b.heritageId) ? 1 : 0;
+      if (aSel !== bSel) return bSel - aSel;
+      return 0;
+    });
+    return arr;
+  }, [bookmarkPlaces, added]);
+
+  /** ロード済みピンに実際に存在するテーマコードのみ（昇順） */
+  const allHeritageThemeCodes = useMemo(() => {
+    const s = new Set();
+    for (const p of allHeritagePlaces) {
+      const c = p.themeCode;
+      if (c != null && Number.isFinite(Number(c)) && Number(c) >= 1) {
+        s.add(Number(c));
+      }
+    }
+    return Array.from(s).sort((a, b) => a - b);
+  }, [allHeritagePlaces]);
+
+  useEffect(() => {
+    if (allFilterTheme === "") return;
+    const n = Number.parseInt(allFilterTheme, 10);
+    if (Number.isNaN(n) || !allHeritageThemeCodes.includes(n)) {
+      setAllFilterTheme("");
+    }
+  }, [allHeritageThemeCodes, allFilterTheme]);
+
+  const hasMoreAllHeritage = allHeritageVisibleCount < sortedFilteredAllHeritagePlaces.length;
+  const visibleAllHeritagePlaces = useMemo(
+    () => sortedFilteredAllHeritagePlaces.slice(0, allHeritageVisibleCount),
+    [sortedFilteredAllHeritagePlaces, allHeritageVisibleCount],
+  );
+
+  /** 地域・テーマ変更・件数ロード時のみ先頭ページ相当に戻す（名前は入力のたびにリセットしない） */
+  useEffect(() => {
+    setAllHeritageVisibleCount(Math.min(ALL_HERITAGE_PAGE_SIZE, sortedFilteredAllHeritagePlaces.length));
+  }, [allFilterRegion, allFilterCategory, allFilterTheme, allHeritagePlaces.length, sortedFilteredAllHeritagePlaces.length]);
+
+  /** 「すべての遺産」スクロール下端で次の 100 件を読み込み */
+  useLayoutEffect(() => {
+    if (navTab !== "all" || !hasMoreAllHeritage) return;
+    const root = allHeritageScrollRef.current;
+    const target = allHeritageSentinelRef.current;
+    if (!root || !target) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const vis = entry.isIntersecting;
+        if (vis && !allHeritageIoPrevIntersectingRef.current) {
+          setAllHeritageVisibleCount((c) =>
+            Math.min(c + ALL_HERITAGE_PAGE_SIZE, sortedFilteredAllHeritagePlaces.length),
+          );
+        }
+        allHeritageIoPrevIntersectingRef.current = vis;
+      },
+      { root, rootMargin: "0px 0px 200px 0px", threshold: 0 },
+    );
+    io.observe(target);
+    return () => {
+      io.disconnect();
+      allHeritageIoPrevIntersectingRef.current = false;
+    };
+  }, [navTab, hasMoreAllHeritage, sortedFilteredAllHeritagePlaces.length]);
+
+  const placeByHeritageId = useMemo(() => {
+    const m = new Map();
+    allHeritagePlaces.forEach((p) => m.set(p.heritageId, p));
+    bookmarkPlaces.forEach((p) => m.set(p.heritageId, p));
+    return m;
+  }, [bookmarkPlaces, allHeritagePlaces]);
+
+  const bookmarkHeritageIdSet = useMemo(
+    () => new Set(bookmarkPlaces.map((p) => String(p.heritageId))),
+    [bookmarkPlaces],
+  );
 
   const toggle = (id) => {
     setAdded((prev) => {
@@ -2049,11 +2405,79 @@ export default function RouteCreate() {
     });
   };
 
+  const handleRemoveBookmark = useCallback(async (heritageId) => {
+    const token = localStorage.getItem("token");
+    if (!token || heritageId == null) return;
+    setRemovingBookmarkId(heritageId);
+    try {
+      const res = await fetch(apiHeritageBookmark(heritageId), {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new Error("unauthorized");
+      if (!res.ok) throw new Error("fail");
+      setBookmarkPlaces((prev) => prev.filter((p) => p.heritageId !== heritageId));
+      setAdded((prev) => {
+        if (!prev.has(heritageId)) return prev;
+        const next = new Set(prev);
+        next.delete(heritageId);
+        return next;
+      });
+      setMapFocusHeritageId((cur) => (cur === heritageId ? null : cur));
+    } catch {
+      // 失敗時は一覧はそのまま（必要ならトースト等）
+    } finally {
+      setRemovingBookmarkId(null);
+    }
+  }, []);
+
+  const handleToggleBookmarkFromAll = useCallback(
+    async (heritageId) => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.alert("ブックマークするにはログインが必要です。");
+        return;
+      }
+      const id = String(heritageId);
+      const already = bookmarkHeritageIdSet.has(id);
+      setBookmarkToggleBusyId(id);
+      try {
+        const res = await fetch(apiHeritageBookmark(id), {
+          method: already ? "DELETE" : "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.status === 401) {
+          window.alert("ログインの有効期限が切れた可能性があります。再度ログインしてください。");
+          return;
+        }
+        if (!res.ok) {
+          window.alert(already ? "ブックマーク解除に失敗しました。" : "ブックマーク追加に失敗しました。");
+          return;
+        }
+        if (already) {
+          setBookmarkPlaces((prev) => prev.filter((p) => String(p.heritageId) !== id));
+        } else {
+          const src = allHeritagePlaces.find((p) => String(p.heritageId) === id);
+          if (src) {
+            setBookmarkPlaces((prev) => {
+              if (prev.some((p) => String(p.heritageId) === id)) return prev;
+              return [{ ...src, createdAt: new Date().toISOString() }, ...prev];
+            });
+          }
+        }
+      } catch {
+        window.alert("通信に失敗しました。");
+      } finally {
+        setBookmarkToggleBusyId(null);
+      }
+    },
+    [bookmarkHeritageIdSet, allHeritagePlaces],
+  );
+
   const handleSave = async (name) => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    const selected = bookmarkPlaces.filter((p) => added.has(p.heritageId));
-    const heritageIds = selected.map((p) => p.heritageId);
+    const heritageIds = [...added].filter((id) => placeByHeritageId.has(id));
     setSaveSubmitting(true);
     try {
       const res = await fetch(API_ROUTES, {
@@ -2189,7 +2613,7 @@ export default function RouteCreate() {
 
   const mapHeritageIdForMap = mapFocusHeritageId ?? heritageIdFromMap;
 
-  /** 북마크 탭: 선택한 북마크 핀 / 保存ルート 탭: 펼친 카드 1件の places だけ */
+  /** 全遺産・북마크 탭: 선택 핀 / 保存ルート: 펼친 카드 places */
   const routePins = useMemo(() => {
     if (navTab === "routes" && openRouteId != null) {
       const r = savedRoutes.find((x) => x.id === openRouteId);
@@ -2211,7 +2635,8 @@ export default function RouteCreate() {
           imageUrl: p.imageUrl || null,
         }));
     }
-    return bookmarkPlaces
+    const listSource = navTab === "all" ? allHeritagePlaces : bookmarkPlaces;
+    return listSource
       .filter(
         (p) =>
           added.has(p.heritageId) &&
@@ -2225,17 +2650,17 @@ export default function RouteCreate() {
         heritageName: p.heritageName,
         imageUrl: p.imageUrl,
       }));
-  }, [navTab, openRouteId, bookmarkPlaces, added, savedRoutes]);
+  }, [navTab, openRouteId, bookmarkPlaces, allHeritagePlaces, added, savedRoutes]);
 
   const lonelyUrlHeritage =
-    navTab === "bookmark" &&
+    (navTab === "bookmark" || navTab === "all") &&
     heritageIdFromMap &&
-    !routePins.some((p) => p.heritageId === heritageIdFromMap)
+    !routePins.some((p) => String(p.heritageId) === String(heritageIdFromMap))
       ? heritageIdFromMap
       : null;
 
   useEffect(() => {
-    if (navTab === "bookmark") {
+    if (navTab === "bookmark" || navTab === "all") {
       setOpenRouteId(null);
     }
   }, [navTab]);
@@ -2368,8 +2793,9 @@ export default function RouteCreate() {
 
   // 탭 설정 (커뮤니티 제거)
   const TABS = [
+    { key: "all", label: "すべての遺産", Icon: LayersIcon },
     { key: "bookmark", label: "ブックマークした場所", Icon: BookmarkFillIcon },
-    { key: "routes",   label: "保存したルート",       Icon: RouteIcon },
+    { key: "routes", label: "保存したルート", Icon: RouteIcon },
   ];
 
   return (
@@ -2455,11 +2881,12 @@ export default function RouteCreate() {
       </header>
 
       {/* ── 메인 영역: 사이드바 + 지도 ── */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
 
         {/* ── 좌: 사이드바 (탭에 따라 내용 변경) ── */}
         <aside style={{
           width: 380,
+          minHeight: 0,
           background: C.white,
           borderRight: `1.5px solid ${C.border}`,
           display: "flex",
@@ -2468,32 +2895,242 @@ export default function RouteCreate() {
         }}>
 
           {/* ── 탭: 북마크한 장소 ── */}
+          {navTab === "all" && (
+            <>
+              <div
+                style={{
+                  padding: "16px 18px 16px",
+                  borderBottom: `1.5px solid ${C.border}`,
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 14,
+                    alignItems: "flex-start",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ flex: "1 1 168px", minWidth: 0 }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>すべての遺産</h2>
+                    <p style={{ fontSize: 12, color: C.gray4, margin: 0, lineHeight: 1.45 }}>
+                      地図と同じピンデータ（一覧を読み込み済み）
+                      <br />
+                      表示は {ALL_HERITAGE_PAGE_SIZE} 件ずつ · スクロールで続きを読み込みます
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      flex: "1 1 200px",
+                      minWidth: 0,
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: "6px 8px",
+                      alignItems: "end",
+                      padding: "8px 10px",
+                      background: "rgba(0,13,87,0.03)",
+                      borderRadius: 10,
+                      border: `1px solid ${C.border}`,
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: C.gray3, fontFamily: font }}>地域</span>
+                      <select
+                        value={allFilterRegion}
+                        onChange={(e) => setAllFilterRegion(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "5px 6px",
+                          borderRadius: 6,
+                          border: `1px solid ${C.border}`,
+                          fontSize: 11,
+                          fontFamily: font,
+                          color: C.navy,
+                          background: C.white,
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {REGIONS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: C.gray3, fontFamily: font }}>種別</span>
+                      <select
+                        value={allFilterCategory}
+                        onChange={(e) => setAllFilterCategory(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "5px 6px",
+                          borderRadius: 6,
+                          border: `1px solid ${C.border}`,
+                          fontSize: 11,
+                          fontFamily: font,
+                          color: C.navy,
+                          background: C.white,
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: C.gray3, fontFamily: font }}>テーマ</span>
+                      <select
+                        value={allFilterTheme}
+                        onChange={(e) => setAllFilterTheme(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "5px 6px",
+                          borderRadius: 6,
+                          border: `1px solid ${C.border}`,
+                          fontSize: 11,
+                          fontFamily: font,
+                          color: C.navy,
+                          background: C.white,
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        <option value="">すべて</option>
+                        {allHeritageThemeCodes.map((n) => (
+                          <option key={n} value={String(n)}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: C.gray3, fontFamily: font }}>名前</span>
+                      <input
+                        type="search"
+                        value={allFilterName}
+                        onChange={(e) => setAllFilterName(e.target.value)}
+                        placeholder="検索…"
+                        autoComplete="off"
+                        style={{
+                          width: "100%",
+                          padding: "5px 6px",
+                          borderRadius: 6,
+                          border: `1px solid ${C.border}`,
+                          fontSize: 11,
+                          fontFamily: font,
+                          color: C.navy,
+                          background: C.white,
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                ref={allHeritageScrollRef}
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  padding: "16px 20px 40px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                {allHeritageLoading && allHeritagePlaces.length === 0 ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px" }}>読み込み中…</p>
+                ) : allHeritageError ? (
+                  <p style={{ fontSize: 14, color: C.red, margin: 0, padding: "8px 4px" }}>
+                    一覧の取得に失敗しました。しばらくしてから再度お試しください。
+                  </p>
+                ) : allHeritagePlaces.length === 0 ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px", lineHeight: 1.6 }}>
+                    表示できる遺産がありません。
+                  </p>
+                ) : filteredAllHeritagePlaces.length === 0 ? (
+                  <p style={{ fontSize: 14, color: C.gray4, margin: 0, padding: "8px 4px", lineHeight: 1.6 }}>
+                    条件に一致する遺産がありません。条件を変えてください。
+                  </p>
+                ) : (
+                  <>
+                    {visibleAllHeritagePlaces.map((place) => (
+                      <BookmarkPlaceCard
+                        key={place.heritageId}
+                        place={place}
+                        added={added.has(place.heritageId)}
+                        onToggle={() => toggle(place.heritageId)}
+                        showRemoveBookmark={false}
+                        hideThumbnail
+                        bookmarkToggle
+                        isBookmarked={bookmarkHeritageIdSet.has(String(place.heritageId))}
+                        onBookmarkToggle={() => handleToggleBookmarkFromAll(place.heritageId)}
+                        bookmarkToggleBusy={bookmarkToggleBusyId === String(place.heritageId)}
+                        isHighlightedOnMap={mapPinHighlightId === place.heritageId}
+                      />
+                    ))}
+                    {hasMoreAllHeritage && (
+                      <div
+                        ref={allHeritageSentinelRef}
+                        style={{ height: 1, minHeight: 1, flexShrink: 0, width: "100%" }}
+                        aria-hidden
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+              <div style={{ padding: "20px", borderTop: `1.5px solid ${C.border}`, background: C.bg, flexShrink: 0 }}>
+                <button
+                  onClick={() => {
+                    if (!localStorage.getItem("token")) {
+                      window.alert("ルートを保存するにはログインが必要です。");
+                      return;
+                    }
+                    addedCount > 0 && setShowModal(true);
+                  }}
+                  style={{
+                    width: "100%", padding: "16px", borderRadius: 14, border: "none",
+                    background: addedCount > 0 ? C.navy : "#c8ccd8",
+                    color: "white", fontSize: 16, fontWeight: 700,
+                    cursor: addedCount > 0 ? "pointer" : "default",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    fontFamily: font, transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => { if (addedCount > 0) e.currentTarget.style.background = "#001080"; }}
+                  onMouseLeave={e => { if (addedCount > 0) e.currentTarget.style.background = C.navy; }}
+                >
+                  <SaveIcon />
+                  ルートを保存 ({addedCount})
+                </button>
+              </div>
+            </>
+          )}
+
           {navTab === "bookmark" && (
             <>
               <div style={{ padding: "28px 28px 20px", borderBottom: `1.5px solid ${C.border}` }}>
                 <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>ブックマークした場所</h2>
                 <p style={{ fontSize: 14, color: C.gray4, margin: 0 }}>ルートに追加する場所を選んでください</p>
-                {heritageIdFromMap && (
-                  <div
-                    style={{
-                      marginTop: 16,
-                      padding: "12px 14px",
-                      background: "rgba(0,13,87,0.06)",
-                      borderRadius: 10,
-                      border: `1px solid ${C.border}`,
-                    }}
-                  >
-                    <p style={{ fontSize: 12, fontWeight: 700, color: C.navy, margin: "0 0 4px", fontFamily: font }}>地図から選択した文化遺産</p>
-                    <p style={{ fontSize: 14, color: C.gray3, margin: 0, lineHeight: 1.5, fontFamily: font, wordBreak: "break-word" }}>
-                      {heritageNameFromMap || heritageIdFromMap}
-                    </p>
-                    <p style={{ fontSize: 12, color: C.gray4, margin: "8px 0 0", lineHeight: 1.45, fontFamily: font }}>
-                      下のリストから他の場所を追加してルートを保存できます。
-                    </p>
-                  </div>
-                )}
               </div>
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  padding: "16px 20px 40px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
                 {!localStorage.getItem("token") ? (
                   <div style={{ padding: "24px 12px", textAlign: "center" }}>
                     <p style={{ fontSize: 14, color: C.gray3, margin: "0 0 16px", lineHeight: 1.6 }}>
@@ -2527,12 +3164,15 @@ export default function RouteCreate() {
                     ブックマークした文化財はまだありません。地図や詳細画面からブックマークを追加してください。
                   </p>
                 ) : (
-                  bookmarkPlaces.map((place) => (
+                  sortedBookmarkPlaces.map((place) => (
                     <BookmarkPlaceCard
                       key={place.heritageId}
                       place={place}
                       added={added.has(place.heritageId)}
                       onToggle={() => toggle(place.heritageId)}
+                      onRemoveBookmark={() => handleRemoveBookmark(place.heritageId)}
+                      removeBusy={removingBookmarkId === place.heritageId}
+                      hideThumbnail
                       isHighlightedOnMap={mapPinHighlightId === place.heritageId}
                     />
                   ))
@@ -2566,7 +3206,18 @@ export default function RouteCreate() {
                 <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>保存したルート</h2>
                 <p style={{ fontSize: 14, color: C.gray4, margin: 0 }}>ルートをタップして場所を確認</p>
               </div>
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  padding: "16px 20px 40px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
                 {!localStorage.getItem("token") ? (
                   <div style={{ padding: "24px 12px", textAlign: "center" }}>
                     <p style={{ fontSize: 14, color: C.gray3, margin: "0 0 16px", lineHeight: 1.6 }}>
@@ -2649,7 +3300,7 @@ export default function RouteCreate() {
               routePins={routePins}
               lonelyHeritageId={lonelyUrlHeritage}
               nameFromUrl={heritageNameFromMap || ""}
-              selectedCount={navTab === "bookmark" ? addedCount : 0}
+              selectedCount={navTab === "bookmark" || navTab === "all" ? addedCount : 0}
               onMarkerSelect={(id) => setMapFocusHeritageId(id)}
               focusHeritageId={mapFocusHeritageId}
               tmapRouteContext={tmapRouteContext}

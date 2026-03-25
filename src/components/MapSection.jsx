@@ -303,9 +303,10 @@ function writeSessionJson(key, value) {
 }
 
 function hasThemeBit(pin, themeIndex) {
-  const mask = Number(pin?.themeMask || 0);
-  const bit = 1 << (themeIndex - 1);
-  return (mask & bit) !== 0;
+  const want = Number(themeIndex);
+  if (!Number.isFinite(want) || want < 1) return true;
+  const code = Number(pin?.themeCode ?? pin?.themeMask ?? 0);
+  return code === want;
 }
 
 function dedupePinsById(pins) {
@@ -2120,9 +2121,10 @@ function MapWithGoogle({ apiKey, mapConfig }) {
                       type="button"
                       onClick={() => {
                         const name = selectedPin.nameJa || selectedPin.nameKo || "";
-                        navigate(
-                          `/route/create?heritageId=${encodeURIComponent(selectedPin.id)}&heritageName=${encodeURIComponent(name)}`,
-                        );
+                        const params = new URLSearchParams();
+                        params.set("heritageId", selectedPin.id);
+                        params.set("heritageName", name);
+                        navigate(`/route/create?${params.toString()}`);
                       }}
                       style={{
                         border: `2px solid ${PANEL_C.red}`,
