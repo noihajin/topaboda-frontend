@@ -90,7 +90,7 @@ useEffect(() => {
         id: item.id,
         category: item.categories,        // 이름 바꿔줌
         title: item.title,
-        author: item.nickName,           // 중요!
+        author: item.nickname,           // 중요!
         date: item.createdAt.slice(0, 10), // 날짜만 자르기
         views: item.viewCount,
         likes: item.likeCount ?? 0,      // null 방지
