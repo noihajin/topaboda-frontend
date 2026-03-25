@@ -22,6 +22,7 @@ export default function CommentRow({ item, onEditComment, onDeleteComment }) {
                 date={item.date}
                 onEdit={() => setEditOpen(true)}
                 onDelete={handleDelete}
+                showDesc
             />
             <CommentEditModal
                 isOpen={editOpen}

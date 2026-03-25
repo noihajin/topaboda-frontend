@@ -22,6 +22,7 @@ const ReviewRow = ({ item, onEditReview, onDeleteReview }) => {
                 date={item.date}
                 onEdit={() => setEditOpen(true)}
                 onDelete={handleDelete}
+                showDesc
             />
             <ReviewEditModal
                 isOpen={editOpen}
