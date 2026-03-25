@@ -68,7 +68,7 @@ export default function HeritageHero({ data, isLiked, isBookmarked, isLiking, is
                 >
                     {data.nameJa}
                 </h1>
-                <p
+                {/* <p
                     style={{
                         fontSize: "clamp(16px, 2vw, 24px)",
                         color: "rgba(255,255,255,0.88)",
@@ -78,7 +78,7 @@ export default function HeritageHero({ data, isLiked, isBookmarked, isLiking, is
                     }}
                 >
                     {data.nameJaReading}
-                </p>
+                </p> */}
                 <p
                     style={{
                         fontSize: 14,
