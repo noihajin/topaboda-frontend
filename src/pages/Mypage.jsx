@@ -215,8 +215,10 @@ export default function MyPage() {
 
     const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
     const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
-    // 항상 마지막에 +1 가상 페이지(추가 슬롯 전용)
-    const totalHtPagesWithAdd = totalHtPages + 1;
+    const currentHtTotal = heritageTab === "bookmark" ? htBkData.totalElements : htLkData.totalElements;
+    // 마지막 페이지가 꽉 찬 경우에만 +버튼 전용 가상 페이지 추가 (아니면 인라인으로 표시)
+    const lastPageIsFull = currentHtTotal > 0 && currentHtTotal % HT_SIZE === 0;
+    const totalHtPagesWithAdd = totalHtPages + (lastPageIsFull ? 1 : 0);
     const displayedHt = currentHtData;
 
     const fetchData = async (url, params, setData) => {

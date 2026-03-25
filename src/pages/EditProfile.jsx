@@ -17,18 +17,6 @@ const C = {
 const font = "'Noto Sans JP', 'Noto Sans KR', sans-serif";
 
 // ── 아이콘 ────────────────────────────────────────────────────────────
-const IconUser = () => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-    </svg>
-);
-const IconMail = () => (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-        <polyline points="22,6 12,13 2,6" />
-    </svg>
-);
 const IconCamera = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
@@ -51,7 +39,8 @@ export default function EditProfile() {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
-    const [nickname, setNickname] = useState("");
+    const [newUserId, setNewUserId] = useState("");
+    const [userIdCheck, setUserIdCheck] = useState(null); // null | "ok" | "dup"
     const [newNickname, setNewNickname] = useState("");
     const [nickCheck, setNickCheck] = useState(null); // null | "ok" | "dup"
     const [previewImg, setPreviewImg] = useState(null);
@@ -60,6 +49,7 @@ export default function EditProfile() {
     const [hoverPw, setHoverPw] = useState(false);
     const [hoverDel, setHoverDel] = useState(false);
     const [hoverCheck, setHoverCheck] = useState(false);
+    const [hoverIdCheck, setHoverIdCheck] = useState(false);
     const deleteModal = useModal();
 
     const handleImageChange = (e) => {
@@ -70,15 +60,25 @@ export default function EditProfile() {
         reader.readAsDataURL(file);
     };
 
+    const handleUserIdCheck = async () => {
+        if (!newUserId.trim()) return;
+        // TODO: GET /api/users/check-id?userId=...
+        // 임시 목 처리 (API 연동 시 교체)
+        setUserIdCheck("ok");
+    };
+
     const handleNicknameCheck = async () => {
         if (!newNickname.trim()) return;
         // TODO: GET /api/users/check-nickname?nickname=...
         // 임시 목 처리 (API 연동 시 교체)
-        const isDup = newNickname === nickname;
-        setNickCheck(isDup ? "dup" : "ok");
+        setNickCheck("ok");
     };
 
     const handleSave = () => {
+        if (newUserId && userIdCheck !== "ok") {
+            alert("ユーザーIDの重複確認をしてください。");
+            return;
+        }
         if (newNickname && nickCheck !== "ok") {
             alert("ニックネームの重複確認をしてください。");
             return;
@@ -185,35 +185,63 @@ export default function EditProfile() {
 
                     {/* 입력 필드 */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                        {/* 현재 유저명 (읽기 전용) */}
+                        {/* 유저 아이디 변경 + 중복확인 */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.navy }}>
-                                <IconUser /> ユーザー名
+                            <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>
+                                ユーザーID変更
                             </label>
-                            <input
-                                type="text"
-                                value={nickname}
-                                onChange={(e) => setNickname(e.target.value)}
-                                placeholder="文化遺産探検家"
-                                style={{
-                                    border: `1.2px solid ${C.border}`,
-                                    borderRadius: 13,
-                                    padding: "12px 16px",
-                                    fontSize: 14,
-                                    fontFamily: font,
-                                    outline: "none",
-                                    color: "#0a0a0a",
-                                    transition: "border-color 0.2s",
-                                }}
-                                onFocus={(e) => (e.target.style.borderColor = C.navy)}
-                                onBlur={(e) => (e.target.style.borderColor = C.border)}
-                            />
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <input
+                                    type="text"
+                                    value={newUserId}
+                                    onChange={(e) => {
+                                        setNewUserId(e.target.value);
+                                        setUserIdCheck(null);
+                                    }}
+                                    placeholder="新しいIDを入力"
+                                    style={{
+                                        flex: 1,
+                                        border: `1.2px solid ${userIdCheck === "ok" ? "#16a34a" : userIdCheck === "dup" ? "#dc2626" : C.border}`,
+                                        borderRadius: 13,
+                                        padding: "12px 16px",
+                                        fontSize: 14,
+                                        fontFamily: font,
+                                        outline: "none",
+                                        color: "#0a0a0a",
+                                        transition: "border-color 0.2s",
+                                    }}
+                                    onFocus={(e) => { if (!userIdCheck) e.target.style.borderColor = C.navy; }}
+                                    onBlur={(e) => { if (!userIdCheck) e.target.style.borderColor = C.border; }}
+                                />
+                                <button
+                                    onClick={handleUserIdCheck}
+                                    onMouseEnter={() => setHoverIdCheck(true)}
+                                    onMouseLeave={() => setHoverIdCheck(false)}
+                                    style={{
+                                        padding: "0 14px",
+                                        borderRadius: 13,
+                                        fontSize: 13,
+                                        fontWeight: 700,
+                                        border: `1.2px solid ${C.navy}`,
+                                        background: hoverIdCheck ? C.navy : C.white,
+                                        color: hoverIdCheck ? C.white : C.navy,
+                                        cursor: "pointer",
+                                        transition: "all 0.2s",
+                                        whiteSpace: "nowrap",
+                                        fontFamily: font,
+                                    }}
+                                >
+                                    重複確認
+                                </button>
+                            </div>
+                            {userIdCheck === "ok" && <p style={{ fontSize: 12, color: "#16a34a", margin: 0, fontFamily: font }}>✓ 使用可能なIDです。</p>}
+                            {userIdCheck === "dup" && <p style={{ fontSize: 12, color: "#dc2626", margin: 0, fontFamily: font }}>✗ すでに使用されているIDです。</p>}
                         </div>
 
                         {/* 닉네임 변경 + 중복확인 */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.navy }}>
-                                <IconUser /> ニックネーム変更
+                            <label style={{ fontSize: 13, fontWeight: 600, color: C.navy }}>
+                                ニックネーム変更
                             </label>
                             <div style={{ display: "flex", gap: 8 }}>
                                 <input
