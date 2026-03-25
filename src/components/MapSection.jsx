@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useJsApiLoader, GoogleMap } from "@react-google-maps/api";
+import { KOREA_MAP_RESTRICTION } from "../constants/mapKoreaBounds";
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 // ✅ 파일을 따로 찾지 않도록 데이터를 코드 내부에 직접 정의합니다. (에러 해결 핵심)
 const mapFocusPreset = {
@@ -2293,7 +2294,11 @@ function MapWithGoogle({ apiKey, mapConfig }) {
             }
           }
           zoom={mapFocusPreset?.[INITIAL_FOCUS_KEY]?.zoom || INIT_ZOOM}
-          options={{ backgroundColor: "#e8f4ff", mapId: mapConfig?.mapId || DEFAULT_MAP_ID }}
+          options={{
+            backgroundColor: "#e8f4ff",
+            mapId: mapConfig?.mapId || DEFAULT_MAP_ID,
+            restriction: KOREA_MAP_RESTRICTION,
+          }}
           onLoad={onMapLoad}
         />
       </div>
