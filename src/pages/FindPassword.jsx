@@ -38,15 +38,18 @@ export default function FindPasswordPage() {
         e.preventDefault();
         setError("");
 
-        if (!userId.trim()) { setError("IDを入力してください。"); return; }
-        if (!email.trim())  { setError("メールアドレスを入力してください。"); return; }
+        if (!userId.trim()) {
+            setError("IDを入力してください。");
+            return;
+        }
+        if (!email.trim()) {
+            setError("メールアドレスを入力してください。");
+            return;
+        }
 
         setLoading(true);
         try {
-            await axios.post(
-                "http://localhost:9990/topaboda/api/auth/find-password",
-                { id: userId, email }
-            );
+            await axios.post("http://localhost:9990/topaboda/api/auth/pw/email", { id: userId, email: email });
             setSent(true);
         } catch (err) {
             setError(err.response?.data?.message || "該当するアカウントが見つかりませんでした。");
@@ -67,20 +70,20 @@ export default function FindPasswordPage() {
                     {/* 바디 */}
                     <div style={{ padding: "48px 40px 40px", display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
                         <div style={{ fontSize: 40, marginBottom: 20 }}>✉️</div>
-                        <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 8px", textAlign: "center", fontFamily: font }}>
-                            メールを送信しました
-                        </p>
+                        <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 8px", textAlign: "center", fontFamily: font }}>メールを送信しました</p>
                         <p style={{ fontSize: 13, color: C.gray2, textAlign: "center", lineHeight: 1.7, margin: "0 0 32px", fontFamily: font }}>
-                            {email} に<br />パスワード再設定用のリンクを送りました。<br />メールをご確認ください。
+                            {email} に<br />
+                            パスワード再設定用のリンクを送りました。
+                            <br />
+                            メールをご確認ください。
                         </p>
                         <div style={{ width: "100%", height: "1.25px", background: "#d3d3d3", marginBottom: 20 }} />
                         <p style={{ fontSize: 12, color: "#6a7282", textAlign: "center", lineHeight: 1.7, margin: 0, fontFamily: font }}>
-                            メールが届かない場合は<br />迷惑メールフォルダをご確認ください。
+                            メールが届かない場合は
+                            <br />
+                            迷惑メールフォルダをご確認ください。
                         </p>
-                        <Link
-                            to="/login"
-                            style={{ marginTop: 28, color: C.navy, fontWeight: 700, fontSize: 14, textDecoration: "none", fontFamily: font }}
-                        >
+                        <Link to="/login" style={{ marginTop: 28, color: C.navy, fontWeight: 700, fontSize: 14, textDecoration: "none", fontFamily: font }}>
                             ← ログインに戻る
                         </Link>
                     </div>
@@ -92,25 +95,23 @@ export default function FindPasswordPage() {
     /* ── 입력 화면 ── */
     return (
         <div style={pageStyle}>
-            <div style={{
-                width: "100%",
-                maxWidth: 420,
-                background: C.white,
-                borderRadius: 24,
-                padding: "45px 40px",
-                boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
-                border: `1px solid ${C.border}`,
-                textAlign: "center",
-            }}>
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: 420,
+                    background: C.white,
+                    borderRadius: 24,
+                    padding: "45px 40px",
+                    boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
+                    border: `1px solid ${C.border}`,
+                    textAlign: "center",
+                }}
+            >
                 {/* 로고 · 타이틀 */}
                 <div style={{ marginBottom: 35, display: "flex", flexDirection: "column", alignItems: "center" }}>
                     <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
-                    <p style={{ color: C.gray1, fontSize: 20, fontWeight: 700, margin: 0, letterSpacing: "1px", fontFamily: font }}>
-                        パスワード検索
-                    </p>
-                    <p style={{ fontSize: 13, color: C.gray3, margin: "8px 0 0", fontWeight: 500, fontFamily: font }}>
-                        登録済みのIDとメールアドレスを入力してください
-                    </p>
+                    <p style={{ color: C.gray1, fontSize: 20, fontWeight: 700, margin: 0, letterSpacing: "1px", fontFamily: font }}>パスワード検索</p>
+                    <p style={{ fontSize: 13, color: C.gray3, margin: "8px 0 0", fontWeight: 500, fontFamily: font }}>登録済みのIDとメールアドレスを入力してください</p>
                 </div>
 
                 {/* 폼 */}
@@ -122,7 +123,10 @@ export default function FindPasswordPage() {
                         value={userId}
                         onFocus={() => setUserIdFocused(true)}
                         onBlur={() => setUserIdFocused(false)}
-                        onChange={(e) => { setUserId(e.target.value); setError(""); }}
+                        onChange={(e) => {
+                            setUserId(e.target.value);
+                            setError("");
+                        }}
                         style={{ ...inputStyle, border: `1px solid ${userIdFocused ? C.navy : "#d4d4d4"}`, transition: "border-color 0.2s" }}
                     />
 
@@ -133,15 +137,14 @@ export default function FindPasswordPage() {
                         value={email}
                         onFocus={() => setEmailFocused(true)}
                         onBlur={() => setEmailFocused(false)}
-                        onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError("");
+                        }}
                         style={{ ...inputStyle, border: `1px solid ${emailFocused ? C.navy : "#d4d4d4"}`, transition: "border-color 0.2s" }}
                     />
 
-                    {error && (
-                        <p style={{ fontSize: 13, color: "#b91c1c", margin: 0, textAlign: "left", fontWeight: 500 }}>
-                            {error}
-                        </p>
-                    )}
+                    {error && <p style={{ fontSize: 13, color: "#b91c1c", margin: 0, textAlign: "left", fontWeight: 500 }}>{error}</p>}
 
                     <button
                         type="submit"
@@ -166,21 +169,11 @@ export default function FindPasswordPage() {
 
                 {/* 하단 링크 */}
                 <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.divider}`, display: "flex", justifyContent: "center", gap: 10, fontSize: 14, color: C.gray3, fontWeight: 500 }}>
-                    <Link
-                        to="/login"
-                        onMouseEnter={() => setLoginHover(true)}
-                        onMouseLeave={() => setLoginHover(false)}
-                        style={{ color: C.gray3, textDecoration: loginHover ? "underline" : "none", textUnderlineOffset: "3px", transition: "text-decoration 0.15s", cursor: "pointer" }}
-                    >
+                    <Link to="/login" onMouseEnter={() => setLoginHover(true)} onMouseLeave={() => setLoginHover(false)} style={{ color: C.gray3, textDecoration: loginHover ? "underline" : "none", textUnderlineOffset: "3px", transition: "text-decoration 0.15s", cursor: "pointer" }}>
                         ログイン
                     </Link>
                     <span style={{ color: C.divider }}>|</span>
-                    <Link
-                        to="/find-id"
-                        onMouseEnter={() => setIdHover(true)}
-                        onMouseLeave={() => setIdHover(false)}
-                        style={{ color: C.gray3, textDecoration: idHover ? "underline" : "none", textUnderlineOffset: "3px", transition: "text-decoration 0.15s", cursor: "pointer" }}
-                    >
+                    <Link to="/find-id" onMouseEnter={() => setIdHover(true)} onMouseLeave={() => setIdHover(false)} style={{ color: C.gray3, textDecoration: idHover ? "underline" : "none", textUnderlineOffset: "3px", transition: "text-decoration 0.15s", cursor: "pointer" }}>
                         ID検索
                     </Link>
                 </div>
@@ -188,12 +181,7 @@ export default function FindPasswordPage() {
                 {/* 신규 가입 링크 */}
                 <div style={{ marginTop: 14, fontSize: 14, color: C.gray3, fontWeight: 500, fontFamily: font }}>
                     初めてご利用の方は
-                    <Link
-                        to="/register"
-                        onMouseEnter={() => setKochiraHover(true)}
-                        onMouseLeave={() => setKochiraHover(false)}
-                        style={{ color: kochiraHover ? C.red : C.navy, fontWeight: 700, textDecoration: "none", marginLeft: 2, transition: "color 0.2s" }}
-                    >
+                    <Link to="/register" onMouseEnter={() => setKochiraHover(true)} onMouseLeave={() => setKochiraHover(false)} style={{ color: kochiraHover ? C.red : C.navy, fontWeight: 700, textDecoration: "none", marginLeft: 2, transition: "color 0.2s" }}>
                         こちら
                     </Link>
                 </div>

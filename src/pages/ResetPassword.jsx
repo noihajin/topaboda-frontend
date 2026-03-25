@@ -62,17 +62,26 @@ export default function ResetPasswordPage() {
         e.preventDefault();
         setError("");
 
-        if (!newPw) { setError("新しいパスワードを入力してください。"); return; }
-        if (newPw.length < 8) { setError("パスワードは8文字以上で入力してください。"); return; }
-        if (newPw !== confirmPw) { setError("パスワードが一致しません。"); return; }
-        if (!token) { setError("無効なリンクです。再度パスワード検索を行ってください。"); return; }
+        if (!newPw) {
+            setError("新しいパスワードを入力してください。");
+            return;
+        }
+        if (newPw.length < 8) {
+            setError("パスワードは8文字以上で入力してください。");
+            return;
+        }
+        if (newPw !== confirmPw) {
+            setError("パスワードが一致しません。");
+            return;
+        }
+        if (!token) {
+            setError("無効なリンクです。再度パスワード検索を行ってください。");
+            return;
+        }
 
         setLoading(true);
         try {
-            await axios.post(
-                "http://localhost:9990/topaboda/api/auth/reset-password",
-                { token, newPassword: newPw }
-            );
+            await axios.patch("http://localhost:9990/topaboda/api/auth/pw/reset", { token: token, password: newPw });
             setDone(true);
         } catch (err) {
             setError(err.response?.data?.message || "パスワードの再設定に失敗しました。");
@@ -91,12 +100,8 @@ export default function ResetPasswordPage() {
                     </div>
                     <div style={{ padding: "48px 40px 40px", display: "flex", flexDirection: "column", alignItems: "center" }}>
                         <div style={{ fontSize: 44, marginBottom: 20 }}>✅</div>
-                        <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 8px", textAlign: "center", fontFamily: font }}>
-                            パスワードを変更しました
-                        </p>
-                        <p style={{ fontSize: 13, color: C.gray2, textAlign: "center", lineHeight: 1.7, margin: "0 0 32px", fontFamily: font }}>
-                            新しいパスワードでログインしてください。
-                        </p>
+                        <p style={{ fontSize: 16, fontWeight: 700, color: C.navy, margin: "0 0 8px", textAlign: "center", fontFamily: font }}>パスワードを変更しました</p>
+                        <p style={{ fontSize: 13, color: C.gray2, textAlign: "center", lineHeight: 1.7, margin: "0 0 32px", fontFamily: font }}>新しいパスワードでログインしてください。</p>
                         <button
                             onClick={() => navigate("/login")}
                             style={{
@@ -129,45 +134,49 @@ export default function ResetPasswordPage() {
                 {/* 바디 */}
                 <div style={{ padding: "28px 28px 36px" }}>
                     {/* 파란 요건 박스 (피그마) */}
-                    <div style={{
-                        background: "#eff6ff",
-                        border: "1.2px solid #93c5fd",
-                        borderRadius: 13,
-                        padding: "16px",
-                        display: "flex",
-                        gap: 12,
-                        alignItems: "flex-start",
-                        marginBottom: 28,
-                    }}>
+                    <div
+                        style={{
+                            background: "#eff6ff",
+                            border: "1.2px solid #93c5fd",
+                            borderRadius: 13,
+                            padding: "16px",
+                            display: "flex",
+                            gap: 12,
+                            alignItems: "flex-start",
+                            marginBottom: 28,
+                        }}
+                    >
                         <div style={{ flexShrink: 0, marginTop: 1 }}>
                             <LockIcon />
                         </div>
                         <div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: "0 0 6px", fontFamily: font }}>
-                                パスワード要件
-                            </p>
-                            <p style={{
-                                fontSize: 12,
-                                color: hasMinLength ? "#16a34a" : "#6b7280",
-                                margin: "0 0 3px",
-                                fontFamily: font,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                                transition: "color 0.2s",
-                            }}>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: C.navy, margin: "0 0 6px", fontFamily: font }}>パスワード要件</p>
+                            <p
+                                style={{
+                                    fontSize: 12,
+                                    color: hasMinLength ? "#16a34a" : "#6b7280",
+                                    margin: "0 0 3px",
+                                    fontFamily: font,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    transition: "color 0.2s",
+                                }}
+                            >
                                 {hasMinLength ? "✓" : "•"} 最低8文字以上
                             </p>
-                            <p style={{
-                                fontSize: 12,
-                                color: hasNumberOrSpecial ? "#16a34a" : "#6b7280",
-                                margin: 0,
-                                fontFamily: font,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                                transition: "color 0.2s",
-                            }}>
+                            <p
+                                style={{
+                                    fontSize: 12,
+                                    color: hasNumberOrSpecial ? "#16a34a" : "#6b7280",
+                                    margin: 0,
+                                    fontFamily: font,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    transition: "color 0.2s",
+                                }}
+                            >
                                 {hasNumberOrSpecial ? "✓" : "•"} 数字と特殊文字を含む（推奨）
                             </p>
                         </div>
@@ -184,7 +193,10 @@ export default function ResetPasswordPage() {
                                     value={newPw}
                                     onFocus={() => setNewFocused(true)}
                                     onBlur={() => setNewFocused(false)}
-                                    onChange={(e) => { setNewPw(e.target.value); setError(""); }}
+                                    onChange={(e) => {
+                                        setNewPw(e.target.value);
+                                        setError("");
+                                    }}
                                     style={{
                                         ...inputStyle,
                                         border: `1px solid ${newFocused ? C.navy : "#d4d4d4"}`,
@@ -208,16 +220,13 @@ export default function ResetPasswordPage() {
                                     value={confirmPw}
                                     onFocus={() => setConfirmFocused(true)}
                                     onBlur={() => setConfirmFocused(false)}
-                                    onChange={(e) => { setConfirmPw(e.target.value); setError(""); }}
+                                    onChange={(e) => {
+                                        setConfirmPw(e.target.value);
+                                        setError("");
+                                    }}
                                     style={{
                                         ...inputStyle,
-                                        border: `1px solid ${
-                                            confirmPw && confirmPw !== newPw
-                                                ? "#b91c1c"
-                                                : confirmFocused
-                                                ? C.navy
-                                                : "#d4d4d4"
-                                        }`,
+                                        border: `1px solid ${confirmPw && confirmPw !== newPw ? "#b91c1c" : confirmFocused ? C.navy : "#d4d4d4"}`,
                                         paddingRight: 45,
                                         transition: "border-color 0.2s",
                                     }}
@@ -227,16 +236,10 @@ export default function ResetPasswordPage() {
                                 </button>
                             </div>
                             {/* 불일치 인라인 메시지 */}
-                            {confirmPw && confirmPw !== newPw && (
-                                <p style={{ fontSize: 12, color: "#b91c1c", margin: "4px 0 0", fontWeight: 500 }}>
-                                    パスワードが一致しません。
-                                </p>
-                            )}
+                            {confirmPw && confirmPw !== newPw && <p style={{ fontSize: 12, color: "#b91c1c", margin: "4px 0 0", fontWeight: 500 }}>パスワードが一致しません。</p>}
                         </div>
 
-                        {error && (
-                            <p style={{ fontSize: 13, color: "#b91c1c", margin: 0, fontWeight: 500 }}>{error}</p>
-                        )}
+                        {error && <p style={{ fontSize: 13, color: "#b91c1c", margin: 0, fontWeight: 500 }}>{error}</p>}
 
                         {/* 제출 버튼 */}
                         <button
