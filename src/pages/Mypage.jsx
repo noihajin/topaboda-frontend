@@ -174,6 +174,38 @@ export default function MyPage() {
     const PAGE_SIZE = 5;
     const HT_SIZE = 4;
 
+    const handlePostSaveCancelClose = () => {
+    setPostSaveCancelModal({ open: false, item: null });
+    };
+
+    const handlePostSaveCancelConfirm = async () => {
+        const token = localStorage.getItem("token");
+
+        if (!token || !postSaveCancelModal.item) {
+            console.error("인증 정보 또는 삭제 대상이 없습니다.");
+            return;
+        }
+
+        const boardId = postSaveCancelModal.item.id;
+        const url = `http://localhost:9990/topaboda/api/boards/${boardId}/${postSaveCancelModal.item.type === "bookmark" ? "bookmarks" : "likes"}`;
+
+        try {
+            await axios.delete(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (postSaveCancelModal.item.type === "bookmark") {
+                fetchData("/boards/bookmarks/snippet", { page: postBkPage, size: PAGE_SIZE }, setPostBkData);
+            } else {
+                fetchData("/boards/likes/snippet", { page: postLkPage, size: PAGE_SIZE }, setPostLkData);
+            }
+        } catch (error) {
+            console.error(`${url} 삭제 실패:`, error);
+        }
+
+        setPostSaveCancelModal({ open: false, item: null });
+    };
+
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -199,7 +231,7 @@ export default function MyPage() {
             } else {
                 fetchData("/heritages/likes/snippet", { page: htLkPage, size: HT_SIZE }, setHtLkData);
             }
-        } catch (e) {
+        } catch (error) {
             console.error(`${url} 삭제 실패:`, error);
         }
 
@@ -215,10 +247,8 @@ export default function MyPage() {
 
     const currentHtData = heritageTab === "bookmark" ? htBkData.contents : htLkData.contents;
     const totalHtPages = heritageTab === "bookmark" ? htBkData.totalPages : htLkData.totalPages;
-    const currentHtTotal = heritageTab === "bookmark" ? htBkData.totalElements : htLkData.totalElements;
-    // 마지막 페이지가 꽉 찬 경우에만 +버튼 전용 가상 페이지 추가 (아니면 인라인으로 표시)
-    const lastPageIsFull = currentHtTotal > 0 && currentHtTotal % HT_SIZE === 0;
-    const totalHtPagesWithAdd = totalHtPages + (lastPageIsFull ? 1 : 0);
+    // 항상 마지막에 +1 가상 페이지(추가 슬롯 전용)
+    const totalHtPagesWithAdd = totalHtPages + 1;
     const displayedHt = currentHtData;
 
     const fetchData = async (url, params, setData) => {
@@ -368,59 +398,6 @@ export default function MyPage() {
             console.error("status:", error.response?.status);
             console.error("data:", error.response?.data);
             alert("コメントの削除に失敗しました。");
-        }
-    };
-
-    // 리뷰 수정
-    const handleEditReview = async (reviewId, newContent) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
-
-        try {
-            await axios.patch(
-                `http://localhost:9990/topaboda/api/reviews/${reviewId}`,
-                { content: newContent },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                },
-            );
-
-            alert("レビューが修正されました。");
-            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
-        } catch (error) {
-            console.error("리뷰 수정 실패:", error);
-            alert("レビューの修正に失敗しました。");
-        }
-    };
-
-    // 리뷰 삭제
-    const handleDeleteReview = async (reviewId) => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
-
-        try {
-            await axios.delete(`http://localhost:9990/topaboda/api/reviews/${reviewId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            alert("レビューが削除されました。");
-            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
-        } catch (error) {
-            console.error("리뷰 삭제 실패:", error);
-            alert("レビューの削除に失敗しました。");
         }
     };
 
@@ -608,7 +585,12 @@ export default function MyPage() {
                                 </div>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-                                {!routesLoading && savedRoutes.length === 0 ? (
+                                {routesLoading ? (
+                                    <>
+                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
+                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
+                                    </>
+                                ) : savedRoutes.length === 0 ? (
                                     /* 목록 없을 때 */
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
                                         <p style={{ fontSize: 14, color: C.gray3, margin: 0 }}>探訪路がありません</p>
@@ -714,7 +696,7 @@ export default function MyPage() {
                         </div>
 
                         {/* 리스트 */}
-                        <div style={{ minHeight: 320, flex: 1 }}>
+                        <div style={{ minHeight: 500, flex: 1 }}>
                             {displayedAct.length === 0 ? (
                                 <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                     {postTab === "posts"    && "投稿した記事がありません。"}
@@ -725,7 +707,7 @@ export default function MyPage() {
                                 displayedAct.map((item) => {
                                     if (postTab === "posts")    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
                                     if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                    return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReview} />;
+                                    return <ReviewRow key={item.id} item={item} />;
                                 })
                             )}
                         </div>
@@ -735,7 +717,7 @@ export default function MyPage() {
                     </div>
 
                     {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
                         {/* 탭 헤더 */}
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                             <div style={{ display: "flex", gap: 8 }}>
@@ -765,7 +747,7 @@ export default function MyPage() {
                             const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
                             return (
                                 <>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 320, flex: 1 }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 500, flex: 1 }}>
                                         {saveData.contents.length === 0 ? (
                                             <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
                                                 {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
@@ -892,11 +874,8 @@ export default function MyPage() {
         {/* 게시글 북마크 / 좋아요 취소 확인 모달 */}
         <TopaModal
             isOpen={postSaveCancelModal.open}
-            onClose={() => setPostSaveCancelModal({ open: false, item: null })}
-            onConfirm={() => {
-                // TODO: DELETE /api/boards/bookmarks/{id} or DELETE /api/boards/{id}/likes
-                setPostSaveCancelModal({ open: false, item: null });
-            }}
+            onClose={handlePostSaveCancelClose}
+            onConfirm={handlePostSaveCancelConfirm}
             variant={postSaveCancelModal.item?.type === "bookmark" ? "info" : "danger"}
             title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
             confirmLabel="解除する"
