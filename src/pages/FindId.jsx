@@ -19,11 +19,31 @@ const font = "'Roboto', 'Noto Sans JP', 'Noto Sans KR', sans-serif";
 
 export default function FindIdPage() {
     const navigate = useNavigate();
+
+    // 이메일 입력
     const [email, setEmail] = useState("");
-    const [btnHover, setBtnHover] = useState(false);
-    const [result, setResult] = useState(null);   // { id: string } | null
+    // 단계: 'email' → 이메일 입력, 'code' → 인증번호 입력, 'done' → ID 표시
+    const [step, setStep] = useState("email");
+
+    // 인증번호
+    const [code, setCode] = useState("");
+    const [codeFocused, setCodeFocused] = useState(false);
+    const [codeError, setCodeError] = useState("");
+
+    // 결과
+    const [result, setResult] = useState(null);  // { id: string }
+
+    // 알림 배너
+    const [notice, setNotice] = useState("");
+
+    // 에러 / 로딩
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+
+    // 버튼 hover
+    const [btnHover, setBtnHover] = useState(false);
+    const [verifyBtnHover, setVerifyBtnHover] = useState(false);
 
     // 인터랙션 상태
     const [inputFocused, setInputFocused] = useState(false);
@@ -31,10 +51,10 @@ export default function FindIdPage() {
     const [pwHover, setPwHover] = useState(false);
     const [kochiraHover, setKochiraHover] = useState(false);
 
-    const handleFindId = async (e) => {
+    /* ── STEP 1: 이메일로 인증번호 발송 ── */
+    const handleSendCode = async (e) => {
         e.preventDefault();
         setError("");
-        setResult(null);
 
         if (!email.trim()) {
             setError("メールアドレスを入力してください。");
@@ -43,11 +63,12 @@ export default function FindIdPage() {
 
         setLoading(true);
         try {
-            const response = await axios.post(
+            await axios.post(
                 "http://localhost:9990/topaboda/api/auth/find-id",
                 { email }
             );
-            setResult({ id: response.data.id });
+            setNotice("認証番号をメールに送信しました。");
+            setStep("code");
         } catch (err) {
             const msg =
                 err.response?.data?.message ||
@@ -55,6 +76,35 @@ export default function FindIdPage() {
             setError(msg);
         } finally {
             setLoading(false);
+        }
+    };
+
+    /* ── STEP 2: 인증번호 확인 → ID 표시 ── */
+    const handleVerifyCode = async (e) => {
+        e.preventDefault();
+        setCodeError("");
+
+        if (!code.trim()) {
+            setCodeError("認証番号を入力してください。");
+            return;
+        }
+
+        setVerifying(true);
+        try {
+            const response = await axios.post(
+                "http://localhost:9990/topaboda/api/auth/find-id/verify",
+                { email, code }
+            );
+            setResult({ id: response.data.id });
+            setStep("done");
+            setNotice("");
+        } catch (err) {
+            const msg =
+                err.response?.data?.message ||
+                "認証番号が正しくありません。";
+            setCodeError(msg);
+        } finally {
+            setVerifying(false);
         }
     };
 
@@ -67,7 +117,7 @@ export default function FindIdPage() {
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "center",
-                padding: "120px 20px 60px",
+                padding: "180px 20px 60px",
             }}
         >
             <div
@@ -109,52 +159,170 @@ export default function FindIdPage() {
                     </p>
                 </div>
 
-                {/* 검색 폼 */}
-                <form
-                    onSubmit={handleFindId}
-                    style={{ display: "flex", flexDirection: "column", gap: 12 }}
-                >
-                    <input
-                        type="email"
-                        placeholder={inputFocused ? "" : "メールアドレスを入力してください。"}
-                        value={email}
-                        onFocus={() => setInputFocused(true)}
-                        onBlur={() => setInputFocused(false)}
-                        onChange={(e) => {
-                            setEmail(e.target.value);
-                            setError("");
-                            setResult(null);
-                        }}
-                        style={{
-                            ...inputStyle,
-                            border: `1px solid ${inputFocused ? C.navy : "#d4d4d4"}`,
-                            transition: "border-color 0.2s",
-                        }}
-                    />
-
-                    {/* 에러 메시지 */}
-                    {error && (
-                        <p
+                {/* ── STEP 1: 이메일 입력 ── */}
+                {step === "email" && (
+                    <form
+                        onSubmit={handleSendCode}
+                        style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                    >
+                        <input
+                            type="email"
+                            placeholder={inputFocused ? "" : "メールアドレスを入力してください。"}
+                            value={email}
+                            onFocus={() => setInputFocused(true)}
+                            onBlur={() => setInputFocused(false)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setError("");
+                            }}
                             style={{
-                                fontSize: 13,
-                                color: "#b91c1c",
-                                margin: "0",
-                                textAlign: "left",
-                                fontWeight: 500,
+                                ...inputStyle,
+                                border: `1px solid ${inputFocused ? C.navy : "#d4d4d4"}`,
+                                transition: "border-color 0.2s",
+                            }}
+                        />
+                        {error && (
+                            <p style={errorStyle}>{error}</p>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            onMouseEnter={() => setBtnHover(true)}
+                            onMouseLeave={() => setBtnHover(false)}
+                            style={{
+                                ...actionBtnBase,
+                                border: `1.2px solid ${C.navy}`,
+                                background: btnHover && !loading ? C.navy : C.white,
+                                color: btnHover && !loading ? C.white : C.navy,
+                                transform: btnHover && !loading ? "translateY(-1px)" : "none",
+                                boxShadow: btnHover && !loading ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
+                                opacity: loading ? 0.65 : 1,
+                                cursor: loading ? "not-allowed" : "pointer",
+                                marginTop: 8,
                             }}
                         >
-                            {error}
-                        </p>
-                    )}
+                            {loading ? "送信中..." : "ID検索"}
+                        </button>
+                    </form>
+                )}
 
-                    {/* ID 검색 결과 */}
-                    {result && (
+                {/* ── STEP 2: 인증번호 입력 ── */}
+                {step === "code" && (
+                    <form
+                        onSubmit={handleVerifyCode}
+                        style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                    >
+                        {/* 인증번호 발송 알림 배너 */}
+                        {notice && (
+                            <div
+                                style={{
+                                    background: "#f0fdf4",
+                                    border: "1px solid #bbf7d0",
+                                    borderRadius: 10,
+                                    padding: "11px 14px",
+                                    fontSize: 13,
+                                    color: "#166534",
+                                    fontWeight: 600,
+                                    textAlign: "left",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                <span style={{ fontSize: 15 }}>✉️</span>
+                                {notice}
+                            </div>
+                        )}
+
+                        {/* 이메일 표시 (수정 불가 + 수정 링크) */}
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                background: "#f8f9fc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: 10,
+                                padding: "0 16px",
+                                height: 50,
+                            }}
+                        >
+                            <span style={{ fontSize: 14, color: C.gray2, fontWeight: 500 }}>
+                                {email}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => { setStep("email"); setCode(""); setCodeError(""); setNotice(""); }}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: 12,
+                                    color: C.gray3,
+                                    cursor: "pointer",
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "2px",
+                                    padding: 0,
+                                    fontFamily: font,
+                                }}
+                            >
+                                変更
+                            </button>
+                        </div>
+
+                        {/* 인증번호 입력 */}
+                        <input
+                            type="text"
+                            maxLength={6}
+                            placeholder={codeFocused ? "" : "認証番号を入力してください。"}
+                            value={code}
+                            onFocus={() => setCodeFocused(true)}
+                            onBlur={() => setCodeFocused(false)}
+                            onChange={(e) => {
+                                setCode(e.target.value);
+                                setCodeError("");
+                            }}
+                            style={{
+                                ...inputStyle,
+                                border: `1px solid ${codeFocused ? C.navy : "#d4d4d4"}`,
+                                transition: "border-color 0.2s",
+                                letterSpacing: "0.15em",
+                            }}
+                        />
+                        {codeError && (
+                            <p style={errorStyle}>{codeError}</p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={verifying}
+                            onMouseEnter={() => setVerifyBtnHover(true)}
+                            onMouseLeave={() => setVerifyBtnHover(false)}
+                            style={{
+                                ...actionBtnBase,
+                                border: `1.2px solid ${C.navy}`,
+                                background: verifyBtnHover && !verifying ? C.navy : C.white,
+                                color: verifyBtnHover && !verifying ? C.white : C.navy,
+                                transform: verifyBtnHover && !verifying ? "translateY(-1px)" : "none",
+                                boxShadow: verifyBtnHover && !verifying ? "0 4px 12px rgba(0,13,87,0.12)" : "none",
+                                opacity: verifying ? 0.65 : 1,
+                                cursor: verifying ? "not-allowed" : "pointer",
+                                marginTop: 8,
+                            }}
+                        >
+                            {verifying ? "確認中..." : "認証番号確認"}
+                        </button>
+                    </form>
+                )}
+
+                {/* ── STEP 3: ID 표시 ── */}
+                {step === "done" && result && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                         <div
                             style={{
                                 background: "#f0f4ff",
                                 border: `1px solid ${C.navy}22`,
                                 borderRadius: 12,
-                                padding: "14px 16px",
+                                padding: "18px 20px",
                                 textAlign: "left",
                             }}
                         >
@@ -163,7 +331,7 @@ export default function FindIdPage() {
                                     fontSize: 12,
                                     color: C.gray3,
                                     fontWeight: 600,
-                                    margin: "0 0 4px",
+                                    margin: "0 0 6px",
                                     letterSpacing: "0.05em",
                                 }}
                             >
@@ -171,7 +339,7 @@ export default function FindIdPage() {
                             </p>
                             <p
                                 style={{
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     fontWeight: 700,
                                     color: C.navy,
                                     margin: 0,
@@ -181,31 +349,20 @@ export default function FindIdPage() {
                                 {result.id}
                             </p>
                         </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        onMouseEnter={() => setBtnHover(true)}
-                        onMouseLeave={() => setBtnHover(false)}
-                        style={{
-                            ...actionBtnBase,
-                            border: `1.2px solid ${C.navy}`,
-                            background: btnHover && !loading ? C.navy : C.white,
-                            color: btnHover && !loading ? C.white : C.navy,
-                            transform: btnHover && !loading ? "translateY(-1px)" : "none",
-                            boxShadow:
-                                btnHover && !loading
-                                    ? "0 4px 12px rgba(0,13,87,0.12)"
-                                    : "none",
-                            opacity: loading ? 0.65 : 1,
-                            cursor: loading ? "not-allowed" : "pointer",
-                            marginTop: 8,
-                        }}
-                    >
-                        {loading ? "検索中..." : "ID検索"}
-                    </button>
-                </form>
+                        <button
+                            onClick={() => navigate("/login")}
+                            style={{
+                                ...actionBtnBase,
+                                border: `1.2px solid ${C.navy}`,
+                                background: C.navy,
+                                color: C.white,
+                                cursor: "pointer",
+                            }}
+                        >
+                            ログインへ
+                        </button>
+                    </div>
+                )}
 
                 {/* 하단 링크 */}
                 <div
@@ -293,6 +450,14 @@ const inputStyle = {
     boxSizing: "border-box",
     background: "#ffffff",
     color: "#4c4c4c",
+};
+
+const errorStyle = {
+    fontSize: 13,
+    color: "#b91c1c",
+    margin: "0",
+    textAlign: "left",
+    fontWeight: 500,
 };
 
 const actionBtnBase = {
