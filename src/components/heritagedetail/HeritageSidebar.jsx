@@ -2,8 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { C, font, fontSerif } from "./constants";
 import { IconClock, IconTag, IconMapPinSmall, IconPlus, IconExternalLink, IconAward, IconCheck, InfoRow } from "./DetailUI";
 
-export default function HeritageSidebar({ data }) {
+export default function HeritageSidebar({ data, heritageId: heritageIdParam }) {
     const navigate = useNavigate();
+
+    const goToRouteCreate = () => {
+        const id = data?.id ?? heritageIdParam;
+        if (id == null || String(id).trim() === "") return;
+        const name = (data?.nameJa || data?.nameKo || "").trim();
+        const params = new URLSearchParams();
+        params.set("heritageId", String(id));
+        if (name) params.set("heritageName", name);
+        navigate(`/route/create?${params.toString()}`);
+    };
 
     return (
         <div style={{ width: 360, flexShrink: 0 }}>
@@ -41,6 +51,8 @@ export default function HeritageSidebar({ data }) {
                     {/* 버튼 */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 4 }}>
                         <button
+                            type="button"
+                            onClick={goToRouteCreate}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -60,7 +72,7 @@ export default function HeritageSidebar({ data }) {
                             onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
                             onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
                         >
-                            <IconPlus /> ルートに追加
+                            <IconPlus /> 新しい探訪路を作る
                         </button>
                         <button
                             onClick={() => {

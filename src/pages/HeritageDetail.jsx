@@ -175,7 +175,7 @@ export default function HeritageDetail() {
                 }}
             >
                 <HeritageContent data={data} reviews={reviewData.content} reviewPage={reviewPage} totalPages={reviewData.totalPages} setReviewPage={setReviewPage} fetchReviews={fetchReviews} galleryRef={galleryRef} scrollGallery={scrollGallery} />
-                <HeritageSidebar data={data} />
+                <HeritageSidebar data={data} heritageId={heritageId} />
             </div>
         </div>
     );
