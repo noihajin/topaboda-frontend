@@ -78,6 +78,7 @@ export default function PostSaveCard({ item, type = "bookmark", onCancel }) {
             {/* 제목 */}
             <p style={{
                 flex: 1,
+                minWidth: 0,
                 margin: 0,
                 fontSize: 14,
                 fontWeight: 600,

@@ -371,6 +371,59 @@ export default function MyPage() {
         }
     };
 
+    // 리뷰 수정
+    const handleEditReview = async (reviewId, newContent) => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("ログイン情報がありません。");
+            return;
+        }
+
+        try {
+            await axios.patch(
+                `http://localhost:9990/topaboda/api/reviews/${reviewId}`,
+                { content: newContent },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            alert("レビューが修正されました。");
+            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+        } catch (error) {
+            console.error("리뷰 수정 실패:", error);
+            alert("レビューの修正に失敗しました。");
+        }
+    };
+
+    // 리뷰 삭제
+    const handleDeleteReview = async (reviewId) => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("ログイン情報がありません。");
+            return;
+        }
+
+        try {
+            await axios.delete(`http://localhost:9990/topaboda/api/reviews/${reviewId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert("レビューが削除されました。");
+            fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+        } catch (error) {
+            console.error("리뷰 삭제 실패:", error);
+            alert("レビューの削除に失敗しました。");
+        }
+    };
+
     useEffect(() => {
         const id = localStorage.getItem("id");
         const token = localStorage.getItem("token");
@@ -555,12 +608,7 @@ export default function MyPage() {
                                 </div>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-                                {routesLoading ? (
-                                    <>
-                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
-                                        <div style={{ height: 72, borderRadius: 12, background: C.bg, border: `1.5px solid ${C.border}` }} />
-                                    </>
-                                ) : savedRoutes.length === 0 ? (
+                                {!routesLoading && savedRoutes.length === 0 ? (
                                     /* 목록 없을 때 */
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
                                         <p style={{ fontSize: 14, color: C.gray3, margin: 0 }}>探訪路がありません</p>
@@ -677,7 +725,7 @@ export default function MyPage() {
                                 displayedAct.map((item) => {
                                     if (postTab === "posts")    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
                                     if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                    return <ReviewRow key={item.id} item={item} />;
+                                    return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReview} />;
                                 })
                             )}
                         </div>
@@ -687,7 +735,7 @@ export default function MyPage() {
                     </div>
 
                     {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
                         {/* 탭 헤더 */}
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                             <div style={{ display: "flex", gap: 8 }}>

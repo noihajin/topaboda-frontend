@@ -218,13 +218,13 @@ export default function EditProfile() {
                                     onMouseEnter={() => setHoverIdCheck(true)}
                                     onMouseLeave={() => setHoverIdCheck(false)}
                                     style={{
-                                        padding: "0 14px",
-                                        borderRadius: 13,
-                                        fontSize: 13,
-                                        fontWeight: 700,
-                                        border: `1.2px solid ${C.navy}`,
-                                        background: hoverIdCheck ? C.navy : C.white,
-                                        color: hoverIdCheck ? C.white : C.navy,
+                                        padding: "0 10px",
+                                        borderRadius: 8,
+                                        fontSize: 12,
+                                        fontWeight: 500,
+                                        border: `1px solid ${C.border}`,
+                                        background: hoverIdCheck ? "#e5e7eb" : "#f3f4f6",
+                                        color: C.gray,
                                         cursor: "pointer",
                                         transition: "all 0.2s",
                                         whiteSpace: "nowrap",
@@ -275,13 +275,13 @@ export default function EditProfile() {
                                     onMouseEnter={() => setHoverCheck(true)}
                                     onMouseLeave={() => setHoverCheck(false)}
                                     style={{
-                                        padding: "0 14px",
-                                        borderRadius: 13,
-                                        fontSize: 13,
-                                        fontWeight: 700,
-                                        border: `1.2px solid ${C.navy}`,
-                                        background: hoverCheck ? C.navy : C.white,
-                                        color: hoverCheck ? C.white : C.navy,
+                                        padding: "0 10px",
+                                        borderRadius: 8,
+                                        fontSize: 12,
+                                        fontWeight: 500,
+                                        border: `1px solid ${C.border}`,
+                                        background: hoverCheck ? "#e5e7eb" : "#f3f4f6",
+                                        color: C.gray,
                                         cursor: "pointer",
                                         transition: "all 0.2s",
                                         whiteSpace: "nowrap",

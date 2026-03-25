@@ -1,48 +1,108 @@
 import { C, font, CAT_COLORS } from "./theme";
 import { CalendarIcon, EyeIcon, SmallHeartIcon, EditIcon, TrashIcon } from "./Icons";
 
-export function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete, onCategoryClick, onTitleClick }) {
+export function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete, onCategoryClick, onTitleClick, showDesc }) {
     const cat = CAT_COLORS[category];
     return (
-        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "12px 16px", background: C.white, marginBottom: 8 }}>
+        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: showDesc ? "8px 16px" : "12px 16px", background: C.white, marginBottom: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* 카테고리 배지 */}
-                    {cat && (
-                        <span
-                            onClick={onCategoryClick}
-                            style={{
-                                display: "inline-block",
-                                background: cat.bg,
-                                color: cat.color,
-                                padding: "3px 10px",
-                                borderRadius: 99,
-                                fontSize: 11,
-                                fontWeight: 700,
-                                marginBottom: 4,
-                                fontFamily: font,
-                                cursor: onCategoryClick ? "pointer" : "default",
-                            }}
-                        >
-                            {category}
-                        </span>
+                    {showDesc ? (
+                        /* 게시글 탭: 카테고리 + 제목 한 줄 */
+                        <>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, minWidth: 0 }}>
+                                {cat && (
+                                    <span
+                                        onClick={onCategoryClick}
+                                        style={{
+                                            flexShrink: 0,
+                                            background: cat.bg,
+                                            color: cat.color,
+                                            padding: "2px 8px",
+                                            borderRadius: 99,
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            fontFamily: font,
+                                            cursor: onCategoryClick ? "pointer" : "default",
+                                        }}
+                                    >
+                                        {category}
+                                    </span>
+                                )}
+                                <h4
+                                    onClick={onTitleClick}
+                                    style={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                        fontSize: 14,
+                                        fontWeight: 700,
+                                        color: C.navy,
+                                        margin: 0,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        fontFamily: font,
+                                        cursor: onTitleClick ? "pointer" : "default",
+                                    }}
+                                >
+                                    {title}
+                                </h4>
+                            </div>
+                            {desc && (
+                                <p style={{
+                                    fontSize: 11,
+                                    color: C.gray3,
+                                    margin: "0 0 3px",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    fontFamily: font,
+                                    lineHeight: 1.4,
+                                }}>
+                                    {desc}
+                                </p>
+                            )}
+                        </>
+                    ) : (
+                        /* 댓글/리뷰 탭: 기존 레이아웃 */
+                        <>
+                            {cat && (
+                                <span
+                                    onClick={onCategoryClick}
+                                    style={{
+                                        display: "inline-block",
+                                        background: cat.bg,
+                                        color: cat.color,
+                                        padding: "3px 10px",
+                                        borderRadius: 99,
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        marginBottom: 4,
+                                        fontFamily: font,
+                                        cursor: onCategoryClick ? "pointer" : "default",
+                                    }}
+                                >
+                                    {category}
+                                </span>
+                            )}
+                            <h4
+                                onClick={onTitleClick}
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: 700,
+                                    color: C.navy,
+                                    margin: "0 0 4px",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    fontFamily: font,
+                                    cursor: onTitleClick ? "pointer" : "default",
+                                }}
+                            >
+                                {title}
+                            </h4>
+                        </>
                     )}
-                    <h4
-                        onClick={onTitleClick}
-                        style={{
-                            fontSize: 14,
-                            fontWeight: 700,
-                            color: C.navy,
-                            margin: "0 0 4px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            fontFamily: font,
-                            cursor: onTitleClick ? "pointer" : "default",
-                        }}
-                    >
-                        {title}
-                    </h4>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
                             <CalendarIcon /> {date}

@@ -28,7 +28,7 @@ const PostRow = ({ item, navigate, onEditPost, onDeletePost }) => {
         await onDeletePost(item.id);
     };
 
-    return <ListRow category={item.category} title={item.title} desc={item.desc} date={item.date} views={item.views} likes={item.likes} onCategoryClick={handleCategoryClick} onTitleClick={handleTitleClick} onEdit={handleEditClick} onDelete={handleDeleteClick} />;
+    return <ListRow category={item.category} title={item.title} desc={item.desc} date={item.date} views={item.views} likes={item.likes} onCategoryClick={handleCategoryClick} onTitleClick={handleTitleClick} onEdit={handleEditClick} onDelete={handleDeleteClick} showDesc />;
 };
 
 export default PostRow;
