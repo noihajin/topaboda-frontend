@@ -76,7 +76,7 @@ export default function PopularHeritageSection() {
     return (
         <section
             ref={sectionRef}
-            className="w-full bg-white pt-44 pb-32 px-[10%]"
+            className="w-full bg-[#F8F9FC] pt-44 pb-32 px-[10%]"
             style={{
                 opacity: sectionVisible ? 1 : 0,
                 transition: "opacity 0.8s ease",
@@ -84,19 +84,32 @@ export default function PopularHeritageSection() {
             }}
         >
             {/* 헤더 영역 */}
-            <div className="flex flex-col items-center mb-20 text-center">
-                <span className="bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-6" style={{ fontFamily: "'Roboto', sans-serif" }}>
-                    CURATION
-                </span>
-                <h2 className="text-4xl lg:text-5xl font-bold text-[#000D57] mb-6 tracking-tight" style={{ fontFamily: "'Noto Serif JP', serif" }}>
-                    人気の国の遺産
-                </h2>
-                <p className="text-gray-500 text-lg max-w-2xl" style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
-                    多くの人々に愛される、韓国を代表する文化遺産をご紹介します
-                </p>
-                <div className="flex bg-white p-1.5 rounded-full shadow-sm border border-gray-100 mt-12">
+            <div className="flex items-end justify-between mb-20">
+                {/* 왼쪽: 뱃지 + 타이틀 + 서브 */}
+                <div className="flex flex-col items-start">
+                    <span className="bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-5" style={{ fontFamily: "'Roboto', sans-serif" }}>
+                        CURATION
+                    </span>
+                    <h2 className="text-4xl lg:text-5xl font-bold text-[#000D57] mb-4 tracking-tight" style={{ fontFamily: "'Noto Serif JP', serif" }}>
+                        人気の国の遺産
+                    </h2>
+                    <p className="text-gray-500 text-base" style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
+                        多くの人々に愛される、韓国を代表する文化遺産をご紹介します
+                    </p>
+                </div>
+                {/* 오른쪽: 탭 버튼 */}
+                <div className="flex items-center gap-1 bg-white rounded-full border border-[#CACA00]/40 shadow-sm p-1 shrink-0">
                     {SORT_OPTIONS.map((option) => (
-                        <button key={option.key} onClick={() => setSortType(option.key)} className={`px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${sortType === option.key ? "bg-[#000D57] text-white shadow-md scale-105" : "text-gray-400 hover:text-[#000D57]"}`} style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
+                        <button
+                            key={option.key}
+                            onClick={() => setSortType(option.key)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-250 ${
+                                sortType === option.key
+                                    ? "bg-[#CACA00] text-[#000D57] shadow-sm"
+                                    : "text-gray-400 hover:text-[#A0A000]"
+                            }`}
+                            style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}
+                        >
                             {option.label}
                         </button>
                     ))}
