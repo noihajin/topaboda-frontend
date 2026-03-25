@@ -31,7 +31,7 @@ export default function FindIdPage() {
     const [codeError, setCodeError] = useState("");
 
     // 결과
-    const [result, setResult] = useState(null);  // { id: string }
+    const [result, setResult] = useState(null); // { id: string }
 
     // 알림 배너
     const [notice, setNotice] = useState("");
@@ -64,16 +64,11 @@ export default function FindIdPage() {
 
         setLoading(true);
         try {
-            await axios.post(
-                "http://localhost:9990/topaboda/api/auth/find-id",
-                { email }
-            );
+            await axios.post("http://localhost:9990/topaboda/api/auth/id/email", { email: email });
             setNotice("認証番号をメールに送信しました。");
             setStep("code");
         } catch (err) {
-            const msg =
-                err.response?.data?.message ||
-                "該当するアカウントが見つかりませんでした。";
+            const msg = err.response?.data?.message || "該当するアカウントが見つかりませんでした。";
             setError(msg);
         } finally {
             setLoading(false);
@@ -92,17 +87,12 @@ export default function FindIdPage() {
 
         setVerifying(true);
         try {
-            const response = await axios.post(
-                "http://localhost:9990/topaboda/api/auth/find-id/verify",
-                { email, code }
-            );
+            const response = await axios.post("http://localhost:9990/topaboda/api/auth/id/verify", { email: email, token: code });
             setResult({ id: response.data.id });
             setStep("done");
             setNotice("");
         } catch (err) {
-            const msg =
-                err.response?.data?.message ||
-                "認証番号が正しくありません。";
+            const msg = err.response?.data?.message || "認証番号が正しくありません。";
             setCodeError(msg);
         } finally {
             setVerifying(false);
@@ -226,8 +216,10 @@ export default function FindIdPage() {
                                 fontFamily: "'Noto Sans KR', 'Noto Sans JP', sans-serif",
                             }}
                         >
-                            IDをお忘れた方は<br />
-                            会員登録時に登録したメールアドレスに<br />
+                            IDをお忘れた方は
+                            <br />
+                            会員登録時に登録したメールアドレスに
+                            <br />
                             IDを発送いたします。
                         </p>
                     </div>
@@ -269,11 +261,7 @@ export default function FindIdPage() {
                         alignItems: "center",
                     }}
                 >
-                    <img
-                        src={imgLogoBlkSmall}
-                        alt="TOPABODA"
-                        style={{ height: 48, marginBottom: 12 }}
-                    />
+                    <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
                     <p
                         style={{
                             color: C.gray1,
@@ -285,17 +273,12 @@ export default function FindIdPage() {
                     >
                         ID検索
                     </p>
-                    <p style={{ fontSize: 13, color: C.gray3, margin: "8px 0 0", fontWeight: 500 }}>
-                        登録済みのメールアドレスに認証番号をお送りします
-                    </p>
+                    <p style={{ fontSize: 13, color: C.gray3, margin: "8px 0 0", fontWeight: 500 }}>登録済みのメールアドレスに認証番号をお送りします</p>
                 </div>
 
                 {/* ── STEP 1: 이메일 입력 ── */}
                 {step === "email" && (
-                    <form
-                        onSubmit={handleSendCode}
-                        style={{ display: "flex", flexDirection: "column", gap: 12 }}
-                    >
+                    <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         <input
                             type="email"
                             placeholder={inputFocused ? "" : "メールアドレスを入力してください。"}
@@ -312,9 +295,7 @@ export default function FindIdPage() {
                                 transition: "border-color 0.2s",
                             }}
                         />
-                        {error && (
-                            <p style={errorStyle}>{error}</p>
-                        )}
+                        {error && <p style={errorStyle}>{error}</p>}
                         <button
                             type="submit"
                             disabled={loading}
@@ -339,10 +320,7 @@ export default function FindIdPage() {
 
                 {/* ── STEP 2: 인증번호 입력 ── */}
                 {step === "code" && (
-                    <form
-                        onSubmit={handleVerifyCode}
-                        style={{ display: "flex", flexDirection: "column", gap: 12 }}
-                    >
+                    <form onSubmit={handleVerifyCode} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         {/* 인증번호 발송 알림 배너 */}
                         {notice && (
                             <div
@@ -378,12 +356,15 @@ export default function FindIdPage() {
                                 height: 50,
                             }}
                         >
-                            <span style={{ fontSize: 14, color: C.gray2, fontWeight: 500 }}>
-                                {email}
-                            </span>
+                            <span style={{ fontSize: 14, color: C.gray2, fontWeight: 500 }}>{email}</span>
                             <button
                                 type="button"
-                                onClick={() => { setStep("email"); setCode(""); setCodeError(""); setNotice(""); }}
+                                onClick={() => {
+                                    setStep("email");
+                                    setCode("");
+                                    setCodeError("");
+                                    setNotice("");
+                                }}
                                 style={{
                                     background: "none",
                                     border: "none",
@@ -419,9 +400,7 @@ export default function FindIdPage() {
                                 letterSpacing: "0.15em",
                             }}
                         />
-                        {codeError && (
-                            <p style={errorStyle}>{codeError}</p>
-                        )}
+                        {codeError && <p style={errorStyle}>{codeError}</p>}
 
                         <button
                             type="submit"
