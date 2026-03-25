@@ -17,7 +17,7 @@ export default function MainHome() {
             </section>
 
             {/* 3. 인기 유산 섹션 */}
-            <section id="section-popular">
+            <section id="section-popular" className="sticky top-[5.5rem] z-10">
                 <PopularHeritageSection />
             </section>
 
