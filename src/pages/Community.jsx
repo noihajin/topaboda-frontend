@@ -57,7 +57,9 @@ export default function Community() {
   const [isCatOpen, setIsCatOpen]           = useState(false);
   const [sortType, setSortType]             = useState("latest");
   const [windowWidth, setWindowWidth]       = useState(window.innerWidth);
-  const catRef = useRef(null);
+  const [popularVisible, setPopularVisible] = useState(false);
+  const catRef      = useRef(null);
+  const popularRef  = useRef(null);
 
   const isMobile = windowWidth <= 768;
 
@@ -81,6 +83,19 @@ export default function Community() {
 
   /* 카테고리 변경 시 검색 초기화 */
   useEffect(() => { setSearchInput(""); setKeyword(""); }, [selectedCat]);
+
+  /* 인기 리뷰 섹션 스크롤 감지 — popularPosts 로드 후 ref가 붙으면 observer 설정 */
+  useEffect(() => {
+    if (popularVisible) return;           // 이미 보임 처리됐으면 스킵
+    const el = popularRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setPopularVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [posts.length, popularVisible]);
 
   /* 데이터 fetch */
   useEffect(() => {
@@ -119,61 +134,104 @@ export default function Community() {
   );
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", paddingTop: isMobile ? "8rem" : "11.9rem", paddingBottom: "8rem", fontFamily: fBase }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
+    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: fBase }}>
 
-        {/* ── 헤더 ── */}
-        <header style={{ marginBottom: isMobile ? 48 : 80 }}>
-          <div>
-            <span style={{
-              display: "inline-block",
-              background: `${C.gold}22`, color: C.goldD,
-              fontSize: 11, fontWeight: 900, letterSpacing: "0.12em",
-              padding: "5px 14px", borderRadius: 999, marginBottom: 16,
-              fontFamily: "'Roboto', sans-serif",
-            }}>
-              COMMUNITY
-            </span>
-            <h1 style={{
-              color: C.navy, fontFamily: fJPSerif,
-              fontSize: isMobile ? 34 : 52, fontWeight: 900,
-              margin: "0 0 12px", lineHeight: 1.15, letterSpacing: "-0.02em",
-            }}>
-              コミュニティ
-            </h1>
-            <p style={{ color: C.gray2, fontSize: isMobile ? 14 : 17, fontFamily: fJP, margin: 0, lineHeight: 1.7 }}>
-              国家遺産探訪の体験を共有し、交流しましょう
-            </p>
-          </div>
-        </header>
+      {/* ── 배너 (전폭) ── */}
+      <header style={{
+        position: "relative",
+        width: "100%",
+        height: isMobile ? "340px" : "460px",
+        overflow: "hidden",
+      }}>
+        {/* 배경 이미지 */}
+        <img
+          src="https://www.figma.com/api/mcp/asset/d14302f3-832c-45db-98cd-74e120079d0e"
+          alt=""
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center",
+          }}
+        />
+        {/* 밝은 오버레이 */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "rgba(248,249,252,0.60)",
+        }} />
+        {/* 텍스트 — 배너 이미지 전체 높이의 정중앙 */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          textAlign: "center",
+          padding: isMobile ? "0 20px" : "0 48px",
+        }}>
+          <span style={{
+            display: "inline-block",
+            background: `${C.gold}33`, color: C.goldD,
+            fontSize: 11, fontWeight: 900, letterSpacing: "0.14em",
+            padding: "5px 16px", borderRadius: 999, marginBottom: 20,
+            fontFamily: "'Roboto', sans-serif",
+          }}>COMMUNITY</span>
+          <h1 style={{
+            color: C.navy, fontFamily: fJPSerif,
+            fontSize: isMobile ? 34 : 50, fontWeight: 700,
+            margin: "0 0 16px", lineHeight: 1.2, letterSpacing: "-0.02em",
+          }}>
+            コミュニティ
+          </h1>
+          <p style={{
+            color: "#4a5565",
+            fontSize: isMobile ? 14 : 20,
+            fontFamily: fJP,
+            margin: 0, lineHeight: 1.75,
+          }}>
+            文化遺産探検の経験を共有し、交流しましょう
+          </p>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "64px 20px 64px" : "120px 48px 120px" }}>
 
         {/* ── 인기 리뷰 ── */}
         {popularPosts.length > 0 && (
-          <section style={{ marginBottom: isMobile ? 56 : 80 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-              {/* Figma 아이콘: gold 그라디언트 + trending-up */}
-              <div style={{
-                width: 38, height: 38, borderRadius: 11, flexShrink: 0,
-                background: "linear-gradient(to bottom, #caca00, #a0a000)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 3px 8px rgba(160,160,0,0.30)",
-              }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="#000d57" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                  <polyline points="16 7 22 7 22 13" />
-                </svg>
-              </div>
+          <section ref={popularRef} style={{ marginBottom: isMobile ? 64 : 100 }}>
+            {/* 헤더 — 시간차 등장 */}
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              animate={popularVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}
+            >
+              {/* Figma 아이콘: 배경 없이 trending-up SVG만 */}
+              <img
+                src="https://www.figma.com/api/mcp/asset/ebe89c18-df49-4fbf-a134-713f63c3818f"
+                alt=""
+                style={{ width: 28, height: 28, flexShrink: 0 }}
+              />
               <h2 style={{ color: C.navy, fontSize: isMobile ? 20 : 24, fontWeight: 900, margin: 0, fontFamily: fJP }}>
                 人気のレビュー
               </h2>
-            </div>
+            </motion.div>
+
+            {/* 카드 그리드 — 카드별 시간차 등장 */}
             <div style={{
               display: "grid",
               gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
               gap: 20,
             }}>
-              {popularPosts.map((p, i) => <PopularCard key={p.id} post={p} rank={i + 1} />)}
+              {popularPosts.map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, y: 36 }}
+                  animate={popularVisible ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.55, delay: 0.12 + i * 0.13, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <PopularCard post={p} rank={i + 1} />
+                </motion.div>
+              ))}
             </div>
           </section>
         )}
@@ -303,7 +361,7 @@ export default function Community() {
         </div>
 
         {/* ── 정렬 토글 (오른쪽 정렬) ── */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
               <button
@@ -377,8 +435,6 @@ export default function Community() {
 ════════════════════════════════════════════════ */
 function PopularCard({ post, rank }) {
   const navigate = useNavigate();
-  const RANK_COLORS = ["#caca00", "#b0b8c8", "#c8926a"];
-  const rankColor   = RANK_COLORS[rank - 1] ?? C.gold;
 
   return (
     <div
@@ -403,11 +459,11 @@ function PopularCard({ post, rank }) {
         {/* 순위 배지 */}
         <div style={{
           position: "absolute", top: 12, left: 12,
-          width: 36, height: 36, borderRadius: 10,
-          background: rankColor, color: rank === 1 ? C.navy : C.white,
+          width: 36, height: 36, borderRadius: "50%",
+          background: "rgba(220,224,232,0.92)", color: C.navy,
           fontSize: 17, fontWeight: 900,
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
           fontFamily: "'Roboto', sans-serif",
         }}>
           {rank}
