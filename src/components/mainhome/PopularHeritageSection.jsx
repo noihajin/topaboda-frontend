@@ -76,7 +76,7 @@ export default function PopularHeritageSection() {
     return (
         <section
             ref={sectionRef}
-            className="w-full bg-[#F8F9FC] pt-44 pb-32 px-[10%]"
+            className="w-full bg-[#F8F9FC] pt-32 pb-20 px-[10%]"
             style={{
                 opacity: sectionVisible ? 1 : 0,
                 transition: "opacity 0.8s ease",
@@ -84,7 +84,7 @@ export default function PopularHeritageSection() {
             }}
         >
             {/* 헤더 영역 */}
-            <div className="flex items-end justify-between mb-20">
+            <div className="flex items-end justify-between mb-12">
                 {/* 왼쪽: 뱃지 + 타이틀 + 서브 */}
                 <div className="flex flex-col items-start">
                     <span className="bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-5" style={{ fontFamily: "'Roboto', sans-serif" }}>
@@ -116,7 +116,7 @@ export default function PopularHeritageSection() {
                 </div>
             </div>
             {/* 카드 그리드 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {displayedHt.map((item) => (
                     <HeritageCard
                         key={`${item.id}`}
