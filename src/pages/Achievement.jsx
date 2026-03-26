@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Pagination from "../components/Pagination";
 import { C, font, fontSerif, MOCK_ACHIEVEMENTS, ITEMS_PER_PAGE } from "../components/achievement/constants";
 import AchievementSummary from "../components/achievement/AchievementSummary";
@@ -66,8 +67,12 @@ export default function Achievement() {
             <div
                 style={{
                     background: `linear-gradient(135deg, ${C.navy} 0%, #001a6e 50%, #0a2280 100%)`,
-                    paddingTop: 140,
-                    paddingBottom: 72,
+                    height: 460,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingTop: "7rem",
                     textAlign: "center",
                     position: "relative",
                     overflow: "hidden",
@@ -93,7 +98,7 @@ export default function Achievement() {
                     ACHIEVEMENTS
                 </span>
                 <h1 style={{ color: C.white, fontSize: 42, fontWeight: 900, fontFamily: fontSerif, margin: "0 0 12px", letterSpacing: -0.5 }}>全ての業績</h1>
-                <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, margin: 0, fontFamily: font }}>文化遺産探訪の記録と達成度</p>
+                <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, margin: 0, fontFamily: font }}>遺産を訪れて実績を達成してみてください</p>
             </div>
 
             {/* コンテンツ */}
@@ -103,9 +108,19 @@ export default function Achievement() {
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: C.navy, fontFamily: font, margin: "0 0 20px" }}>業績詳細</h2>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 40 }}>
-                    {paginated.map((item) => (
-                        <AchievementCard key={item.id} item={item} />
-                    ))}
+                    <AnimatePresence mode="wait">
+                        {paginated.map((item, idx) => (
+                            <motion.div
+                                key={item.id}
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: idx * 0.07 }}
+                            >
+                                <AchievementCard item={item} />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
 
                 <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

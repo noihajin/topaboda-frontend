@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "../config/config";
+import InfoModal from "../components/InfoModal";
 
 // ── Design Tokens ─────────────────────────────────────────────
 const C = {
@@ -41,6 +42,15 @@ export default function WritePost() {
     const [submitHover, setSubmitHover] = useState(false);
     const fileInputRef = useRef(null);
 
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
+
     // 이미지 업로드 핸들러
     const handleFiles = (files) => {
         const valid = Array.from(files).filter((f) => ["image/jpeg", "image/png"].includes(f.type) && f.size <= 5 * 1024 * 1024);
@@ -53,24 +63,50 @@ export default function WritePost() {
     };
 
     const handleSubmit = async () => {
-        if (!category) {
-            alert("カテゴリーを選択してください。");
-            return;
-        }
-        if (!title.trim()) {
-            alert("タイトルを入力してください。");
-            return;
-        }
-        if (!content.trim()) {
-            alert("内容を入力してください。");
-            return;
-        }
+        let contentConfig = {};
 
         try {
+            if (!category) {
+                contentConfig = {
+                    icon: "⚠️",
+                    title: "カテゴリーを選択してください。",
+                    content: "",
+                    btnMsg: "確認",
+                    onMove: () => navigate(setOpenPopup(false)),
+                };
+                throw new Error("");
+            }
+            if (!title.trim()) {
+                contentConfig = {
+                    icon: "⚠️",
+                    title: "タイトルを入力してください。",
+                    content: "",
+                    btnMsg: "確認",
+                    onMove: () => navigate(setOpenPopup(false)),
+                };
+                throw new Error("");
+            }
+            if (!content.trim()) {
+                contentConfig = {
+                    icon: "⚠️",
+                    title: "内容を入力してください。",
+                    content: "",
+                    btnMsg: "確認",
+                    onMove: () => navigate(setOpenPopup(false)),
+                };
+                throw new Error("");
+            }
+
             const token = localStorage.getItem("token");
             if (!token) {
-                alert("ログイン情報がありません。");
-                return;
+                contentConfig = {
+                    icon: "⚠️",
+                    title: "ログイン情報がありません。",
+                    btnMsg: "確認",
+                    content: "",
+                    onMove: () => navigate(setOpenPopup(false)),
+                };
+                throw new Error("");
             }
 
             const formData = new FormData();
@@ -95,393 +131,410 @@ export default function WritePost() {
                     },
                 });
 
-                alert("記事が修正されました。");
-                navigate("/mypage");
-                return;
+                contentConfig = {
+                    icon: "✅",
+                    title: "記事修正",
+                    btnMsg: "確認",
+                    content: "記事が修正されました！",
+                    onMove: () => navigate("/mypage"),
+                };
             } else {
                 await axios.post(`${API_URL}/topaboda/api/boards`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-
-                alert("記事が登録されました！");
-                navigate("/community");
+                contentConfig = {
+                    icon: "✅",
+                    title: "記事登録",
+                    btnMsg: "確認",
+                    content: "記事が登録されました！",
+                    onMove: () => navigate("/community"),
+                };
             }
         } catch (err) {
             console.error("작성/수정 실패:", err);
             console.error("응답 데이터:", err.response?.data);
             console.error("상태 코드:", err.response?.status);
-            alert(isEdit ? "修正する" : "登録する");
+        } finally {
+            setPopupContent({
+                ...contentConfig,
+            });
+            setOpenPopup(true);
         }
     };
 
     return (
-        <div
-            style={{
-                background: C.bg,
-                minHeight: "100vh",
-                fontFamily: font,
-                paddingTop: "11.9rem",
-                paddingBottom: "10rem",
-            }}
-        >
-            <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
-
-                {/* ── 메인 글쓰기 카드 (Glassmorphism 적용) ── */}
-                <div
-                    style={{
-                        background: "rgba(255, 255, 255, 0.6)",
-                        backdropFilter: "blur(20px)",
-                        borderRadius: 32,
-                        border: "1px solid rgba(255, 255, 255, 0.5)",
-                        padding: "48px",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.04)",
-                    }}
-                >
-                    <h1
+        <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} btnMsg={popupContent.btnMsg} content={popupContent.content} onMove={popupContent.onMove} />
+            <div
+                style={{
+                    background: C.bg,
+                    minHeight: "100vh",
+                    fontFamily: font,
+                    paddingTop: "11.9rem",
+                    paddingBottom: "10rem",
+                }}
+            >
+                <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
+                    {/* ── 메인 글쓰기 카드 (Glassmorphism 적용) ── */}
+                    <div
                         style={{
-                            fontSize: 36,
-                            fontWeight: 900,
-                            color: C.navy,
-                            margin: "0 0 40px",
-                            letterSpacing: "-0.02em",
+                            background: "rgba(255, 255, 255, 0.6)",
+                            backdropFilter: "blur(20px)",
+                            borderRadius: 32,
+                            border: "1px solid rgba(255, 255, 255, 0.5)",
+                            padding: "48px",
+                            boxShadow: "0 20px 50px rgba(0,0,0,0.04)",
                         }}
                     >
-                        {isEdit ? "記事を編集" : "記事を作成"}
-                    </h1>
+                        <h1
+                            style={{
+                                fontSize: 36,
+                                fontWeight: 900,
+                                color: C.navy,
+                                margin: "0 0 40px",
+                                letterSpacing: "-0.02em",
+                            }}
+                        >
+                            {isEdit ? "記事を編集" : "記事を作成"}
+                        </h1>
 
-                    {/* ── 카테고리 ── */}
-                    <Field label="カテゴリー" required>
-                        <div style={{ position: "relative" }}>
-                            <button
-                                onClick={() => setCatOpen((v) => !v)}
-                                style={{
-                                    width: "100%",
-                                    height: 56,
-                                    background: C.white,
-                                    border: `1px solid ${C.border}`,
-                                    borderRadius: 16,
-                                    padding: "0 20px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    cursor: "pointer",
-                                    fontFamily: font,
-                                    fontSize: 15,
-                                    color: category ? C.navy : C.gray3,
-                                    fontWeight: 600,
-                                }}
-                            >
-                                <span>{category || "カテゴリーを選択してください"}</span>
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke={C.gray3}
-                                    strokeWidth="2"
+                        {/* ── 카테고리 ── */}
+                        <Field label="カテゴリー" required>
+                            <div style={{ position: "relative" }}>
+                                <button
+                                    onClick={() => setCatOpen((v) => !v)}
                                     style={{
-                                        transform: catOpen ? "rotate(180deg)" : "none",
-                                        transition: "0.2s",
+                                        width: "100%",
+                                        height: 56,
+                                        background: C.white,
+                                        border: `1px solid ${C.border}`,
+                                        borderRadius: 16,
+                                        padding: "0 20px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        cursor: "pointer",
+                                        fontFamily: font,
+                                        fontSize: 15,
+                                        color: category ? C.navy : C.gray3,
+                                        fontWeight: 600,
                                     }}
                                 >
-                                    <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </button>
-
-                            <AnimatePresence>
-                                {catOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
+                                    <span>{category || "カテゴリーを選択してください"}</span>
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke={C.gray3}
+                                        strokeWidth="2"
                                         style={{
-                                            position: "absolute",
-                                            top: "calc(100% + 8px)",
-                                            left: 0,
-                                            right: 0,
-                                            background: C.white,
-                                            borderRadius: 16,
-                                            zIndex: 50,
-                                            border: `1px solid ${C.border}`,
-                                            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-                                            overflow: "hidden",
+                                            transform: catOpen ? "rotate(180deg)" : "none",
+                                            transition: "0.2s",
                                         }}
                                     >
-                                        {CATEGORIES.map((cat) => (
-                                            <div
-                                                key={cat}
-                                                onClick={() => {
-                                                    setCategory(cat);
-                                                    setCatOpen(false);
-                                                }}
-                                                className="hover:bg-gray-50"
-                                                style={{
-                                                    padding: "14px 20px",
-                                                    cursor: "pointer",
-                                                    fontSize: 14,
-                                                    color: C.navy,
-                                                    fontWeight: category === cat ? 800 : 500,
-                                                    borderBottom: `1px solid ${C.border}22`,
-                                                    transition: "0.2s",
-                                                }}
-                                            >
-                                                {cat}
-                                            </div>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </Field>
+                                        <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
 
-                    {/* ── 제목 ── */}
-                    <Field label="タイトル" required>
-                        <div style={{ position: "relative" }}>
-                            <input
-                                value={title}
-                                onChange={(e) => e.target.value.length <= 100 && setTitle(e.target.value)}
-                                placeholder="タイトルを入力してください"
-                                onFocus={() => setTitleFocus(true)}
-                                onBlur={() => setTitleFocus(false)}
+                                <AnimatePresence>
+                                    {catOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            style={{
+                                                position: "absolute",
+                                                top: "calc(100% + 8px)",
+                                                left: 0,
+                                                right: 0,
+                                                background: C.white,
+                                                borderRadius: 16,
+                                                zIndex: 50,
+                                                border: `1px solid ${C.border}`,
+                                                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                                                overflow: "hidden",
+                                            }}
+                                        >
+                                            {CATEGORIES.map((cat) => (
+                                                <div
+                                                    key={cat}
+                                                    onClick={() => {
+                                                        setCategory(cat);
+                                                        setCatOpen(false);
+                                                    }}
+                                                    className="hover:bg-gray-50"
+                                                    style={{
+                                                        padding: "14px 20px",
+                                                        cursor: "pointer",
+                                                        fontSize: 14,
+                                                        color: C.navy,
+                                                        fontWeight: category === cat ? 800 : 500,
+                                                        borderBottom: `1px solid ${C.border}22`,
+                                                        transition: "0.2s",
+                                                    }}
+                                                >
+                                                    {cat}
+                                                </div>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </Field>
+
+                        {/* ── 제목 ── */}
+                        <Field label="タイトル" required>
+                            <div style={{ position: "relative" }}>
+                                <input
+                                    value={title}
+                                    onChange={(e) => e.target.value.length <= 100 && setTitle(e.target.value)}
+                                    placeholder="タイトルを入力してください"
+                                    onFocus={() => setTitleFocus(true)}
+                                    onBlur={() => setTitleFocus(false)}
+                                    style={{
+                                        width: "100%",
+                                        height: 56,
+                                        border: `1.5px solid ${titleFocus ? C.navy : C.border}`,
+                                        borderRadius: 16,
+                                        padding: "0 20px",
+                                        fontSize: 16,
+                                        fontFamily: font,
+                                        outline: "none",
+                                        boxSizing: "border-box",
+                                        color: C.navy,
+                                        fontWeight: 600,
+                                        transition: "border-color 0.2s",
+                                    }}
+                                />
+                                <span
+                                    style={{
+                                        position: "absolute",
+                                        right: 20,
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        fontSize: 12,
+                                        color: C.gray3,
+                                    }}
+                                >
+                                    {title.length}/100
+                                </span>
+                            </div>
+                        </Field>
+
+                        {/* ── 내용 ── */}
+                        <Field label="内容" required style={{ marginTop: 32 }}>
+                            <textarea
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="探訪の感想や役立つ情報を自由に作成してください。"
+                                onFocus={() => setContentFocus(true)}
+                                onBlur={() => setContentFocus(false)}
                                 style={{
                                     width: "100%",
-                                    height: 56,
-                                    border: `1.5px solid ${titleFocus ? C.navy : C.border}`,
+                                    minHeight: 300,
+                                    border: `1.5px solid ${contentFocus ? C.navy : C.border}`,
                                     borderRadius: 16,
-                                    padding: "0 20px",
-                                    fontSize: 16,
+                                    padding: "24px",
+                                    fontSize: 15,
+                                    lineHeight: 1.7,
                                     fontFamily: font,
                                     outline: "none",
                                     boxSizing: "border-box",
                                     color: C.navy,
-                                    fontWeight: 600,
+                                    resize: "vertical",
                                     transition: "border-color 0.2s",
                                 }}
                             />
-                            <span
+                        </Field>
+
+                        {/* ── 이미지 첨부 ── */}
+                        <Field label="画像を添付" style={{ marginTop: 32 }}>
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setDragOver(true);
+                                }}
+                                onDragLeave={() => setDragOver(false)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setDragOver(false);
+                                    handleFiles(e.dataTransfer.files);
+                                }}
                                 style={{
-                                    position: "absolute",
-                                    right: 20,
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    fontSize: 12,
-                                    color: C.gray3,
+                                    border: `2px dashed ${dragOver ? C.navy : C.border}`,
+                                    borderRadius: 16,
+                                    padding: "40px 24px",
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    background: dragOver ? "rgba(0,13,87,0.05)" : "rgba(255,255,255,0.3)",
+                                    transition: "all 0.2s",
+                                    minHeight: 140,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
                                 }}
                             >
-                                {title.length}/100
-                            </span>
-                        </div>
-                    </Field>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={C.gray3} strokeWidth="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <polyline points="21 15 16 10 5 21" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                <p
+                                    style={{
+                                        fontSize: 15,
+                                        color: C.gray2,
+                                        fontWeight: 700,
+                                        margin: 0,
+                                    }}
+                                >
+                                    クリックして画像をアップロード
+                                </p>
+                                <p style={{ fontSize: 12, color: C.gray4, margin: 0 }}>JPG, PNG (最大 5MB)</p>
+                            </div>
+                            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => handleFiles(e.target.files)} />
 
-                    {/* ── 내용 ── */}
-                    <Field label="内容" required style={{ marginTop: 32 }}>
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="探訪の感想や役立つ情報を自由に作成してください。"
-                            onFocus={() => setContentFocus(true)}
-                            onBlur={() => setContentFocus(false)}
+                            {images.length > 0 && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: 12,
+                                        marginTop: 16,
+                                    }}
+                                >
+                                    {images.map((img, i) => (
+                                        <div key={i} style={{ position: "relative" }}>
+                                            <img
+                                                src={img.url}
+                                                alt=""
+                                                style={{
+                                                    width: 80,
+                                                    height: 80,
+                                                    objectFit: "cover",
+                                                    borderRadius: 12,
+                                                }}
+                                            />
+                                            <button
+                                                onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
+                                                style={{
+                                                    position: "absolute",
+                                                    top: -5,
+                                                    right: -5,
+                                                    width: 22,
+                                                    height: 22,
+                                                    borderRadius: "50%",
+                                                    background: C.red,
+                                                    color: "white",
+                                                    border: "none",
+                                                    cursor: "pointer",
+                                                    fontSize: 12,
+                                                    fontWeight: 900,
+                                                }}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </Field>
+
+                        {/* ── 작성 가이드 ── */}
+                        <div
                             style={{
-                                width: "100%",
-                                minHeight: 300,
-                                border: `1.5px solid ${contentFocus ? C.navy : C.border}`,
+                                background: "rgba(0,13,87,0.03)",
                                 borderRadius: 16,
                                 padding: "24px",
-                                fontSize: 15,
-                                lineHeight: 1.7,
-                                fontFamily: font,
-                                outline: "none",
-                                boxSizing: "border-box",
-                                color: C.navy,
-                                resize: "vertical",
-                                transition: "border-color 0.2s",
-                            }}
-                        />
-                    </Field>
-
-                    {/* ── 이미지 첨부 ── */}
-                    <Field label="画像を添付" style={{ marginTop: 32 }}>
-                        <div
-                            onClick={() => fileInputRef.current?.click()}
-                            onDragOver={(e) => {
-                                e.preventDefault();
-                                setDragOver(true);
-                            }}
-                            onDragLeave={() => setDragOver(false)}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                setDragOver(false);
-                                handleFiles(e.dataTransfer.files);
-                            }}
-                            style={{
-                                border: `2px dashed ${dragOver ? C.navy : C.border}`,
-                                borderRadius: 16,
-                                padding: "40px 24px",
-                                textAlign: "center",
-                                cursor: "pointer",
-                                background: dragOver ? "rgba(0,13,87,0.05)" : "rgba(255,255,255,0.3)",
-                                transition: "all 0.2s",
-                                minHeight: 140,
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 8,
+                                marginTop: 40,
                             }}
                         >
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={C.gray3} strokeWidth="1.5">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <polyline points="21 15 16 10 5 21" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <p
+                            <h4
                                 style={{
-                                    fontSize: 15,
-                                    color: C.gray2,
-                                    fontWeight: 700,
+                                    fontSize: 16,
+                                    fontWeight: 800,
+                                    color: C.navy,
+                                    margin: "0 0 12px",
+                                }}
+                            >
+                                作成ガイド
+                            </h4>
+                            <ul
+                                style={{
                                     margin: 0,
-                                }}
-                            >
-                                クリックして画像をアップロード
-                            </p>
-                            <p style={{ fontSize: 12, color: C.gray4, margin: 0 }}>JPG, PNG (最大 5MB)</p>
-                        </div>
-                        <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => handleFiles(e.target.files)} />
-
-                        {images.length > 0 && (
-                            <div
-                                style={{
+                                    padding: 0,
+                                    listStyle: "none",
                                     display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: 12,
-                                    marginTop: 16,
+                                    flexDirection: "column",
+                                    gap: 6,
                                 }}
                             >
-                                {images.map((img, i) => (
-                                    <div key={i} style={{ position: "relative" }}>
-                                        <img
-                                            src={img.url}
-                                            alt=""
-                                            style={{
-                                                width: 80,
-                                                height: 80,
-                                                objectFit: "cover",
-                                                borderRadius: 12,
-                                            }}
-                                        />
-                                        <button
-                                            onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
-                                            style={{
-                                                position: "absolute",
-                                                top: -5,
-                                                right: -5,
-                                                width: 22,
-                                                height: 22,
-                                                borderRadius: "50%",
-                                                background: C.red,
-                                                color: "white",
-                                                border: "none",
-                                                cursor: "pointer",
-                                                fontSize: 12,
-                                                fontWeight: 900,
-                                            }}
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
+                                {["他のユーザーを尊重する内容を作成してください。", "具体的で有益な情報をシェアしてください。", "商業的な広告投稿は制限される場合があります。"].map((text, i) => (
+                                    <li key={i} style={{ fontSize: 13, color: C.gray2, lineHeight: 1.6 }}>
+                                        • {text}
+                                    </li>
                                 ))}
-                            </div>
-                        )}
-                    </Field>
+                            </ul>
+                        </div>
 
-                    {/* ── 작성 가이드 ── */}
-                    <div
-                        style={{
-                            background: "rgba(0,13,87,0.03)",
-                            borderRadius: 16,
-                            padding: "24px",
-                            marginTop: 40,
-                        }}
-                    >
-                        <h4
+                        {/* ── 버튼 행 ── */}
+                        <div
                             style={{
-                                fontSize: 16,
-                                fontWeight: 800,
-                                color: C.navy,
-                                margin: "0 0 12px",
-                            }}
-                        >
-                            作成ガイド
-                        </h4>
-                        <ul
-                            style={{
-                                margin: 0,
-                                padding: 0,
-                                listStyle: "none",
                                 display: "flex",
-                                flexDirection: "column",
-                                gap: 6,
+                                justifyContent: "flex-end",
+                                gap: 10,
+                                marginTop: 48,
                             }}
                         >
-                            {["他のユーザーを尊重する内容を作成してください。", "具体的で有益な情報をシェアしてください。", "商業的な広告投稿は制限される場合があります。"].map((text, i) => (
-                                <li key={i} style={{ fontSize: 13, color: C.gray2, lineHeight: 1.6 }}>
-                                    • {text}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* ── 버튼 행 ── */}
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 10,
-                            marginTop: 48,
-                        }}
-                    >
-                        <button
-                            onClick={() => { window.scrollTo({ top: 0 }); navigate("/community"); }}
-                            style={{
-                                padding: "10px 24px",
-                                borderRadius: 99,
-                                border: `1px solid ${C.border}`,
-                                background: "transparent",
-                                color: C.gray2,
-                                fontWeight: 600,
-                                fontSize: 14,
-                                cursor: "pointer",
-                                fontFamily: font,
-                                transition: "border-color 0.2s, color 0.2s",
-                            }}
-                        >
-                            キャンセル
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            onMouseEnter={() => setSubmitHover(true)}
-                            onMouseLeave={() => setSubmitHover(false)}
-                            style={{
-                                padding: "10px 28px",
-                                borderRadius: 99,
-                                border: "none",
-                                background: submitHover ? "#6e0000" : C.navy,
-                                color: "white",
-                                fontWeight: 700,
-                                fontSize: 14,
-                                cursor: "pointer",
-                                fontFamily: font,
-                                transition: "background 0.2s",
-                            }}
-                        >
-                            {isEdit ? "修正する" : "登録する"}
-                        </button>
+                            <button
+                                onClick={() => {
+                                    window.scrollTo({ top: 0 });
+                                    navigate(isEdit ? "/mypage" : "/community");
+                                }}
+                                style={{
+                                    padding: "10px 24px",
+                                    borderRadius: 99,
+                                    border: `1px solid ${C.border}`,
+                                    background: "transparent",
+                                    color: C.gray2,
+                                    fontWeight: 600,
+                                    fontSize: 14,
+                                    cursor: "pointer",
+                                    fontFamily: font,
+                                    transition: "border-color 0.2s, color 0.2s",
+                                }}
+                            >
+                                キャンセル
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                onMouseEnter={() => setSubmitHover(true)}
+                                onMouseLeave={() => setSubmitHover(false)}
+                                style={{
+                                    padding: "10px 28px",
+                                    borderRadius: 99,
+                                    border: "none",
+                                    background: submitHover ? "#6e0000" : C.navy,
+                                    color: "white",
+                                    fontWeight: 700,
+                                    fontSize: 14,
+                                    cursor: "pointer",
+                                    fontFamily: font,
+                                    transition: "background 0.2s",
+                                }}
+                            >
+                                {isEdit ? "修正する" : "登録する"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

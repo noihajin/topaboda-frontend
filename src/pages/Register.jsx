@@ -175,27 +175,75 @@ export default function Register() {
         nickname: "",
     });
 
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
+
     /* API ハンドラー */
     const handleSendEmail = async (e) => {
         e.preventDefault();
         try {
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp/email`, { email });
             if (res.status === 200) {
-                alert(`${email} に認証コードを送信しました。`);
+                setPopupContent({
+                    icon: "📨",
+                    title: "コード送信",
+                    content: `${email} に認証コードを送信しました。`,
+                    btnMsg: "次へ",
+                    onMove: () => {
+                        setStep(2);
+                        setOpenPopup(false);
+                    },
+                });
+                setOpenPopup(true);
                 setAuthCode("");
-                setStep(2);
             }
         } catch (err) {
-            alert(err.response?.data?.message || "サーバーエラーが発生しました。");
+            const errorMsg = err.response?.data?.message || "サーバーエラーが発生しました。";
+            setPopupContent({
+                icon: "⚠️",
+                title: "エラー",
+                content: errorMsg,
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+
+            setOpenPopup(true);
+            console.error("Email Error:", err.response);
         }
     };
 
     const handleResendEmail = async () => {
         try {
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp/email`, { email });
-            if (res.status === 200) alert("認証コードを再送信しました。");
+            if (res.status === 200) {
+                setPopupContent({
+                    icon: "📨",
+                    title: "コード再送信",
+                    content: "認証コードを再送信しました。",
+                    btnMsg: "確認",
+                    onMove: () => {
+                        setOpenPopup(false);
+                    },
+                });
+                setOpenPopup(true);
+            }
         } catch (err) {
-            alert(err.response?.data?.message || "再送信に失敗しました。");
+            setPopupContent({
+                icon: "⚠️",
+                title: "エラー",
+                content: err.response?.data?.message || "再送信に失敗しました。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
         }
     };
 
@@ -205,30 +253,96 @@ export default function Register() {
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp/verify`, { email, token: authCode });
             if (res.status === 200) setStep(3);
         } catch (err) {
-            alert(err.response?.data?.message || "認証コードが一致しません。");
-            setStep(1);
+            setPopupContent({
+                icon: "❌",
+                title: "エラー",
+                content: err.response?.data?.message || "認証コードが一致しません。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                    setStep(1);
+                },
+            });
+            setOpenPopup(true);
         }
     };
 
     const handleFinalSubmit = async (e) => {
         e.preventDefault();
-        if (userIdStatus !== "available") return alert("IDの重複確認を行ってください。");
-        if (nicknameStatus !== "available") return alert("ニックネームの重複確認を行ってください。");
-        if (formData.password !== formData.passwordConfirm) return alert("パスワードが一致しません。");
+
+        const showModal = (content, title = "入力エラー") => {
+            setPopupContent({
+                icon: "⚠️",
+                title: title,
+                content: content,
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+            setOpenPopup(true);
+        };
+
+        if (userIdStatus !== "available") {
+            return showModal("IDの重複確認を行ってください。", "ID未確認");
+        }
+
+        if (nicknameStatus !== "available") {
+            return showModal("ニックネームの重複確認を行ってください。", "ニックネーム未確認");
+        }
+
+        if (formData.password !== formData.passwordConfirm) {
+            return showModal("パスワードが一致しません。", "パスワード不一致");
+        }
         try {
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp`, { id: formData.userId, email, password: formData.password, nickname: formData.nickname });
             if (res.status === 200) {
                 localStorage.setItem("jwt", res.data.jwt);
                 localStorage.setItem("userName", formData.nickname);
-                setShowSuccessModal(true);
+
+                setPopupContent({
+                    icon: "🎉",
+                    title: "Welcome to TOPABODA!",
+                    content: (
+                        <>
+                            {formData.nickname}様、会員登録ありがとうございます。
+                            <br />
+                            探訪の旅を今すぐ始めましょう！
+                        </>
+                    ),
+                    btnMsg: "確認",
+                    onMove: () => {
+                        navigate("/");
+                    },
+                });
+                setOpenPopup(true);
             }
         } catch (err) {
-            alert(err.response?.data?.message || "サーバーエラーが発生しました。");
+            setPopupContent({
+                icon: "⚠️",
+                title: "エラー",
+                content: err.response?.data?.message || "サーバーエラーが発生しました。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
         }
     };
 
     const handleUserIdCheck = async () => {
-        if (!formData.userId) return alert("IDを入力してください。");
+        if (!formData.userId) {
+            setPopupContent({
+                icon: "⚠️",
+                title: "エラー",
+                content: "IDを入力してください。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
+            return;
+        }
         try {
             setUserIdStatus("checking");
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp/id`, { id: formData.userId });
@@ -242,7 +356,19 @@ export default function Register() {
     };
 
     const handleNicknameCheck = async () => {
-        if (!formData.nickname) return alert("ニックネームを入力してください。");
+        if (!formData.nickname) {
+            setPopupContent({
+                icon: "⚠️",
+                title: "エラー",
+                content: "ニックネームを入力してください。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
+            return;
+        }
         try {
             setNicknameStatus("checking");
             const res = await axios.post(`${API_URL}/topaboda/api/auth/signUp/nickname`, { nickname: formData.nickname });
@@ -257,275 +383,264 @@ export default function Register() {
 
     /* ════ レンダー ════ */
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                background: C.bg,
-                fontFamily: font,
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                padding: "120px 20px 60px",
-            }}
-        >
-            {/* ── ホワイトカード (Step 1 / 2 / 3共通) ── */}
+        <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} btnMsg={popupContent.btnMsg} content={popupContent.content} onMove={popupContent.onMove} />
             <div
                 style={{
-                    width: "100%",
-                    maxWidth: 420,
-                    background: C.white,
-                    borderRadius: 24,
-                    padding: "45px 40px",
-                    boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
-                    border: `1px solid ${C.border}`,
-                    textAlign: "center",
-                    transition: "max-width 0.3s ease",
+                    minHeight: "100vh",
+                    background: C.bg,
+                    fontFamily: font,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    padding: "120px 20px 60px",
                 }}
             >
-                {/* ロゴ */}
-                <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
-                    <p style={{ color: C.gray2, fontSize: 14, fontWeight: 500, margin: 0 }}>会員登録</p>
-                </div>
+                {/* ── ホワイトカード (Step 1 / 2 / 3共通) ── */}
+                <div
+                    style={{
+                        width: "100%",
+                        maxWidth: 420,
+                        background: C.white,
+                        borderRadius: 24,
+                        padding: "45px 40px",
+                        boxShadow: "0 10px 40px rgba(0,13,87,0.03)",
+                        border: `1px solid ${C.border}`,
+                        textAlign: "center",
+                        transition: "max-width 0.3s ease",
+                    }}
+                >
+                    {/* ロゴ */}
+                    <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <img src={imgLogoBlkSmall} alt="TOPABODA" style={{ height: 48, marginBottom: 12 }} />
+                        <p style={{ color: C.gray2, fontSize: 14, fontWeight: 500, margin: 0 }}>会員登録</p>
+                    </div>
 
-                <StepIndicator step={step} />
+                    <StepIndicator step={step} />
 
-                <AnimatePresence mode="wait">
-                    {/* ════ STEP 1: メールアドレス入力 ════ */}
-                    {step === 1 && (
-                        <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            {/* SNS REGISTER */}
-                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
-                                <div style={{ flex: 1, height: 1, background: C.divider }} />
-                                <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>SNS REGISTER</span>
-                                <div style={{ flex: 1, height: 1, background: C.divider }} />
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 45, marginBottom: 28 }}>
-                                {SNS_ITEMS.map((item) => (
-                                    <button key={item.key} type="button" onClick={() => alert("準備中です。")} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                                        <div
-                                            style={{ width: 54, height: 54, borderRadius: "50%", background: item.bg, border: item.border, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s" }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = "translateY(-2px)";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = "none";
+                    <AnimatePresence mode="wait">
+                        {/* ════ STEP 1: メールアドレス入力 ════ */}
+                        {step === 1 && (
+                            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                {/* SNS REGISTER */}
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
+                                    <div style={{ flex: 1, height: 1, background: C.divider }} />
+                                    <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>SNS REGISTER</span>
+                                    <div style={{ flex: 1, height: 1, background: C.divider }} />
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "center", gap: 45, marginBottom: 28 }}>
+                                    {SNS_ITEMS.map((item) => (
+                                        <button key={item.key} type="button" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                                            <div
+                                                style={{ width: 54, height: 54, borderRadius: "50%", background: item.bg, border: item.border, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s" }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.transform = "translateY(-2px)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.transform = "none";
+                                                }}
+                                            >
+                                                {item.icon}
+                                            </div>
+                                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                                {item.lines.map((line, i) => (
+                                                    <span key={i} style={{ fontSize: 11, fontWeight: 600, color: C.gray2, lineHeight: 1.3 }}>
+                                                        {line}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* MAIL REGISTER */}
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
+                                    <div style={{ flex: 1, height: 1, background: C.divider }} />
+                                    <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>MAIL REGISTER</span>
+                                    <div style={{ flex: 1, height: 1, background: C.divider }} />
+                                </div>
+
+                                <form onSubmit={handleSendEmail} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="メールアドレスを入力"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            height: 46,
+                                            padding: "0 16px",
+                                            border: "1px solid #e2e8f0",
+                                            borderRadius: 12,
+                                            fontSize: 15,
+                                            fontFamily: font,
+                                            outline: "none",
+                                            boxSizing: "border-box",
+                                            background: C.white,
+                                        }}
+                                    />
+                                    <Step1Button label="認証メールを送信" />
+                                </form>
+                            </motion.div>
+                        )}
+
+                        {/* ════ STEP 2: 認証コード入力 (Figma 1100-2163) ════ */}
+                        {step === 2 && (
+                            <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                {/* タイトル */}
+                                <div style={{ textAlign: "left", marginBottom: 20 }}>
+                                    <p style={{ color: C.gray4, fontSize: 16, fontWeight: 500, margin: "0 0 8px", lineHeight: 1.5 }}>認証コードをお送りいたしました。</p>
+                                    <p style={{ color: C.gray4, fontSize: 15, fontWeight: 400, margin: 0, lineHeight: 1.5 }}>送信された認証コードを5分以内に入力してください。</p>
+                                </div>
+
+                                <form onSubmit={handleVerifyCode}>
+                                    {/* 認証コード ラベル + インプット */}
+                                    <div style={{ marginBottom: 10 }}>
+                                        <p style={{ fontSize: 16, fontWeight: 500, color: "#000", textAlign: "left", margin: "0 0 10px" }}>認証コード</p>
+                                        <FigmaInput type="text" required maxLength="6" placeholder="認証コードを入力" value={authCode} onChange={(e) => setAuthCode(e.target.value)} />
+                                    </div>
+
+                                    {/* 再送信リンク */}
+                                    <div style={{ textAlign: "right", marginBottom: 28 }}>
+                                        <button
+                                            type="button"
+                                            onClick={handleResendEmail}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: C.gray4,
+                                                fontSize: 14,
+                                                fontWeight: 500,
+                                                textDecoration: "underline",
+                                                fontFamily: font,
+                                                letterSpacing: "0.15px",
                                             }}
                                         >
-                                            {item.icon}
-                                        </div>
-                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                            {item.lines.map((line, i) => (
-                                                <span key={i} style={{ fontSize: 11, fontWeight: 600, color: C.gray2, lineHeight: 1.3 }}>
-                                                    {line}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
+                                            認証コードを再送信する
+                                        </button>
+                                    </div>
 
-                            {/* MAIL REGISTER */}
-                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22 }}>
-                                <div style={{ flex: 1, height: 1, background: C.divider }} />
-                                <span style={{ fontSize: 10, color: C.gray3, fontWeight: 700, letterSpacing: "0.05em" }}>MAIL REGISTER</span>
-                                <div style={{ flex: 1, height: 1, background: C.divider }} />
-                            </div>
+                                    {/* 入力ボタン */}
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginTop: 8 }}>
+                                        <NavyButton type="submit">入力</NavyButton>
 
-                            <form onSubmit={handleSendEmail} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                                <input
-                                    type="email"
-                                    required
-                                    placeholder="メールアドレスを入力"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    style={{
-                                        width: "100%",
-                                        height: 46,
-                                        padding: "0 16px",
-                                        border: "1px solid #e2e8f0",
-                                        borderRadius: 12,
-                                        fontSize: 15,
-                                        fontFamily: font,
-                                        outline: "none",
-                                        boxSizing: "border-box",
-                                        background: C.white,
-                                    }}
-                                />
-                                <Step1Button label="認証メールを送信" />
-                            </form>
-                        </motion.div>
-                    )}
+                                        {/* 戻るリンク */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep(1)}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: C.gray3,
+                                                fontSize: 13,
+                                                fontWeight: 500,
+                                                textDecoration: "underline",
+                                                fontFamily: font,
+                                            }}
+                                        >
+                                            戻る
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        )}
 
-                    {/* ════ STEP 2: 認証コード入力 (Figma 1100-2163) ════ */}
-                    {step === 2 && (
-                        <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            {/* タイトル */}
-                            <div style={{ textAlign: "left", marginBottom: 20 }}>
-                                <p style={{ color: C.gray4, fontSize: 16, fontWeight: 500, margin: "0 0 8px", lineHeight: 1.5 }}>認証コードをお送りいたしました。</p>
-                                <p style={{ color: C.gray4, fontSize: 15, fontWeight: 400, margin: 0, lineHeight: 1.5 }}>送信された認証コードを5分以内に入力してください。</p>
-                            </div>
+                        {/* ════ STEP 3: 会員情報入力 (Figma 1023-549) ════ */}
+                        {step === 3 && (
+                            <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <form onSubmit={handleFinalSubmit}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                                        {/* アイディー */}
+                                        <FormRow label="アイディー">
+                                            <div style={{ display: "flex", gap: 10 }}>
+                                                <FigmaInput
+                                                    type="text"
+                                                    required
+                                                    placeholder="IDを入力"
+                                                    style={{ flex: 1 }}
+                                                    onChange={(e) => {
+                                                        setFormData({ ...formData, userId: e.target.value });
+                                                        setUserIdStatus("idle");
+                                                    }}
+                                                />
+                                                <CheckButton onClick={handleUserIdCheck} />
+                                            </div>
+                                            {userIdStatus === "available" && <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>}
+                                            {userIdStatus === "duplicate" && <p style={{ fontSize: 12, color: C.red, margin: "5px 0 0", textAlign: "left" }}>✗ すでに使用中です</p>}
+                                        </FormRow>
 
-                            <form onSubmit={handleVerifyCode}>
-                                {/* 認証コード ラベル + インプット */}
-                                <div style={{ marginBottom: 10 }}>
-                                    <p style={{ fontSize: 16, fontWeight: 500, color: "#000", textAlign: "left", margin: "0 0 10px" }}>認証コード</p>
-                                    <FigmaInput type="text" required maxLength="6" placeholder="認証コードを入力" value={authCode} onChange={(e) => setAuthCode(e.target.value)} />
-                                </div>
+                                        {/* パスワード */}
+                                        <FormRow label="パスワード">
+                                            <div style={{ position: "relative" }}>
+                                                <FigmaInput type={showPw ? "text" : "password"} required placeholder="パスワードを入力" style={{ paddingRight: 48 }} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                                                <button type="button" onClick={() => setShowPw(!showPw)} style={eyeBtnStyle}>
+                                                    {showPw ? <EyeIcon /> : <EyeOffIcon />}
+                                                </button>
+                                            </div>
+                                            <p style={{ fontSize: 13, color: "#999", margin: "6px 0 0", textAlign: "left" }}>※英語、数字、記号を含む</p>
+                                        </FormRow>
 
-                                {/* 再送信リンク */}
-                                <div style={{ textAlign: "right", marginBottom: 28 }}>
-                                    <button
-                                        type="button"
-                                        onClick={handleResendEmail}
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            cursor: "pointer",
-                                            color: C.gray4,
-                                            fontSize: 14,
-                                            fontWeight: 500,
-                                            textDecoration: "underline",
-                                            fontFamily: font,
-                                            letterSpacing: "0.15px",
-                                        }}
-                                    >
-                                        認証コードを再送信する
-                                    </button>
-                                </div>
+                                        {/* パスワード確認 */}
+                                        <FormRow
+                                            label={
+                                                <>
+                                                    パスワード
+                                                    <br />
+                                                    (確認)
+                                                </>
+                                            }
+                                        >
+                                            <div style={{ position: "relative" }}>
+                                                <FigmaInput type={showPwConfirm ? "text" : "password"} required placeholder="パスワードを確認" style={{ paddingRight: 48 }} onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })} />
+                                                <button type="button" onClick={() => setShowPwConfirm(!showPwConfirm)} style={eyeBtnStyle}>
+                                                    {showPwConfirm ? <EyeIcon /> : <EyeOffIcon />}
+                                                </button>
+                                            </div>
+                                        </FormRow>
 
-                                {/* 入力ボタン */}
-                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginTop: 8 }}>
-                                    <NavyButton type="submit">入力</NavyButton>
+                                        {/* ニックネーム */}
+                                        <FormRow label="ニックネーム">
+                                            <div style={{ display: "flex", gap: 10 }}>
+                                                <FigmaInput
+                                                    type="text"
+                                                    required
+                                                    placeholder="ニックネームを入力"
+                                                    style={{ flex: 1 }}
+                                                    onChange={(e) => {
+                                                        setFormData({ ...formData, nickname: e.target.value });
+                                                        setNicknameStatus("idle");
+                                                    }}
+                                                />
+                                                <CheckButton onClick={handleNicknameCheck} />
+                                            </div>
+                                            {nicknameStatus === "available" && <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>}
+                                            {nicknameStatus === "duplicate" && <p style={{ fontSize: 12, color: C.red, margin: "5px 0 0", textAlign: "left" }}>✗ すでに使用中です</p>}
+                                        </FormRow>
+                                    </div>
 
-                                    {/* 戻るリンク */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setStep(1)}
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            cursor: "pointer",
-                                            color: C.gray3,
-                                            fontSize: 13,
-                                            fontWeight: 500,
-                                            textDecoration: "underline",
-                                            fontFamily: font,
-                                        }}
-                                    >
-                                        戻る
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    )}
+                                    {/* 登録するボタン */}
+                                    <div style={{ marginTop: 28 }}>
+                                        <NavyButton type="submit">登録する</NavyButton>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    {/* ════ STEP 3: 会員情報入力 (Figma 1023-549) ════ */}
-                    {step === 3 && (
-                        <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                            <form onSubmit={handleFinalSubmit}>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                                    {/* アイディー */}
-                                    <FormRow label="アイディー">
-                                        <div style={{ display: "flex", gap: 10 }}>
-                                            <FigmaInput
-                                                type="text"
-                                                required
-                                                placeholder="IDを入力"
-                                                style={{ flex: 1 }}
-                                                onChange={(e) => {
-                                                    setFormData({ ...formData, userId: e.target.value });
-                                                    setUserIdStatus("idle");
-                                                }}
-                                            />
-                                            <CheckButton onClick={handleUserIdCheck} />
-                                        </div>
-                                        {userIdStatus === "available" && <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>}
-                                        {userIdStatus === "duplicate" && <p style={{ fontSize: 12, color: C.red, margin: "5px 0 0", textAlign: "left" }}>✗ すでに使用中です</p>}
-                                    </FormRow>
-
-                                    {/* パスワード */}
-                                    <FormRow label="パスワード">
-                                        <div style={{ position: "relative" }}>
-                                            <FigmaInput type={showPw ? "text" : "password"} required placeholder="パスワードを入力" style={{ paddingRight: 48 }} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                                            <button type="button" onClick={() => setShowPw(!showPw)} style={eyeBtnStyle}>
-                                                {showPw ? <EyeIcon /> : <EyeOffIcon />}
-                                            </button>
-                                        </div>
-                                        <p style={{ fontSize: 13, color: "#999", margin: "6px 0 0", textAlign: "left" }}>※英語、数字、記号を含む</p>
-                                    </FormRow>
-
-                                    {/* パスワード確認 */}
-                                    <FormRow
-                                        label={
-                                            <>
-                                                パスワード
-                                                <br />
-                                                (確認)
-                                            </>
-                                        }
-                                    >
-                                        <div style={{ position: "relative" }}>
-                                            <FigmaInput type={showPwConfirm ? "text" : "password"} required placeholder="パスワードを確認" style={{ paddingRight: 48 }} onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })} />
-                                            <button type="button" onClick={() => setShowPwConfirm(!showPwConfirm)} style={eyeBtnStyle}>
-                                                {showPwConfirm ? <EyeIcon /> : <EyeOffIcon />}
-                                            </button>
-                                        </div>
-                                    </FormRow>
-
-                                    {/* ニックネーム */}
-                                    <FormRow label="ニックネーム">
-                                        <div style={{ display: "flex", gap: 10 }}>
-                                            <FigmaInput
-                                                type="text"
-                                                required
-                                                placeholder="ニックネームを入力"
-                                                style={{ flex: 1 }}
-                                                onChange={(e) => {
-                                                    setFormData({ ...formData, nickname: e.target.value });
-                                                    setNicknameStatus("idle");
-                                                }}
-                                            />
-                                            <CheckButton onClick={handleNicknameCheck} />
-                                        </div>
-                                        {nicknameStatus === "available" && <p style={{ fontSize: 12, color: "#16a34a", margin: "5px 0 0", textAlign: "left" }}>✓ 使用可能です</p>}
-                                        {nicknameStatus === "duplicate" && <p style={{ fontSize: 12, color: C.red, margin: "5px 0 0", textAlign: "left" }}>✗ すでに使用中です</p>}
-                                    </FormRow>
-                                </div>
-
-                                {/* 登録するボタン */}
-                                <div style={{ marginTop: 28 }}>
-                                    <NavyButton type="submit">登録する</NavyButton>
-                                </div>
-                            </form>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* ログインへ */}
-                <div style={{ margin: "32px 0 0", height: 1, background: C.divider }} />
-                <p style={{ fontSize: 13, color: C.gray3, margin: "16px 0 0", fontWeight: 500 }}>
-                    すでにアカウントをお持ちですか？{" "}
-                    <Link to="/login" style={{ color: C.navy, fontWeight: 700, textDecoration: "none" }}>
-                        ログイン
-                    </Link>
-                </p>
+                    {/* ログインへ */}
+                    <div style={{ margin: "32px 0 0", height: 1, background: C.divider }} />
+                    <p style={{ fontSize: 13, color: C.gray3, margin: "16px 0 0", fontWeight: 500 }}>
+                        すでにアカウントをお持ちですか？{" "}
+                        <Link to="/login" style={{ color: C.navy, fontWeight: 700, textDecoration: "none" }}>
+                            ログイン
+                        </Link>
+                    </p>
+                </div>
             </div>
-
-            <InfoModal
-                open={showSuccessModal}
-                icon="🎉"
-                title="Welcome to TOPABODA!"
-                content={
-                    <>
-                        ff様、会員登録ありがとうございます。
-                        <br />
-                        探訪の旅を今すぐ始めましょう！
-                    </>
-                }
-                onMove={() => navigate("/")}
-            />
-        </div>
+        </>
     );
 }
 

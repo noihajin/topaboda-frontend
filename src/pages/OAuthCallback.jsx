@@ -109,7 +109,7 @@ const OAuthCallback = () => {
 
     return (
         <>
-            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} content={popupContent.content} onMove={popupContent.onMove} />
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} content={popupContent.content} btnMsg={popupContent.btnMsg} onMove={popupContent.onMove} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
                 <p>認証処理中です。少々お待ちください...</p>
             </div>
