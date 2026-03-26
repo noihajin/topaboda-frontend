@@ -108,7 +108,7 @@ export default function PopularHeritageSection() {
     return (
         <section
             ref={sectionRef}
-            className="w-full bg-white pt-32 pb-20 px-[10%]"
+            className="w-full bg-white py-32 px-[10%]"
             style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', 'Roboto', sans-serif" }}
         >
             {/* 헤더 영역 */}
