@@ -228,9 +228,29 @@ export default function Community() {
             </button>
           </div>
 
-          {/* 정렬 토글 — PopularHeritageSection 스타일과 동일 */}
+          {/* 투고 버튼 */}
+          <button
+            onClick={() => navigate("/community/write")}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: C.red, color: C.white, border: "none",
+              borderRadius: 999, height: 48, padding: "0 24px",
+              fontWeight: 800, fontSize: 14, cursor: "pointer",
+              transition: "all 0.2s", flexShrink: 0, fontFamily: fJP,
+              boxShadow: "0 4px 14px rgba(110,0,0,0.22)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.red;    e.currentTarget.style.transform = "none"; }}
+          >
+            <img src={icPen} alt="" style={{ width: 16 }} />
+            投稿する
+          </button>
+        </div>
+
+        {/* ── 정렬 토글 (오른쪽 정렬) — PopularHeritageSection 스타일과 동일 ── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
+            display: "flex", alignItems: "center", gap: 4,
             background: C.white,
             border: "1px solid rgba(202,202,0,0.4)",
             borderRadius: 999, padding: "4px",
@@ -253,24 +273,6 @@ export default function Community() {
               </button>
             ))}
           </div>
-
-          {/* 투고 버튼 */}
-          <button
-            onClick={() => navigate("/community/write")}
-            style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: C.red, color: C.white, border: "none",
-              borderRadius: 999, height: 48, padding: "0 24px",
-              fontWeight: 800, fontSize: 14, cursor: "pointer",
-              transition: "all 0.2s", flexShrink: 0, fontFamily: fJP,
-              boxShadow: "0 4px 14px rgba(110,0,0,0.22)",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = C.red;    e.currentTarget.style.transform = "none"; }}
-          >
-            <img src={icPen} alt="" style={{ width: 16 }} />
-            投稿する
-          </button>
         </div>
 
         {/* ── 게시글 리스트 ── */}
