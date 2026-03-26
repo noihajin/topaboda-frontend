@@ -58,6 +58,7 @@ export default function Community() {
   const [sortType, setSortType]             = useState("latest");
   const [windowWidth, setWindowWidth]       = useState(window.innerWidth);
   const [popularVisible, setPopularVisible] = useState(false);
+  const [bannerLoaded, setBannerLoaded]     = useState(false);
   const catRef      = useRef(null);
   const popularRef  = useRef(null);
 
@@ -142,15 +143,21 @@ export default function Community() {
         width: "100%",
         height: isMobile ? "340px" : "460px",
         overflow: "hidden",
+        background: "#dde4ec", /* 로드 전 플레이스홀더 */
       }}>
         {/* 배경 이미지 */}
         <img
-          src="https://www.figma.com/api/mcp/asset/d14302f3-832c-45db-98cd-74e120079d0e"
+          src="/community_banner.png"
           alt=""
+          fetchpriority="high"
+          decoding="async"
+          onLoad={() => setBannerLoaded(true)}
           style={{
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
             objectFit: "cover", objectPosition: "center",
+            opacity: bannerLoaded ? 1 : 0,
+            transition: "opacity 0.6s ease",
           }}
         />
         {/* 밝은 오버레이 */}

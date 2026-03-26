@@ -2,7 +2,7 @@ import { C, font } from "./constants";
 import { CircleProgress, BadgeStat } from "./AchievementUI";
 
 // 업적 달성도 요약 카드 (원형 진행도 + 메달 통계 + 마이페이지 버튼)
-export default function AchievementSummary({ achievedCount, totalCount, progressPct, goldCount, silverCount, bronzeCount, onBack }) {
+export default function AchievementSummary({ achievedCount, totalCount, progressPct, goldCount, silverCount, bronzeCount }) {
     const safePct = Number(progressPct) || 0;
 
     return (
@@ -69,33 +69,6 @@ export default function AchievementSummary({ achievedCount, totalCount, progress
                 </div>
             </div>
 
-            {/* マイページボタン */}
-            <button
-                onClick={onBack}
-                style={{
-                    background: "transparent",
-                    border: `2px solid ${C.navy}`,
-                    color: C.navy,
-                    padding: "11px 22px",
-                    borderRadius: 10,
-                    fontWeight: 700,
-                    fontSize: 14,
-                    fontFamily: font,
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = C.navy;
-                    e.currentTarget.style.color = C.white;
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = C.navy;
-                }}
-            >
-                ← マイページに戻る
-            </button>
         </div>
     );
 }

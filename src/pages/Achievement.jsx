@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { C, font, fontSerif, MOCK_ACHIEVEMENTS, ITEMS_PER_PAGE } from "../components/achievement/constants";
 import AchievementSummary from "../components/achievement/AchievementSummary";
@@ -7,7 +6,6 @@ import AchievementCard from "../components/achievement/AchievementCard";
 import axios from "axios";
 
 export default function Achievement() {
-    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [achievements, setAchievements] = useState({ contents: [] });
 
@@ -92,8 +90,8 @@ export default function Achievement() {
             </div>
 
             {/* コンテンツ */}
-            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 40px 80px" }}>
-                <AchievementSummary achievedCount={achievedCount} totalCount={totalCount} progressPct={progressPct} goldCount={goldCount} silverCount={silverCount} bronzeCount={bronzeCount} onBack={() => navigate("/mypage")} />
+            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 6% 80px" }}>
+                <AchievementSummary achievedCount={achievedCount} totalCount={totalCount} progressPct={progressPct} goldCount={goldCount} silverCount={silverCount} bronzeCount={bronzeCount} />
 
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: C.navy, fontFamily: font, margin: "0 0 20px" }}>業績詳細</h2>
 
