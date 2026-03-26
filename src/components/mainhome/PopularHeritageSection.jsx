@@ -150,40 +150,11 @@ export default function PopularHeritageSection() {
                         ))}
                     </div>
 
-                    {/* 화살표 버튼 */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={handlePrev}
-                            disabled={carouselIdx === 0}
-                            className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                                ${carouselIdx === 0
-                                    ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                                    : "border-[#000D57] text-[#000D57] hover:bg-[#000D57] hover:text-white"
-                                }`}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="15 18 9 12 15 6" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            disabled={carouselIdx >= totalSlides - 1}
-                            className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                                ${carouselIdx >= totalSlides - 1
-                                    ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                                    : "border-[#000D57] text-[#000D57] hover:bg-[#000D57] hover:text-white"
-                                }`}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="9 18 15 12 9 6" />
-                            </svg>
-                        </button>
                     </div>
-                </div>
             </div>
 
             {/* 캐러셀 카드 영역 */}
-            <div className="overflow-hidden mb-8">
+            <div className="overflow-hidden mb-6">
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={`${sortType}-${carouselIdx}`}
@@ -208,26 +179,40 @@ export default function PopularHeritageSection() {
                 </AnimatePresence>
             </div>
 
-            {/* 도트 인디케이터 */}
-            {totalSlides > 1 && (
-                <div className="flex justify-center items-center gap-2 mb-10">
-                    {Array.from({ length: totalSlides }).map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => { setDirection(i > carouselIdx ? 1 : -1); setCarouselIdx(i); }}
-                            className={`rounded-full transition-all duration-300 ${
-                                i === carouselIdx
-                                    ? "w-6 h-2 bg-[#000D57]"
-                                    : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+            {/* 화살표 + 더보기 버튼 */}
+            <div className="flex items-center justify-between">
+                {/* 화살표 (카드 아래 가운데) */}
+                <div className="flex-1 flex justify-center items-center gap-4">
+                    <button
+                        onClick={handlePrev}
+                        disabled={carouselIdx === 0}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                            ${carouselIdx === 0
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-[#000D57] hover:bg-[#000D57]/10"
                             }`}
-                        />
-                    ))}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={handleNext}
+                        disabled={carouselIdx >= totalSlides - 1}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
+                            ${carouselIdx >= totalSlides - 1
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-[#000D57] hover:bg-[#000D57]/10"
+                            }`}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </button>
                 </div>
-            )}
 
-            {/* 더보기 버튼 */}
-            <div className="flex justify-center">
-                <button onClick={() => navigate("/heritage")} className="group bg-white border-2 border-[#000D57] text-[#000D57] px-12 py-4 rounded-full font-bold hover:bg-[#000D57] hover:text-white transition-all duration-300 shadow-sm flex items-center gap-2" style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
+                {/* 더보기 버튼 (오른쪽 정렬) */}
+                <button onClick={() => navigate("/heritage")} className="group text-[#000D57] font-bold flex items-center gap-1.5 hover:text-[#6E0000] transition-all duration-200" style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
                     もっと多くの遺産を見る
                     <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </button>
