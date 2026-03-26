@@ -7,102 +7,105 @@ const OAuthCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        onMove: () => {},
+    });
+
     useEffect(() => {
-        const [onMove, setOnMove] = useState(() => navigate("/", { replace: true }));
-
-        const [openPopup, setOpenPopup] = useState(false);
-
-        // 1. URL 파라미터에서 token과 status 읽기
         const token = searchParams.get("token");
         const id = searchParams.get("id");
         const status = searchParams.get("status");
 
+        // 기본 이동 경로 설정
+        let targetPath = "/";
+        let contentConfig = {};
+
         if (token) {
-            // 2. 로컬 스토리지에 토큰 저장 (로그인 완료)
             localStorage.setItem("token", token);
             localStorage.setItem("id", id);
 
-            // 3. 상태에 따른 알림 처리
             if (status === "signup_success") {
-                setPopupContent({
+                contentConfig = {
                     icon: "🎉",
                     title: "Welcome to TOPABODA!",
                     content: (
                         <>
-                            ${id}様、会員登録ありがとうございます。
+                            {id}様、会員登録ありがとうございます。
                             <br />
-                            探訪の旅を今すぐ始めましょう！
+                            探訪の旅을 今すぐ始めましょう！
                         </>
                     ),
-                    onMove: onMove,
-                });
+                };
             } else if (status === "login_success") {
-                setPopupContent({
+                contentConfig = {
                     icon: "🎉",
                     title: "Welcome back to TOPABODA!",
                     content: (
                         <>
-                            ${id}様、お帰りなさい。
+                            {id}様、お帰りなさい。
                             <br />
                             今日も新しい探訪の旅を続けましょう！
                         </>
                     ),
-                    onMove: onMove,
-                });
+                };
             }
-            openPopup(true);
         } else {
-            // 에러 처리 로직
             if (status === "already_exists") {
-                setOnMove(() => navigate("/login", { replace: true }));
-                setPopupContent({
+                targetPath = "/login";
+                contentConfig = {
                     icon: "🔍",
-                    title: "이미 가입된 계정입니다",
+                    title: "このアカウントは既に登録済みです",
                     content: (
                         <>
-                            입력하신 정보로 등록된 계정이 이미 존재합니다.
+                            ご入力いただいた情報のアカウントは、既に登録されています。
                             <br />
-                            로그인 페이지에서 접속을 시도해주세요!
+                            ログイン画面に戻ってログインしてください。
                         </>
                     ),
-                    onMove: onMove,
-                });
+                };
             } else if (status === "user_not_found") {
-                setPopupContent({
+                contentConfig = {
                     icon: "✍️",
-                    title: "등록된 정보 없음",
+                    title: "一致する情報が見고つかりませんでした。",
                     content: (
                         <>
-                            찾으시는 회원 정보가 존재하지 않습니다.
+                            ご入力いただいた情報で登録されているアカウントはありません。
                             <br />
-                            TOPABODA의 새로운 가족이 되어보시겠어요?
+                            TOPABODAのメンバーになってみませんか？
                         </>
                     ),
-                    onMove: onMove,
-                });
+                };
             } else {
-                setPopupContent({
+                contentConfig = {
                     icon: "⚠️",
-                    title: "오류 발생",
+                    title: "エラーが発生しました",
                     content: (
                         <>
-                            로그인 처리 중 예기치 못한 문제가 발생했습니다.
+                            ログイン処理中に予期せぬエラーが発生しました。
                             <br />
-                            잠시 후 다시 시도해 주세요.
+                            時間を置いてから、再度お試しください。
                         </>
                     ),
-                    onMove: onMove,
-                });
+                };
             }
-            openPopup(true);
         }
+
+        setPopupContent({
+            ...contentConfig,
+            onMove: () => navigate(targetPath, { replace: true }),
+        });
+        setOpenPopup(true);
     }, [searchParams, navigate]);
 
     return (
         <>
-            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} content={popupContent.content} onMove={"/"} />
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} content={popupContent.content} onMove={popupContent.onMove} />
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-                <p>인증 처리 중입니다. 잠시만 기다려주세요...</p>
+                <p>認証処理中です。少々お待ちください...</p>
             </div>
         </>
     );
