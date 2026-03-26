@@ -478,7 +478,7 @@ export default function Community() {
 
                 {/* ── 정렬 토글 (오른쪽 정렬) ── */}
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "4px", background: "rgba(0,13,87,0.05)", borderRadius: 99 }}>
                         {[
                             { key: "latest", label: "最新" },
                             { key: "views", label: "閲覧" },

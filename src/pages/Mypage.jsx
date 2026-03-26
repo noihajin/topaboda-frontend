@@ -13,6 +13,8 @@ import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
 import { API_URL } from "../config/config";
 
+import InfoModal from "../components/InfoModal";
+
 const API_ROUTES = "/api/routes";
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
 const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
@@ -93,8 +95,14 @@ function RouteCard({ route, onClick }) {
                 }
             }}
             style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.navy; e.currentTarget.style.background = "#f8f9fc"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = "#f8f9fc";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.white;
+            }}
         >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontWeight: 700, color: C.navy }}>{route.title}</span>
@@ -492,7 +500,7 @@ export default function MyPage() {
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 28, fontWeight: 900, color: C.navy, margin: "0 0 4px" }}>{user?.nickname || "ゲスト"}</h1>
-                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email || "example@email.com"}</p>
+                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email && !user.email.trim().includes("@") ? "SNSアカウント" : user?.email || "example@email.com"}</p>
                                 <div style={{ display: "flex", gap: 24 }}>
                                     <div>
                                         <p style={{ fontSize: 12, color: C.gray4, margin: 0 }}>登録日</p>
@@ -752,7 +760,7 @@ export default function MyPage() {
                 </div>
             </div>
             {/* 북마크 / 좋아요 취소 확인 모달 */}
-            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? "🔖" : "❤️"}>
+            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{cancelModal.item?.heritageName}</strong>
                     {heritageTab === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
@@ -770,7 +778,10 @@ export default function MyPage() {
                 title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
                 confirmLabel="解除する"
                 cancelLabel="キャンセル"
-                icon={postSaveCancelModal.item?.type === "bookmark" ? "🔖" : "❤️"}
+                icon={postSaveCancelModal.item?.type === "bookmark"
+                    ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                }
             >
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{postSaveCancelModal.item?.title}</strong>
