@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Pagination from "../components/Pagination";
@@ -141,6 +141,10 @@ export default function PostDetail() {
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState("");
     const [submitHover, setSubmitHover] = useState(false);
+    const [activeImg,    setActiveImg]    = useState(0);
+    const [copied,       setCopied]       = useState(false);
+    const [commentFocus, setCommentFocus] = useState(false);
+    const thumbRef = useRef(null);
 
     const [commentPage, setCommentPage] = useState(1);
     const COMMENTS_PER_PAGE = 5;
@@ -309,6 +313,13 @@ export default function PostDetail() {
         }
     };
 
+    const handleShare = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
     const handleCommentKeyDown = async (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -351,9 +362,23 @@ export default function PostDetail() {
                                 <button onClick={handleBookmark} style={iconBtnStyle}>
                                     <BookmarkIcon active={bookmarked} />
                                 </button>
-                                <button style={iconBtnStyle}>
-                                    <ShareIcon />
-                                </button>
+                                <div style={{ position: "relative" }}>
+                                    <button onClick={handleShare} style={iconBtnStyle} title="リンクをコピー">
+                                        <ShareIcon />
+                                    </button>
+                                    {copied && (
+                                        <div style={{
+                                            position: "absolute", top: "calc(100% + 8px)", right: 0,
+                                            background: C.navy, color: "#fff",
+                                            fontSize: 12, fontFamily: font, fontWeight: 600,
+                                            padding: "5px 12px", borderRadius: 8,
+                                            whiteSpace: "nowrap", zIndex: 10,
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                                        }}>
+                                            リンクをコピーしました！
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -365,7 +390,7 @@ export default function PostDetail() {
                                 color: C.navy,
                                 margin: "0 0 18px",
                                 lineHeight: 1.35,
-                                fontFamily: fontBold,
+                                fontFamily: font,
                             }}
                         >
                             {post.title}
@@ -392,65 +417,87 @@ export default function PostDetail() {
                         </div>
                     </div>
 
-                    {/* 이미지 영역 */}
+                    {/* 이미지 갤러리 */}
                     {post.mediaList && post.mediaList.length > 0 && (
-                        <div style={{ padding: "24px 45px 0" }}>
-                            {/* 첫 번째 이미지는 크게 */}
-                            <div
-                                style={{
-                                    width: "100%",
-                                    borderRadius: 14,
-                                    overflow: "hidden",
-                                    background: C.border,
-                                    marginBottom: post.mediaList.length > 1 ? 10 : 0,
-                                }}
-                            >
+                        <div>
+                            {/* 메인 이미지 */}
+                            <div style={{ position: "relative", background: "#f5f6f8", height: 480, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 <img
-                                    src={post.mediaList[0].fileUrl || `${API_URL}/topaboda/boards/default-board-thumbnail.png`}
-                                    alt={post.mediaList[0].orgName || post.title}
-                                    onError={(e) => {
-                                        console.log("main image load failed:", post.mediaList[0].fileUrl);
-                                        e.currentTarget.src = `${API_URL}/topaboda/boards/default-board-thumbnail.png`;
-                                    }}
-                                    style={{
-                                        width: "100%",
-                                        maxHeight: 420,
-                                        objectFit: "cover",
-                                        display: "block",
-                                    }}
+                                    key={activeImg}
+                                    src={post.mediaList[activeImg]?.fileUrl || `${API_URL}/topaboda/boards/default-board-thumbnail.png`}
+                                    alt={post.mediaList[activeImg]?.orgName || post.title}
+                                    onError={(e) => { e.currentTarget.src = `${API_URL}/topaboda/boards/default-board-thumbnail.png`; }}
+                                    style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block", transition: "opacity 0.25s" }}
                                 />
+                                {/* 이미지 카운터 */}
+                                {post.mediaList.length > 1 && (
+                                    <div style={{
+                                        position: "absolute", bottom: 16, right: 18,
+                                        background: "rgba(0,0,0,0.45)", color: "#fff",
+                                        borderRadius: 99, padding: "4px 13px",
+                                        fontSize: 13, fontFamily: font, fontWeight: 600,
+                                    }}>
+                                        {activeImg + 1} / {post.mediaList.length}
+                                    </div>
+                                )}
+                                {/* 메인 좌우 화살표 */}
+                                {activeImg > 0 && (
+                                    <button onClick={() => setActiveImg(v => v - 1)} style={mainArrowStyle("left")}>
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="15 18 9 12 15 6" />
+                                        </svg>
+                                    </button>
+                                )}
+                                {activeImg < post.mediaList.length - 1 && (
+                                    <button onClick={() => setActiveImg(v => v + 1)} style={mainArrowStyle("right")}>
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
-                            {/* 나머지 이미지는 썸네일 */}
+                            {/* 썸네일 가로 스크롤 */}
                             {post.mediaList.length > 1 && (
-                                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                                    {post.mediaList.slice(1).map((media) => (
-                                        <div
-                                            key={media.id}
-                                            style={{
-                                                width: 140,
-                                                height: 100,
-                                                borderRadius: 10,
-                                                overflow: "hidden",
-                                                background: C.border,
-                                            }}
-                                        >
-                                            <img
-                                                src={media.fileUrl || `${API_URL}/topaboda/boards/default-board-thumbnail.png`}
-                                                alt={media.orgName || post.title}
-                                                onError={(e) => {
-                                                    console.log("sub image load failed:", media.fileUrl);
-                                                    e.currentTarget.src = `${API_URL}/topaboda/boards/default-board-thumbnail.png`;
-                                                }}
+                                <div style={{ position: "relative", background: "#f5f6f8", padding: "10px 48px" }}>
+                                    {/* 왼쪽 화살표 */}
+                                    <button onClick={() => thumbRef.current?.scrollBy({ left: -180, behavior: "smooth" })} style={thumbArrowStyle("left")}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.gray2} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="15 18 9 12 15 6" />
+                                        </svg>
+                                    </button>
+
+                                    {/* 썸네일 목록 */}
+                                    <div ref={thumbRef} style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", scrollBehavior: "smooth" }}>
+                                        {post.mediaList.map((media, i) => (
+                                            <div
+                                                key={media.id ?? i}
+                                                onClick={() => setActiveImg(i)}
                                                 style={{
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    objectFit: "cover",
-                                                    display: "block",
+                                                    flex: "0 0 90px", height: 64,
+                                                    borderRadius: 8, overflow: "hidden",
+                                                    cursor: "pointer", boxSizing: "border-box",
+                                                    border: i === activeImg ? `2.5px solid ${C.navy}` : `2px solid transparent`,
+                                                    opacity: i === activeImg ? 1 : 0.55,
+                                                    transition: "all 0.2s",
                                                 }}
-                                            />
-                                        </div>
-                                    ))}
+                                            >
+                                                <img
+                                                    src={media.fileUrl || `${API_URL}/topaboda/boards/default-board-thumbnail.png`}
+                                                    alt={media.orgName || ""}
+                                                    onError={(e) => { e.currentTarget.src = `${API_URL}/topaboda/boards/default-board-thumbnail.png`; }}
+                                                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* 오른쪽 화살표 */}
+                                    <button onClick={() => thumbRef.current?.scrollBy({ left: 180, behavior: "smooth" })} style={thumbArrowStyle("right")}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.gray2} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -511,17 +558,20 @@ export default function PostDetail() {
                     <div style={{ marginBottom: 36 }}>
                         <div
                             style={{
-                                border: `2px solid ${C.border}`,
+                                border: `2px solid ${commentFocus ? C.navy : C.border}`,
                                 borderRadius: 14,
                                 padding: "16px 22px",
                                 marginBottom: 12,
                                 background: C.white,
+                                transition: "border-color 0.2s",
                             }}
                         >
                             <textarea
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                                 onKeyDown={handleCommentKeyDown}
+                                onFocus={() => setCommentFocus(true)}
+                                onBlur={() => setCommentFocus(false)}
                                 placeholder="コメントを入力してください···"
                                 rows={3}
                                 style={{
@@ -546,14 +596,13 @@ export default function PostDetail() {
                                 style={{
                                     padding: "11px 28px",
                                     borderRadius: 11,
-                                    background: submitHover ? "#8a0000" : C.red,
+                                    background: "linear-gradient(135deg, #6e0000, #000d57)",
                                     border: "none",
                                     color: C.white,
                                     fontWeight: 600,
                                     fontSize: 15,
                                     cursor: "pointer",
                                     fontFamily: font,
-                                    transition: "background 0.2s",
                                 }}
                             >
                                 コメントを投稿する
@@ -622,9 +671,14 @@ export default function PostDetail() {
                             </div>
                         ))}
                     </div>
-                </div>
 
-                {comments.length > 0 && <Pagination currentPage={commentPage} totalPages={totalCommentPages} onPageChange={setCommentPage} />}
+                    {/* 댓글 페이지네이션 */}
+                    {comments.length > 0 && (
+                        <div style={{ marginTop: 16 }}>
+                            <Pagination currentPage={commentPage} totalPages={totalCommentPages} onPageChange={setCommentPage} />
+                        </div>
+                    )}
+                </div>
 
                 {/* ── 하단 뒤로가기 ── */}
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
@@ -658,15 +712,14 @@ function BackButton({ navigate }) {
                 gap: 8,
                 padding: "12px 28px 12px 20px",
                 borderRadius: 99,
-                border: `1.5px solid #000d57`,
-                background: hovered ? "#000d57" : "#ffffff",
-                color: hovered ? "#ffffff" : "#000d57",
+                border: "none",
+                background: "transparent",
+                color: hovered ? "#caca00" : "#000d57",
                 fontWeight: 700,
                 fontSize: 15,
                 cursor: "pointer",
-                transition: "background 0.2s, color 0.2s",
+                transition: "color 0.2s",
                 fontFamily: "'Noto Sans JP', sans-serif",
-                boxShadow: "0 2px 8px rgba(0,13,87,0.08)",
             }}
         >
             <span
@@ -696,3 +749,23 @@ const iconBtnStyle = {
     justifyContent: "center",
     cursor: "pointer",
 };
+
+/* 메인 이미지 오버레이 화살표 */
+const mainArrowStyle = (side) => ({
+    position: "absolute", top: "50%", transform: "translateY(-50%)",
+    [side]: 16,
+    width: 44, height: 44, borderRadius: "50%",
+    background: "rgba(0,0,0,0.35)", border: "none",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    cursor: "pointer", zIndex: 2,
+});
+
+/* 썸네일 줄 화살표 */
+const thumbArrowStyle = (side) => ({
+    position: "absolute", top: "50%", transform: "translateY(-50%)",
+    [side]: 8,
+    width: 32, height: 32, borderRadius: "50%",
+    background: "transparent", border: "none",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    cursor: "pointer", zIndex: 2,
+});

@@ -36,6 +36,9 @@ export default function WritePost() {
     const [content, setContent] = useState(editPost?.content ?? "");
     const [images, setImages] = useState([]);
     const [dragOver, setDragOver] = useState(false);
+    const [titleFocus, setTitleFocus] = useState(false);
+    const [contentFocus, setContentFocus] = useState(false);
+    const [submitHover, setSubmitHover] = useState(false);
     const fileInputRef = useRef(null);
 
     // 이미지 업로드 핸들러
@@ -124,29 +127,6 @@ export default function WritePost() {
             }}
         >
             <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
-                {/* ← 뒤로가기 버튼 */}
-                <button
-                    onClick={() => navigate(-1)}
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: C.navy,
-                        fontSize: 16,
-                        fontWeight: 700,
-                        fontFamily: font,
-                        marginBottom: 32,
-                        padding: 0,
-                    }}
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5">
-                        <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    キャンセル
-                </button>
 
                 {/* ── 메인 글쓰기 카드 (Glassmorphism 적용) ── */}
                 <div
@@ -263,10 +243,12 @@ export default function WritePost() {
                                 value={title}
                                 onChange={(e) => e.target.value.length <= 100 && setTitle(e.target.value)}
                                 placeholder="タイトルを入力してください"
+                                onFocus={() => setTitleFocus(true)}
+                                onBlur={() => setTitleFocus(false)}
                                 style={{
                                     width: "100%",
                                     height: 56,
-                                    border: `1px solid ${C.border}`,
+                                    border: `1.5px solid ${titleFocus ? C.navy : C.border}`,
                                     borderRadius: 16,
                                     padding: "0 20px",
                                     fontSize: 16,
@@ -275,6 +257,7 @@ export default function WritePost() {
                                     boxSizing: "border-box",
                                     color: C.navy,
                                     fontWeight: 600,
+                                    transition: "border-color 0.2s",
                                 }}
                             />
                             <span
@@ -298,10 +281,12 @@ export default function WritePost() {
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             placeholder="探訪の感想や役立つ情報を自由に作成してください。"
+                            onFocus={() => setContentFocus(true)}
+                            onBlur={() => setContentFocus(false)}
                             style={{
                                 width: "100%",
                                 minHeight: 300,
-                                border: `1px solid ${C.border}`,
+                                border: `1.5px solid ${contentFocus ? C.navy : C.border}`,
                                 borderRadius: 16,
                                 padding: "24px",
                                 fontSize: 15,
@@ -311,6 +296,7 @@ export default function WritePost() {
                                 boxSizing: "border-box",
                                 color: C.navy,
                                 resize: "vertical",
+                                transition: "border-color 0.2s",
                             }}
                         />
                     </Field>
@@ -439,7 +425,7 @@ export default function WritePost() {
                                 gap: 6,
                             }}
                         >
-                            {["他のユーザーを尊重する内容を作成してください。", " 구체적이고 유용한 정보를 공유해주세요.", "상업적 광고글은 제한될 수 있습니다."].map((text, i) => (
+                            {["他のユーザーを尊重する内容を作成してください。", "具体的で有益な情報をシェアしてください。", "商業的な広告投稿は制限される場合があります。"].map((text, i) => (
                                 <li key={i} style={{ fontSize: 13, color: C.gray2, lineHeight: 1.6 }}>
                                     • {text}
                                 </li>
@@ -452,42 +438,45 @@ export default function WritePost() {
                         style={{
                             display: "flex",
                             justifyContent: "flex-end",
-                            gap: 12,
+                            gap: 10,
                             marginTop: 48,
                         }}
                     >
                         <button
-                            onClick={() => navigate(-1)}
+                            onClick={() => { window.scrollTo({ top: 0 }); navigate("/community"); }}
                             style={{
-                                padding: "0 32px",
-                                height: 56,
-                                borderRadius: 16,
+                                padding: "10px 24px",
+                                borderRadius: 99,
                                 border: `1px solid ${C.border}`,
-                                background: C.white,
-                                color: C.gray1,
-                                fontWeight: 800,
-                                fontSize: 16,
+                                background: "transparent",
+                                color: C.gray2,
+                                fontWeight: 600,
+                                fontSize: 14,
                                 cursor: "pointer",
+                                fontFamily: font,
+                                transition: "border-color 0.2s, color 0.2s",
                             }}
                         >
                             キャンセル
                         </button>
                         <button
                             onClick={handleSubmit}
+                            onMouseEnter={() => setSubmitHover(true)}
+                            onMouseLeave={() => setSubmitHover(false)}
                             style={{
-                                padding: "0 48px",
-                                height: 56,
-                                borderRadius: 16,
+                                padding: "10px 28px",
+                                borderRadius: 99,
                                 border: "none",
-                                background: `linear-gradient(to bottom, ${C.red}, ${C.redL})`,
+                                background: submitHover ? "#6e0000" : C.navy,
                                 color: "white",
-                                fontWeight: 800,
-                                fontSize: 16,
+                                fontWeight: 700,
+                                fontSize: 14,
                                 cursor: "pointer",
-                                boxShadow: "0 8px 20px rgba(110, 0, 0, 0.2)",
+                                fontFamily: font,
+                                transition: "background 0.2s",
                             }}
                         >
-                            登録する
+                            {isEdit ? "修正する" : "登録する"}
                         </button>
                     </div>
                 </div>

@@ -168,7 +168,7 @@ export default function PopularHeritageSection() {
                 {/* 오른쪽: 정렬 탭 + 화살표 */}
                 <div className="flex items-center gap-3 shrink-0">
                     {/* 정렬 탭 */}
-                    <div className="flex items-center gap-1 p-1">
+                    <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "4px", background: "rgba(0,13,87,0.05)", borderRadius: 99 }}>
                         {SORT_OPTIONS.map((option) => (
                             <button key={option.key} onClick={() => setSortType(option.key)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-250 ${sortType === option.key ? "bg-[#CACA00] text-[#000D57]" : "text-gray-400 hover:text-gray-600"}`} style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
                                 {option.label}
