@@ -189,22 +189,42 @@ export default function MyPage() {
     const [postSaveTab, setPostSaveTab] = useState("bookmark"); // "bookmark" | "like"
     const [postSaveCancelModal, setPostSaveCancelModal] = useState({ open: false, item: null });
 
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
+
+    const showError = (title, message) => {
+        setPopupContent({
+            icon: "⚠️",
+            title: title,
+            content: message,
+            btnMsg: "確認",
+            onMove: () => setOpenPopup(false),
+        });
+        setOpenPopup(true);
+    };
+
     const handlePostSaveCancelClose = () => {
-    setPostSaveCancelModal({ open: false, item: null });
+        setPostSaveCancelModal({ open: false, item: null });
     };
 
     const handlePostSaveCancelConfirm = async () => {
-    const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-    if (!token || !postSaveCancelModal.item) {
-        console.error("인증 정보 또는 삭제 대상이 없습니다.");
-        return;
-    }
+        if (!token || !postSaveCancelModal.item) {
+            console.error("인증 정보 또는 삭제 대상이 없습니다.");
+            return;
+        }
 
-    const boardId = postSaveCancelModal.item.id;
-    const type = postSaveCancelModal.item.type;
+        const boardId = postSaveCancelModal.item.id;
+        const type = postSaveCancelModal.item.type;
 
-    const url = `${API_URL}/topaboda/api/boards/${boardId}/${type === "bookmark" ? "bookmarks" : "likes"}`;
+        const url = `${API_URL}/topaboda/api/boards/${boardId}/${type === "bookmark" ? "bookmarks" : "likes"}`;
 
         try {
             await axios.delete(url, {
@@ -241,8 +261,6 @@ export default function MyPage() {
     const [reviewDeleteModal, setReviewDeleteModal] = useState({ open: false, id: null });
     // 삭제 완료 모달
     const [deleteSuccessModal, setDeleteSuccessModal] = useState({ open: false, type: null });
-    const [infoModal, setInfoModal] = useState({ open: false, title: "", message: "", isError: false });
-    const showInfo = (title, message, isError = false) => setInfoModal({ open: true, title, message, isError });
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -310,7 +328,7 @@ export default function MyPage() {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
-                showInfo("ログインが必要です", "ログイン情報がありません。", true);
+                showError("ログインが必要です", "ログイン情報がありません。");
                 return;
             }
             const res = await axios.get(`${API_URL}/topaboda/api/boards/${postId}`, {
@@ -331,7 +349,7 @@ export default function MyPage() {
             });
         } catch (error) {
             console.error("게시글 상세 불러오기 실패:", error);
-            showInfo("エラー", "記事情報を読み込めませんでした。", true);
+            showError("エラー", "記事情報を読み込めませんでした。");
         }
     };
     // 게시글 삭제
@@ -354,7 +372,7 @@ export default function MyPage() {
     const handleEditComment = async (commentId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            showInfo("ログインが必要です", "ログイン情報がありません。", true);
+            showError("ログインが必要です", "ログイン情報がありません。");
             return;
         }
         try {
@@ -368,13 +386,20 @@ export default function MyPage() {
                     },
                 },
             );
-            showInfo("修正完了", "コメントが修正されました。");
+            setPopupContent({
+                icon: "✅",
+                title: "コメント修正",
+                content: "コメントが修正されました。",
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+            setOpenPopup(true);
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
         } catch (error) {
             console.error("댓글 수정 실패:", error);
             console.error("status:", error.response?.status);
             console.error("data:", error.response?.data);
-            showInfo("エラー", "コメントの修正に失敗しました。", true);
+            showError("エラー", "コメントの修正に失敗しました。");
         }
     };
     // 댓글 삭제
@@ -397,7 +422,7 @@ export default function MyPage() {
     const handleEditReview = async (reviewId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            showInfo("ログインが必要です", "ログイン情報がありません。", true);
+            showError("エラー", "ログイン情報がありません。");
             return;
         }
         try {
@@ -411,11 +436,18 @@ export default function MyPage() {
                     },
                 },
             );
-            showInfo("修正完了", "レビューが修正されました。");
+            setPopupContent({
+                icon: "✅",
+                title: "レビュー修正",
+                content: "レビューが修正されました。",
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+            setOpenPopup(true);
             fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
         } catch (error) {
             console.error("리뷰 수정 실패:", error);
-            showInfo("エラー", "レビューの修正に失敗しました。", true);
+            showError("エラー", "レビューの修正に失敗しました。");
         }
     };
     // 리뷰 삭제
@@ -544,6 +576,7 @@ export default function MyPage() {
     }, [savedRoutes.length, routePage]);
     return (
         <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} btnMsg={popupContent.btnMsg} content={popupContent.content} onMove={popupContent.onMove} />
             <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
                 <style>{`
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -839,50 +872,35 @@ export default function MyPage() {
                     </motion.div>
                 </div>
             </div>
-            {/* 수정/오류 안내 모달 */}
-            <TopaModal
-                isOpen={infoModal.open}
-                onClose={() => setInfoModal(p => ({ ...p, open: false }))}
-                onConfirm={() => setInfoModal(p => ({ ...p, open: false }))}
-                variant={infoModal.isError ? "danger" : "info"}
-                title={infoModal.title}
-                confirmLabel="確認"
-                singleButton
-            >{infoModal.message}</TopaModal>
             {/* 게시글 삭제 확인 모달 */}
-            <TopaModal
-                {...MODAL.POST_DELETE_CONFIRM}
-                isOpen={postDeleteModal.open}
-                onClose={() => setPostDeleteModal({ open: false, id: null })}
-                onConfirm={() => handleDeletePost(postDeleteModal.id)}
-            />
+            <TopaModal {...MODAL.POST_DELETE_CONFIRM} isOpen={postDeleteModal.open} onClose={() => setPostDeleteModal({ open: false, id: null })} onConfirm={() => handleDeletePost(postDeleteModal.id)} />
             {/* 댓글 삭제 확인 모달 */}
-            <TopaModal
-                {...MODAL.COMMENT_DELETE_CONFIRM}
-                isOpen={commentDeleteModal.open}
-                onClose={() => setCommentDeleteModal({ open: false, id: null })}
-                onConfirm={() => handleDeleteComment(commentDeleteModal.id)}
-            />
+            <TopaModal {...MODAL.COMMENT_DELETE_CONFIRM} isOpen={commentDeleteModal.open} onClose={() => setCommentDeleteModal({ open: false, id: null })} onConfirm={() => handleDeleteComment(commentDeleteModal.id)} />
             {/* 리뷰 삭제 확인 모달 */}
-            <TopaModal
-                {...MODAL.REVIEW_DELETE_CONFIRM}
-                isOpen={reviewDeleteModal.open}
-                onClose={() => setReviewDeleteModal({ open: false, id: null })}
-                onConfirm={() => handleDeleteReview(reviewDeleteModal.id)}
-            />
+            <TopaModal {...MODAL.REVIEW_DELETE_CONFIRM} isOpen={reviewDeleteModal.open} onClose={() => setReviewDeleteModal({ open: false, id: null })} onConfirm={() => handleDeleteReview(reviewDeleteModal.id)} />
             {/* 삭제 완료 모달 */}
-            <TopaModal
-                {...(deleteSuccessModal.type === "post"
-                    ? MODAL.POST_DELETE_SUCCESS
-                    : deleteSuccessModal.type === "comment"
-                    ? MODAL.COMMENT_DELETE_SUCCESS
-                    : MODAL.REVIEW_DELETE_SUCCESS)}
-                isOpen={deleteSuccessModal.open}
-                onClose={() => setDeleteSuccessModal({ open: false, type: null })}
-                onConfirm={() => setDeleteSuccessModal({ open: false, type: null })}
-            />
+            <TopaModal {...(deleteSuccessModal.type === "post" ? MODAL.POST_DELETE_SUCCESS : deleteSuccessModal.type === "comment" ? MODAL.COMMENT_DELETE_SUCCESS : MODAL.REVIEW_DELETE_SUCCESS)} isOpen={deleteSuccessModal.open} onClose={() => setDeleteSuccessModal({ open: false, type: null })} onConfirm={() => setDeleteSuccessModal({ open: false, type: null })} />
             {/* 북마크 / 좋아요 취소 확인 모달 */}
-            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
+            <TopaModal
+                isOpen={cancelModal.open}
+                onClose={handleCancelClose}
+                onConfirm={handleCancelConfirm}
+                variant={heritageTab === "bookmark" ? "info" : "danger"}
+                title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"}
+                confirmLabel="解除する"
+                cancelLabel="キャンセル"
+                icon={
+                    heritageTab === "bookmark" ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    )
+                }
+            >
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{cancelModal.item?.heritageName}</strong>
                     {heritageTab === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
@@ -897,9 +915,16 @@ export default function MyPage() {
                 title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
                 confirmLabel="解除する"
                 cancelLabel="キャンセル"
-                icon={postSaveCancelModal.item?.type === "bookmark"
-                    ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                    : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                icon={
+                    postSaveCancelModal.item?.type === "bookmark" ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    )
                 }
             >
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
