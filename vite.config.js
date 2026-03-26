@@ -6,16 +6,18 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:9990/topaboda',
+        target: 'http://localhost:9990',
         changeOrigin: true,
-        timeout: 3000,
-        proxyTimeout: 3000,
+        rewrite: (path) => '/topaboda' + path,
+        timeout: 60000,
+        proxyTimeout: 60000,
       },
       '/img': {
-        target: 'http://localhost:9990/topaboda',
+        target: 'http://localhost:9990',
         changeOrigin: true,
-        timeout: 3000,
-        proxyTimeout: 3000,
+        rewrite: (path) => '/topaboda' + path,
+        timeout: 60000,
+        proxyTimeout: 60000,
       },
     },
   },

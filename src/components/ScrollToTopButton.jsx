@@ -30,8 +30,8 @@ export default function ScrollToTopButton() {
         bottom: 40,
         right: 40,
         zIndex: 9000,
-        width: 62,
-        height: 62,
+        width: 40,
+        height: 40,
         borderRadius: "50%",
         // 기본: 흰 배경 + 골드 테두리 / 호버: 골드 채우기
         border: "2px solid #caca00",
@@ -53,8 +53,8 @@ export default function ScrollToTopButton() {
       }}
     >
       <svg
-        width="24"
-        height="24"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         // 기본: 골드 화살표 / 호버: 흰 화살표

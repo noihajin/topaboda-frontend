@@ -1,240 +1,528 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
 
-// 아이콘 임포트 (기존과 동일)
-import icTrending  from "../assets/community/icon_trending_c.svg";
-import icFilter    from "../assets/community/icon_filter_c.svg";
-import icSearch    from "../assets/community/icon_search_navy_c.svg";
-import icPen       from "../assets/community/icon_pen_c.svg";
-import icEye       from "../assets/community/icon_eye_c.svg";
-import icChevLeft  from "../assets/community/icon_chevron_left_c.svg";
-import icChevRight from "../assets/community/icon_chevron_right_c.svg";
-import icComment   from "../assets/community/icon_comment_c.svg";
-import icHeart     from "../assets/community/icon_heart_c_2.svg"; 
+import icSearch  from "../assets/community/icon_search_navy_c.svg";
+import icPen     from "../assets/community/icon_pen_c.svg";
+import icEye     from "../assets/community/icon_eye_c.svg";
+import icComment from "../assets/community/icon_comment_c.svg";
+import icHeart   from "../assets/community/icon_heart_c_2.svg";
 
+/* ── 색상 ── */
 const C = {
-  navy:    "#000d57",
-  red:     "#6e0000",
-  redL:    "#8e0000",
-  gold:    "#caca00",
-  goldD:   "#a0a000",
-  bg:      "#f8f9fc",
-  white:   "#ffffff",
-  gray1:   "#4a5565",
-  gray2:   "#6a7282",
-  gray3:   "#99a1af",
-  border:  "#e5e7eb",
+  navy:   "#000d57",
+  red:    "#6e0000",
+  gold:   "#caca00",
+  goldD:  "#a0a000",
+  bg:     "#f8f9fc",
+  white:  "#ffffff",
+  gray1:  "#4a5565",
+  gray2:  "#6a7282",
+  gray3:  "#99a1af",
+  border: "#e5e7eb",
 };
 
-// ★ 컴포넌트 내부의 별도 font 변수 선언을 제거하고 index.css의 설정을 따릅니다.
+/* ── 폰트 ── */
+const fBase   = "'Noto Sans JP', 'Noto Sans KR', 'Roboto', sans-serif";
+const fJP     = "'Noto Sans JP', sans-serif";
+const fJPSerif= "'Noto Serif JP', serif";
+const fKR     = "'Noto Sans KR', sans-serif";
 
-const CAT_COLORS = {
-  "レビュー": { bg: "#dbeafe", color: "#1447e6" },
-  "ヒント":   { bg: "#ffedd4", color: "#ca3500" },
+/* ── 카테고리 색상 ── */
+const CAT = {
+  "レビュー":     { bg: "#dbeafe", color: "#1447e6" },
+  "ヒント":       { bg: "#ffedd4", color: "#ca3500" },
   "フリートーク": { bg: "#f3e8ff", color: "#8200db" },
-  "質問": { bg: "#dcfce7", color: "#008236" },
+  "質問":         { bg: "#dcfce7", color: "#008236" },
 };
 
-const initialPosts = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  category: ["レビュー", "ヒント", "フリートーク", "質問"][i % 4],
-  title: `${["景福宮", "仏国寺", "石窟庵", "昌徳宮"][i % 4]} 探訪の記録 ${i + 1}`,
-  comments: Math.floor(Math.random() * 50),
-  author: `ユーザー${i + 1}`,
-  date: `2026.03.13`,
-  views: Math.floor(Math.random() * 2000),
-  likes: Math.floor(Math.random() * 300),
-}));
+const CATEGORIES = ["すべて", "レビュー", "ヒント", "フリートーク", "質問"];
+const POSTS_PER_PAGE = 10;
 
+/* ════════════════════════════════════════════════
+   메인 컴포넌트
+════════════════════════════════════════════════ */
 export default function Community() {
   const navigate = useNavigate();
-  
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("すべて");
-  const [isCatOpen, setIsCatOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortType, setSortType] = useState("latest");
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  const postsPerPage = 10;
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const [posts, setPosts]                   = useState([]);
+  const [currentPage, setCurrentPage]       = useState(1);
+  const [totalPages, setTotalPages]         = useState(0);
+  const [totalElements, setTotalElements]   = useState(0);
+  const [searchInput, setSearchInput]       = useState("");
+  const [keyword, setKeyword]               = useState("");
+  const [selectedCat, setSelectedCat]       = useState("すべて");
+  const [isCatOpen, setIsCatOpen]           = useState(false);
+  const [sortType, setSortType]             = useState("latest");
+  const [windowWidth, setWindowWidth]       = useState(window.innerWidth);
+  const catRef = useRef(null);
 
   const isMobile = windowWidth <= 768;
-  const isTablet = windowWidth <= 1024;
 
-  const popularPosts = useMemo(() => {
-    return [...initialPosts]
-      .filter(p => p.category === "レビュー")
-      .sort((a, b) => b.likes - a.likes)
-      .slice(0, 3);
+  /* 리사이즈 */
+  useEffect(() => {
+    const h = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
   }, []);
 
-  const processedPosts = useMemo(() => {
-    let result = [...initialPosts];
-    if (selectedCategory !== "すべて") {
-      result = result.filter(p => p.category === selectedCategory);
-    }
-    if (search) {
-      result = result.filter(p => p.title.includes(search) || p.author.includes(search));
-    }
-    if (sortType === "latest") result.sort((a, b) => b.id - a.id);
-    else if (sortType === "views") result.sort((a, b) => b.views - a.views);
-    return result;
-  }, [selectedCategory, sortType, search]);
+  /* 검색 */
+  const handleSearch = () => { setCurrentPage(1); setKeyword(searchInput.trim()); };
+  const handleKeyDown = (e) => { if (e.key === "Enter") { e.preventDefault(); handleSearch(); } };
 
-  const totalPages = Math.ceil(processedPosts.length / postsPerPage);
-  const currentPosts = processedPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+  /* 카테고리 드롭다운 외부 클릭 닫기 */
+  useEffect(() => {
+    const handler = (e) => { if (catRef.current && !catRef.current.contains(e.target)) setIsCatOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  const categories = ["すべて", "レビュー", "ヒント", "フリートーク", "質問"];
+  /* 카테고리 변경 시 검색 초기화 */
+  useEffect(() => { setSearchInput(""); setKeyword(""); }, [selectedCat]);
+
+  /* 데이터 fetch */
+  useEffect(() => {
+    const params = {
+      page: currentPage - 1,
+      size: POSTS_PER_PAGE,
+      sort: sortType === "views" ? "boardStatus.viewCount,desc" : "id,desc",
+    };
+    if (selectedCat !== "すべて") params.category = selectedCat;
+    if (keyword) params.keyword = keyword;
+
+    axios.get("http://localhost:9990/topaboda/api/boards", { params })
+      .then(res => {
+        const mapped = res.data.content.map(item => ({
+          id:           item.id,
+          category:     item.categories,
+          title:        item.title,
+          author:       item.nickname,
+          date:         item.createdAt.slice(0, 10),
+          views:        item.viewCount,
+          likes:        item.likeCount  ?? 0,
+          comments:     item.commentCount ?? 0,
+          thumbnailUrl: item.thumbnailUrl ?? null,
+        }));
+        setPosts(mapped);
+        setTotalPages(res.data.totalPages);
+        setTotalElements(res.data.totalElements);
+      })
+      .catch(err => console.error("API 실패", err));
+  }, [currentPage, selectedCat, keyword, sortType]);
+
+  /* 인기 리뷰 (좋아요 top 3) */
+  const popularPosts = useMemo(() =>
+    [...posts].filter(p => p.category === "レビュー").sort((a, b) => b.likes - a.likes).slice(0, 3),
+    [posts]
+  );
 
   return (
-    /* index.css의 Roboto + Noto Sans JP가 자동 적용됨 */
-    <div style={{ background: C.bg, minHeight: "100vh", paddingTop: isMobile ? "8rem" : "11.9rem", paddingBottom: "10rem" }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
+    <div style={{ background: C.bg, minHeight: "100vh", paddingTop: isMobile ? "8rem" : "11.9rem", paddingBottom: "8rem", fontFamily: fBase }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "0 20px" : "0 48px" }}>
 
-        <div style={{ marginBottom: isMobile ? 40 : 80, textAlign: "center" }}>
-          {/* 영문/숫자는 Roboto, 일문은 Noto Sans JP로 자동 렌더링 */}
-          <h1 style={{ color: C.navy, fontSize: isMobile ? 32 : 48, fontWeight: 900, margin: "0 0 16px", letterSpacing: "-0.02em" }}>コミュニティ</h1>
-          <p style={{ color: C.gray2, fontSize: isMobile ? 15 : 18, fontWeight: 500 }}>国家遺産探訪の体験を共有し、交流しましょう</p>
-        </div>
-
-        {/* 인기 리뷰 */}
-        <section style={{ marginBottom: isMobile ? 60 : 100 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: `linear-gradient(to bottom, ${C.gold}, ${C.goldD})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={icTrending} alt="" style={{ width: 22 }} />
-            </div>
-            <h2 style={{ color: C.navy, fontSize: isMobile ? 22 : 28, fontWeight: 900 }}>人気のレビュー</h2>
-          </div>
-          <div style={{ display: "flex", gap: isMobile ? 16 : 32, flexDirection: isMobile ? "column" : "row" }}>
-            {popularPosts.map((p, index) => (
-              <PopularCard key={p.id} post={p} rank={index + 1} />
-            ))}
-          </div>
-        </section>
-
-        {/* 필터 및 검색 바 */}
-        <div style={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: 16, marginBottom: 20 }}>
-          <div style={{ position: "relative", zIndex: 50 }}>
-            <div onClick={() => setIsCatOpen(!isCatOpen)} style={{ 
-              width: isTablet ? "100%" : 220, 
-              height: 56, background: "white", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", cursor: "pointer", border: `1px solid ${C.border}`, boxSizing: "border-box"
+        {/* ── 헤더 ── */}
+        <header style={{ marginBottom: isMobile ? 48 : 80 }}>
+          <div>
+            <span style={{
+              display: "inline-block",
+              background: `${C.gold}22`, color: C.goldD,
+              fontSize: 11, fontWeight: 900, letterSpacing: "0.12em",
+              padding: "5px 14px", borderRadius: 999, marginBottom: 16,
+              fontFamily: "'Roboto', sans-serif",
             }}>
-              <span style={{ fontWeight: 800, color: C.navy, whiteSpace: "nowrap", fontSize: 14 }}>{selectedCategory}</span>
-              <img src={icFilter} alt="" style={{ width: 16, transform: isCatOpen ? "rotate(180deg)" : "none", transition: "0.3s" }} />
+              COMMUNITY
+            </span>
+            <h1 style={{
+              color: C.navy, fontFamily: fJPSerif,
+              fontSize: isMobile ? 34 : 52, fontWeight: 900,
+              margin: "0 0 12px", lineHeight: 1.15, letterSpacing: "-0.02em",
+            }}>
+              コミュニティ
+            </h1>
+            <p style={{ color: C.gray2, fontSize: isMobile ? 14 : 17, fontFamily: fJP, margin: 0, lineHeight: 1.7 }}>
+              国家遺産探訪の体験を共有し、交流しましょう
+            </p>
+          </div>
+        </header>
+
+        {/* ── 인기 리뷰 ── */}
+        {popularPosts.length > 0 && (
+          <section style={{ marginBottom: isMobile ? 56 : 80 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+              <div style={{
+                width: 6, height: 28, borderRadius: 3,
+                background: `linear-gradient(to bottom, ${C.gold}, ${C.goldD})`,
+              }} />
+              <h2 style={{ color: C.navy, fontSize: isMobile ? 20 : 24, fontWeight: 900, margin: 0, fontFamily: fJP }}>
+                人気のレビュー
+              </h2>
             </div>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+              gap: 20,
+            }}>
+              {popularPosts.map((p, i) => <PopularCard key={p.id} post={p} rank={i + 1} />)}
+            </div>
+          </section>
+        )}
+
+        {/* ── 컨트롤 바: 카테고리 드롭다운 + 검색바 + 정렬 토글 + 투고하기 ── */}
+        <div style={{
+          display: "flex", alignItems: "center",
+          gap: 10, marginBottom: 24,
+          flexWrap: isMobile ? "wrap" : "nowrap",
+        }}>
+          {/* 카테고리 드롭다운 — SearchFilter 스타일 */}
+          <div ref={catRef} style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={() => setIsCatOpen(v => !v)}
+              style={{
+                height: 48, padding: "0 40px 0 18px",
+                background: C.white, border: `1.5px solid ${C.border}`,
+                borderRadius: 999, outline: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 600, fontFamily: fJP,
+                color: C.gray1, whiteSpace: "nowrap",
+                display: "flex", alignItems: "center",
+                transition: "border-color 0.2s",
+                position: "relative",
+              }}
+            >
+              {selectedCat}
+              {/* chevron */}
+              <svg
+                style={{
+                  position: "absolute", right: 14, top: "50%",
+                  transform: `translateY(-50%) rotate(${isCatOpen ? 180 : 0}deg)`,
+                  transition: "transform 0.3s", opacity: 0.4, pointerEvents: "none",
+                }}
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke={C.gray3} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
             <AnimatePresence>
               {isCatOpen && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} style={{ position: "absolute", top: 64, left: 0, width: "100%", background: "white", borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.1)", overflow: "hidden", border: `1px solid ${C.border}` }}>
-                  {categories.map(cat => (
-                    <div key={cat} onClick={() => { setSelectedCategory(cat); setIsCatOpen(false); setCurrentPage(1); }} className="hover:bg-gray-50" style={{ padding: "14px 24px", fontSize: 14, fontWeight: 700, color: C.gray1, cursor: "pointer", whiteSpace: "nowrap" }}>{cat}</div>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.18 }}
+                  style={{
+                    position: "absolute", top: "calc(100% + 8px)", left: 0,
+                    minWidth: "100%", background: C.white,
+                    borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
+                    border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 100,
+                  }}
+                >
+                  {CATEGORIES.map(cat => (
+                    <div
+                      key={cat}
+                      onClick={() => { setSelectedCat(cat); setCurrentPage(1); setIsCatOpen(false); }}
+                      style={{
+                        padding: "13px 22px", fontSize: 13, fontWeight: 700,
+                        fontFamily: fJP, cursor: "pointer", whiteSpace: "nowrap",
+                        color: selectedCat === cat ? C.navy : C.gray1,
+                        background: selectedCat === cat ? "rgba(0,13,87,0.05)" : "transparent",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={e => { if (selectedCat !== cat) e.currentTarget.style.background = "#f9fafb"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = selectedCat === cat ? "rgba(0,13,87,0.05)" : "transparent"; }}
+                    >
+                      {cat}
+                    </div>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          <div style={{ flex: 1, position: "relative" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索ワードを入力..." style={{ width: "100%", height: 56, padding: "0 70px 0 24px", border: "none", borderRadius: 16, background: "white", fontSize: 15, outline: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.03)", boxSizing: "border-box", fontWeight: 500 }} />
-            <button style={{ position: "absolute", right: 8, top: 8, bottom: 8, width: 48, background: C.navy, border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <img src={icSearch} alt="Search" style={{ width: 20, filter: "brightness(0) invert(1)" }} />
+          {/* 검색바 */}
+          <div style={{ flex: 1, position: "relative", minWidth: isMobile ? "100%" : 0 }}>
+            <input
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="キーワードで検索..."
+              style={{
+                width: "100%", height: 48, boxSizing: "border-box",
+                padding: "0 56px 0 22px",
+                border: `1.5px solid ${C.border}`, borderRadius: 999,
+                background: C.white, fontSize: 14, fontFamily: fJP,
+                outline: "none", color: C.gray1,
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e  => e.target.style.borderColor = C.navy}
+              onBlur={e   => e.target.style.borderColor = C.border}
+            />
+            <button
+              onClick={handleSearch}
+              style={{
+                position: "absolute", right: 6, top: 6, bottom: 6, width: 38,
+                background: C.navy, border: "none", borderRadius: 999,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "background 0.2s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = C.red}
+              onMouseLeave={e => e.currentTarget.style.background = C.navy}
+            >
+              <img src={icSearch} alt="" style={{ width: 16, filter: "brightness(0) invert(1)" }} />
             </button>
           </div>
 
-          <button 
+          {/* 투고 버튼 */}
+          <button
             onClick={() => navigate("/community/write")}
-            style={{ 
-              background: `linear-gradient(to bottom, ${C.red}, ${C.redL})`, 
-              color: C.white, border: "none", borderRadius: 16, 
-              height: 56, padding: "0 32px", 
-              display: "flex", alignItems: "center", justifyContent: "center", 
-              gap: 10, fontWeight: 900, fontSize: 16, cursor: "pointer", whiteSpace: "nowrap" 
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: C.red, color: C.white, border: "none",
+              borderRadius: 999, height: 48, padding: "0 24px",
+              fontWeight: 800, fontSize: 14, cursor: "pointer",
+              transition: "all 0.2s", flexShrink: 0, fontFamily: fJP,
+              boxShadow: "0 4px 14px rgba(110,0,0,0.22)",
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.red;    e.currentTarget.style.transform = "none"; }}
           >
-            <img src={icPen} alt="" style={{ width: 20 }} /> 投稿する
+            <img src={icPen} alt="" style={{ width: 16 }} />
+            投稿する
           </button>
         </div>
 
-        {/* 정렬 버튼 */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginBottom: 20 }}>
-          <button onClick={() => setSortType("latest")} style={{ background: "none", border: "none", color: sortType === "latest" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>最新順</button>
-          <span style={{ color: C.border }}>|</span>
-          <button onClick={() => setSortType("views")} style={{ background: "none", border: "none", color: sortType === "views" ? C.navy : C.gray3, fontWeight: 800, cursor: "pointer", fontSize: 13 }}>閲覧順</button>
+        {/* ── 정렬 토글 (오른쪽 정렬) ── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => { setSortType(key); setCurrentPage(1); }}
+                style={{
+                  padding: "6px 16px", borderRadius: 999, border: "none",
+                  background: sortType === key ? "#caca00" : "transparent",
+                  color: sortType === key ? C.navy : C.gray3,
+                  fontWeight: 700, fontSize: 12, cursor: "pointer",
+                  transition: "all 0.25s", fontFamily: fJP,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* 테이블 */}
-        <div className="no-scrollbar" style={{ background: "rgba(255, 255, 255, 0.5)", backdropFilter: "blur(20px)", borderRadius: isMobile ? 20 : 32, border: "1px solid rgba(255, 255, 255, 0.4)", overflowX: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.04)" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: isMobile ? 700 : "auto" }}>
-            <thead>
-              <tr style={{ borderBottom: `2px solid rgba(0,0,0,0.05)`, background: "rgba(0, 13, 87, 0.04)" }}>
-                <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 80, textAlign: "center" }}>No</th>
-                <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 140 }}>カテゴリ</th>
-                <th style={{ padding: "24px", color: C.navy, fontSize: 14, fontWeight: 900, textAlign: "left" }}>タイトル</th>
-                <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 140 }}>投稿者</th>
-                <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 120 }}>日付</th>
-                <th style={{ padding: "20px", color: C.navy, fontSize: 14, fontWeight: 900, width: 100, textAlign: "center" }}>閲覧</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPosts.map((post, idx) => (
-                <BoardRow key={post.id} post={post} displayNo={processedPosts.length - ((currentPage - 1) * postsPerPage + idx)} />
-              ))}
-            </tbody>
-          </table>
+        {/* ── 게시글 리스트 ── */}
+        <div style={{
+          background: C.white, borderRadius: 20,
+          border: `1px solid ${C.border}`,
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+        }}>
+          {/* 리스트 헤더 */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "60px 110px 1fr 100px 96px 70px",
+            padding: "0 20px",
+            background: C.navy,
+            borderBottom: `1px solid rgba(255,255,255,0.1)`,
+          }}>
+            {["No", "カテゴリ", "タイトル", "投稿者", "日付", "閲覧"].map((h, i) => (
+              <div key={i} style={{
+                padding: "14px 8px",
+                fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.85)",
+                fontFamily: fJP,
+                textAlign: i === 0 || i === 5 ? "center" : "left",
+              }}>{h}</div>
+            ))}
+          </div>
+
+          {/* 게시글 행 */}
+          <AnimatePresence mode="wait">
+            {posts.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: C.gray3, fontFamily: fJP, fontSize: 14 }}>
+                投稿がありません
+              </div>
+            ) : posts.map((post, idx) => (
+              <BoardRow
+                key={post.id}
+                post={post}
+                displayNo={totalElements - ((currentPage - 1) * POSTS_PER_PAGE + idx)}
+              />
+            ))}
+          </AnimatePresence>
         </div>
 
-        {/* 페이지네이션 */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 40 }}>
-          <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === 1 ? 0.3 : 1 }}><img src={icChevLeft} style={{ width: 24 }} alt="" /></button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setCurrentPage(i + 1)} style={{ width: 36, height: 36, borderRadius: 10, border: "none", cursor: "pointer", background: currentPage === i + 1 ? C.navy : "transparent", color: currentPage === i + 1 ? "white" : C.gray2, fontWeight: 800, fontSize: 14 }}>{i + 1}</button>
-          ))}
-          <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} style={{ background: "none", border: "none", cursor: "pointer", opacity: currentPage === totalPages ? 0.3 : 1 }}><img src={icChevRight} style={{ width: 24 }} alt="" /></button>
+        {/* ── 페이지네이션 ── */}
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════
+   인기 리뷰 카드
+════════════════════════════════════════════════ */
+function PopularCard({ post, rank }) {
+  const navigate = useNavigate();
+  const RANK_COLORS = ["#caca00", "#b0b8c8", "#c8926a"];
+  const rankColor   = RANK_COLORS[rank - 1] ?? C.gold;
+
+  return (
+    <div
+      onClick={() => navigate(`/community/${post.id}`)}
+      style={{
+        borderRadius: 18, overflow: "hidden",
+        background: C.white, border: `1px solid ${C.border}`,
+        boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+        cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s",
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.10)"; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "none";             e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
+    >
+      {/* 썸네일 */}
+      <div style={{ position: "relative", height: 160, background: "#eef1f6", overflow: "hidden" }}>
+        <img
+          src={post.thumbnailUrl || "http://localhost:9990/topaboda/boards/default-board-thumbnail.png"}
+          alt={post.title}
+          onError={e => { e.currentTarget.src = "http://localhost:9990/topaboda/boards/default-board-thumbnail.png"; }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+        {/* 순위 배지 */}
+        <div style={{
+          position: "absolute", top: 12, left: 12,
+          width: 36, height: 36, borderRadius: 10,
+          background: rankColor, color: rank === 1 ? C.navy : C.white,
+          fontSize: 17, fontWeight: 900,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
+          fontFamily: "'Roboto', sans-serif",
+        }}>
+          {rank}
+        </div>
+      </div>
+
+      {/* 텍스트 */}
+      <div style={{ padding: "16px 18px 18px" }}>
+        <span style={{
+          display: "inline-block",
+          fontSize: 11, fontWeight: 800,
+          color: "#1447e6", background: "#dbeafe",
+          padding: "3px 10px", borderRadius: 6, marginBottom: 10,
+          fontFamily: fJP,
+        }}>
+          レビュー
+        </span>
+        <p style={{
+          fontSize: 15, fontWeight: 800, color: C.navy,
+          lineHeight: 1.4, margin: "0 0 12px",
+          fontFamily: fJP,
+          display: "-webkit-box", WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: 42,
+        }}>
+          {post.title}
+        </p>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <span style={{ fontSize: 12, color: C.gray3, fontFamily: fKR }}>
+            {post.author} · {post.date}
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
+              <img src={icHeart}   alt="" style={{ width: 12, opacity: 0.5 }} /> {post.likes}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
+              <img src={icComment} alt="" style={{ width: 12, opacity: 0.5 }} /> {post.comments}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function PopularCard({ post, rank }) {
+/* ════════════════════════════════════════════════
+   게시글 행
+════════════════════════════════════════════════ */
+function BoardRow({ post, displayNo }) {
+  const navigate = useNavigate();
+  const cat = CAT[post.category] || { bg: "#eee", color: "#555" };
+
   return (
-    <motion.div whileHover={{ y: -8 }} style={{ background: "rgba(255, 255, 255, 0.7)", backdropFilter: "blur(15px)", borderRadius: 28, border: "1px solid rgba(255, 255, 255, 0.5)", boxShadow: "0 15px 35px rgba(0,0,0,0.06)", overflow: "hidden", flex: 1, cursor: "pointer" }}>
-      <div style={{ height: 160, background: "#f1f3f7", position: "relative" }}>
-        <div style={{ position: "absolute", top: 16, left: 16, width: 36, height: 36, borderRadius: 12, background: `linear-gradient(135deg, ${C.gold}, ${C.goldD})`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, color: C.navy, letterSpacing: "-0.05em" }}>{rank}</div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={() => navigate(`/community/${post.id}`)}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "60px 110px 1fr 100px 96px 70px",
+        padding: "0 20px",
+        borderBottom: `1px solid ${C.border}`,
+        cursor: "pointer", transition: "background 0.15s",
+        background: "transparent",
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = "#f8f9ff"}
+      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+    >
+      {/* No */}
+      <div style={{ padding: "16px 8px", textAlign: "center", color: C.gray3, fontSize: 13, fontFamily: "'Roboto', sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {displayNo}
       </div>
-      <div style={{ padding: 20 }}>
-        <h4 style={{ margin: "0 0 12px", color: C.navy, fontWeight: 900, fontSize: 17, lineHeight: 1.5, letterSpacing: "-0.01em" }}>{post.title}</h4>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontSize: 13, color: C.gray2, fontWeight: 700 }}>{post.author}</span>
-          <div style={{ display: "flex", gap: 10 }}>
-            {/* 숫자는 Roboto 볼드체로 가독성 극대화 */}
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.red, fontWeight: 800 }}><img src={icHeart} style={{ width: 14 }} alt="" /> {post.likes}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.navy, fontWeight: 800 }}><img src={icComment} style={{ width: 13 }} alt="" /> {post.comments}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray2, fontWeight: 800 }}><img src={icEye} style={{ width: 15, opacity: 0.5 }} alt="" /> {post.views}</span>
-          </div>
-        </div>
+
+      {/* 카테고리 */}
+      <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
+        <span style={{
+          background: cat.bg, color: cat.color,
+          borderRadius: 7, padding: "4px 10px",
+          fontSize: 11, fontWeight: 800, whiteSpace: "nowrap",
+          fontFamily: fJP,
+        }}>
+          {post.category}
+        </span>
+      </div>
+
+      {/* 제목 */}
+      <div style={{ padding: "16px 8px", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <span style={{
+          fontWeight: 700, color: C.navy, fontSize: 14,
+          fontFamily: fJP, lineHeight: 1.4,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {post.title}
+        </span>
+        {post.comments > 0 && (
+          <span style={{ color: C.red, fontSize: 12, fontWeight: 800, flexShrink: 0, fontFamily: "'Roboto', sans-serif" }}>
+            [{post.comments}]
+          </span>
+        )}
+      </div>
+
+      {/* 작성자 */}
+      <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
+        <span style={{ fontSize: 13, color: C.gray1, fontFamily: fKR, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {post.author}
+        </span>
+      </div>
+
+      {/* 날짜 */}
+      <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
+        <span style={{ fontSize: 12, color: C.gray2, fontFamily: "'Roboto', sans-serif" }}>
+          {post.date}
+        </span>
+      </div>
+
+      {/* 조회수 */}
+      <div style={{ padding: "16px 8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
+          <img src={icEye} alt="" style={{ width: 13, opacity: 0.4 }} />
+          {post.views}
+        </span>
       </div>
     </motion.div>
-  );
-}
-
-function BoardRow({ post, displayNo }) {
-  const cat = CAT_COLORS[post.category] || { bg: "#eee", color: "#555" };
-  return (
-    <tr className="hover:bg-white/30" style={{ borderBottom: "1px solid rgba(0,0,0,0.03)", transition: "0.2s" }}>
-      {/* 데이터(숫자/날짜)는 Roboto의 깔끔함이 강조되도록 세팅 */}
-      <td style={{ padding: "18px", textAlign: "center", color: C.gray3, fontSize: 13, fontWeight: 600 }}>{displayNo}</td>
-      <td style={{ padding: "18px" }}><span style={{ background: cat.bg, color: cat.color, borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 900, whiteSpace: "nowrap" }}>{post.category}</span></td>
-      <td style={{ padding: "18px" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontWeight: 800, color: C.navy, fontSize: 15, letterSpacing: "-0.01em" }}>{post.title}</span><span style={{ color: C.red, fontSize: 12, fontWeight: 900 }}>[{post.comments}]</span></div></td>
-      <td style={{ padding: "18px", color: C.gray1, fontSize: 13, fontWeight: 700 }}>{post.author}</td>
-      <td style={{ padding: "18px", color: C.gray2, fontSize: 13, fontWeight: 500 }}>{post.date}</td>
-      <td style={{ padding: "18px", textAlign: "center" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: C.gray3, fontWeight: 600 }}><img src={icEye} style={{ width: 15, opacity: 0.4 }} alt="" /> {post.views}</span></td>
-    </tr>
   );
 }

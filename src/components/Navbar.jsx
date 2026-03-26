@@ -6,10 +6,6 @@ import axios from "axios";
 import imgLogoWht from "../assets/logo_white.svg";
 import imgLogoBlk from "../assets/logo_black.svg";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
-import imgIconGlobeWht from "../assets/icon_globe_white.svg";
-import imgIconGlobeBlk from "../assets/icon_globe_black.svg";
-import imgIconLoginWht from "../assets/icon_login_white.svg";
-import imgIconLoginBlk from "../assets/icon_login_black.svg";
 
 const NAV_LINKS = [
     { label: "国の遺産リスト", to: "/heritage" },
@@ -55,15 +51,17 @@ export default function Navbar() {
         navigate("/mypage");
     };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsMenuOpen(false);
-    navigate("/");
-  };
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        setIsMenuOpen(false);
+        // navigate("/");
+        // 로그아웃 시 이전 사용자 기준 렌더링이 그대로 남아있어서 수정
+        window.location.href = "/";
+    };
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         .gnb-root {
           position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -201,10 +199,7 @@ export default function Navbar() {
         }
       `}</style>
 
-            <div
-                className="drawer-overlay"
-                onClick={() => setIsMenuOpen(false)}
-            />
+            <div className="drawer-overlay" onClick={() => setIsMenuOpen(false)} />
 
             <header
                 className={`gnb-root ${isActive ? "active" : ""} ${isCompact ? "compact" : ""}`}
@@ -219,18 +214,7 @@ export default function Navbar() {
                 <div className="gnb-inner">
                     <div className="gnb-logo-area">
                         <Link to="/" className="gnb-logo">
-                            <img
-                                src={
-                                    isCompact
-                                        ? isActive
-                                            ? imgLogoBlkSmall
-                                            : imgLogoWht
-                                        : isActive
-                                          ? imgLogoBlk
-                                          : imgLogoWht
-                                }
-                                alt="Logo"
-                            />
+                            <img src={isCompact ? (isActive ? imgLogoBlkSmall : imgLogoWht) : isActive ? imgLogoBlk : imgLogoWht} alt="Logo" />
                         </Link>
                     </div>
 
@@ -238,11 +222,7 @@ export default function Navbar() {
                         <nav className="gnb-nav-area">
                             <div className="gnb-menus">
                                 {NAV_LINKS.map((link) => (
-                                    <Link
-                                        key={link.label}
-                                        to={link.to}
-                                        className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}
-                                    >
+                                    <Link key={link.label} to={link.to} className={`gnb-menu-item ${location.pathname === link.to ? "page-active" : ""}`}>
                                         {link.label}
                                     </Link>
                                 ))}
@@ -250,105 +230,114 @@ export default function Navbar() {
                         </nav>
                     )}
 
-          <div className="gnb-action-area">
-            {!isMobile ? (
-              <>
-                <button className="gnb-btn">
-                  <img src={isActive ? imgIconGlobeBlk : imgIconGlobeWht} alt="" /> JP
-                </button>
-                {isAuthenticated ? (
-                  <>
-                    <button className="gnb-btn" onClick={handleMyPageClick}>
-                      My Page
-                    </button>
-                    <button className="gnb-btn" onClick={handleLogout}>
-                      <img src={isActive ? imgIconLoginBlk : imgIconLoginWht} alt="" />
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <button className="gnb-btn" onClick={handleLoginClick}>
-                    <img
-                      src={isActive ? imgIconLoginBlk : imgIconLoginWht}
-                      alt=""
-                    />{" "}
-                    Login
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="hamburger" onClick={() => setIsMenuOpen(true)}>
-                <span /><span /><span />
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+                    <div className="gnb-action-area">
+                        {!isMobile ? (
+                            <>
+                                {isAuthenticated ? (
+                                    <>
+                                        <button className="gnb-btn" onClick={handleMyPageClick} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="12" cy="7" r="4"/>
+                                            </svg>
+                                            My Page
+                                        </button>
+                                        <button className="gnb-btn" onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                                <polyline points="16 17 21 12 16 7"/>
+                                                <line x1="21" y1="12" x2="9" y2="12"/>
+                                            </svg>
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button className="gnb-btn" onClick={handleLoginClick} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                            <polyline points="10 17 15 12 10 7"/>
+                                            <line x1="15" y1="12" x2="3" y2="12"/>
+                                        </svg>
+                                        Login
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            <div className="hamburger" onClick={() => setIsMenuOpen(true)}>
+                                <span />
+                                <span />
+                                <span />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </header>
 
-      {/* 모바일 드로어 */}
-      <div className="mobile-drawer">
-        <button className="drawer-close-btn" onClick={() => setIsMenuOpen(false)}>
-          <div className="close-icon">
-            <span style={{ position: 'absolute', top: '11px', left: 0, width: '24px', height: '2px', background: '#000d57', transform: "rotate(45deg)" }}></span>
-            <span style={{ position: 'absolute', top: '11px', left: 0, width: '24px', height: '2px', background: '#000d57', transform: "rotate(-45deg)" }}></span>
-          </div>
-        </button>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '40px' }}>
-          {NAV_LINKS.map(link => (
-            <Link key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)} style={{ fontSize: '20px', fontWeight: '700', textDecoration: 'none', color: location.pathname === link.to ? '#6E0000' : '#000d57' }}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button className="gnb-btn" style={{ color: '#000', padding: '12px 0', justifyContent: 'flex-start' }}>
-            <img src={imgIconGlobeBlk} alt="" /> Language: JP
-          </button>
-          {isAuthenticated ? (
-            <>
-              <button
-                onClick={handleMyPageClick}
-                style={{
-                  background: "#000d57",
-                  color: "#fff",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  border: "none",
-                  fontWeight: "700",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                My Page
-              </button>
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "transparent",
-                  color: "#000d57",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  border: "1.5px solid #000d57",
-                  fontWeight: "700",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                <img src={imgIconLoginBlk} alt="" style={{ width: 18, height: 18 }} />
-                Logout
-              </button>
-            </>
-          ) : (
-            <button onClick={handleLoginClick} style={{ background: '#6E0000', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
-              Login / Sign Up
-            </button>
-          )}
-        </div>
-      </div>
-    </>
-  );
+            {/* 모바일 드로어 */}
+            <div className="mobile-drawer">
+                <button className="drawer-close-btn" onClick={() => setIsMenuOpen(false)}>
+                    <div className="close-icon">
+                        <span style={{ position: "absolute", top: "11px", left: 0, width: "24px", height: "2px", background: "#000d57", transform: "rotate(45deg)" }}></span>
+                        <span style={{ position: "absolute", top: "11px", left: 0, width: "24px", height: "2px", background: "#000d57", transform: "rotate(-45deg)" }}></span>
+                    </div>
+                </button>
+                <nav style={{ display: "flex", flexDirection: "column", gap: "24px", marginTop: "40px" }}>
+                    {NAV_LINKS.map((link) => (
+                        <Link key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)} style={{ fontSize: "20px", fontWeight: "700", textDecoration: "none", color: location.pathname === link.to ? "#6E0000" : "#000d57" }}>
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+                <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {isAuthenticated ? (
+                        <>
+                            <button
+                                onClick={handleMyPageClick}
+                                style={{
+                                    background: "#000d57",
+                                    color: "#fff",
+                                    padding: "15px",
+                                    borderRadius: "12px",
+                                    border: "none",
+                                    fontWeight: "700",
+                                    fontSize: "16px",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                My Page
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    background: "transparent",
+                                    color: "#000d57",
+                                    padding: "15px",
+                                    borderRadius: "12px",
+                                    border: "1.5px solid #000d57",
+                                    fontWeight: "700",
+                                    fontSize: "16px",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "8px",
+                                }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <button onClick={handleLoginClick} style={{ background: "#6E0000", color: "#fff", padding: "15px", borderRadius: "12px", border: "none", fontWeight: "700", fontSize: "16px", cursor: "pointer" }}>
+                            Login / Sign Up
+                        </button>
+                    )}
+                </div>
+            </div>
+        </>
+    );
 }
