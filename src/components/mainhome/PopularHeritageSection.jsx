@@ -165,7 +165,7 @@ export default function PopularHeritageSection() {
                                 onClick={() => setSortType(option.key)}
                                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-250 ${
                                     sortType === option.key
-                                        ? "text-[#000D57]"
+                                        ? "bg-[#CACA00] text-[#000D57]"
                                         : "text-gray-400 hover:text-gray-600"
                                 }`}
                                 style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}
