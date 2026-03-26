@@ -181,8 +181,8 @@ export default function PopularHeritageSection() {
 
             {/* 화살표 + 더보기 버튼 */}
             <div className="flex items-center justify-between">
-                {/* 화살표 (카드 아래 가운데) */}
-                <div className="flex-1 flex justify-center items-center gap-4">
+                {/* 화살표 (왼쪽 정렬) */}
+                <div className="flex items-center gap-4">
                     <button
                         onClick={handlePrev}
                         disabled={carouselIdx === 0}
