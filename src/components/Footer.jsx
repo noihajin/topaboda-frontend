@@ -44,12 +44,6 @@ const navSections = [
   },
 ];
 
-const socialIcons = [
-  { src: icFacebook, alt: "Facebook" },
-  { src: icInstagram, alt: "Instagram" },
-  { src: icTwitter, alt: "Twitter" },
-  { src: icYoutube, alt: "YouTube" },
-];
 
 export default function Footer() {
   const location = useLocation();
