@@ -166,7 +166,7 @@ export default function HeritageDetail() {
             {/* 메인 콘텐츠 */}
             <div
                 style={{
-                    background: "#eeeeee",
+                    background: C.bg,
                     padding: "60px 72px",
                     display: "flex",
                     gap: 48,

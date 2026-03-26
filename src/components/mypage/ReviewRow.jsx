@@ -9,9 +9,8 @@ const ReviewRow = ({ item, onEditReview, onDeleteReview }) => {
         await onEditReview(item.id, newContent);
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm("レビューを削除しますか？")) return;
-        await onDeleteReview(item.id);
+    const handleDelete = () => {
+        onDeleteReview(item.id);
     };
 
     return (

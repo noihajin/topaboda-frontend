@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { API_URL } from "../config/config";
+import TopaModal from "../components/TopaModal";
+import { MODAL } from "../constants/modalConfigs";
 import PopularCard from "../components/community/PopularCard";
 import BoardRow from "../components/community/BoardRow";
 
@@ -59,6 +61,7 @@ export default function Community() {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [popularVisible, setPopularVisible] = useState(false);
     const [bannerLoaded, setBannerLoaded] = useState(false);
+    const [loginModal, setLoginModal] = useState(false);
     const [popularPosts, setPopularPosts] = useState([]);
     const catRef = useRef(null);
     const popularRef = useRef(null);
@@ -175,6 +178,7 @@ export default function Community() {
     }, []);
 
     return (
+        <>
         <div style={{ background: C.bg, minHeight: "100vh", fontFamily: fBase }}>
             {/* ── 배너 (전폭) ── */}
             <header
@@ -459,7 +463,11 @@ export default function Community() {
 
                     {/* 투고 버튼 */}
                     <button
-                        onClick={() => navigate("/community/write")}
+                        onClick={() => {
+                            const token = localStorage.getItem("token");
+                            if (!token) { setLoginModal(true); return; }
+                            navigate("/community/write");
+                        }}
                         style={{
                             display: "flex",
                             alignItems: "center",
@@ -569,5 +577,14 @@ export default function Community() {
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
         </div>
+
+        {/* 로그인 필요 모달 */}
+        <TopaModal
+            {...MODAL.LOGIN_REQUIRED}
+            isOpen={loginModal}
+            onClose={() => setLoginModal(false)}
+            onConfirm={() => { setLoginModal(false); navigate("/login"); }}
+        />
+        </>
     );
 }

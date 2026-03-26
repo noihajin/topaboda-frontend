@@ -20,12 +20,9 @@ const PostRow = ({ item, navigate, onEditPost, onDeletePost }) => {
         await onEditPost(item.id);
     };
 
-    const handleDeleteClick = async (e) => {
+    const handleDeleteClick = (e) => {
         e.stopPropagation();
-
-        if (!window.confirm("削除しますか？")) return;
-
-        await onDeletePost(item.id);
+        onDeletePost(item.id);
     };
 
     return <ListRow category={item.category} title={item.title} desc={item.desc} date={item.date} views={item.views} likes={item.likes} onCategoryClick={handleCategoryClick} onTitleClick={handleTitleClick} onEdit={handleEditClick} onDelete={handleDeleteClick} showDesc />;

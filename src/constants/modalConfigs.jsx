@@ -155,6 +155,46 @@ export const REVIEW_DELETE_CONFIRM = {
   cancelLabel: "キャンセル",
 };
 
+/** 댓글 삭제 확인 */
+export const COMMENT_DELETE_CONFIRM = {
+  variant: "danger",
+  icon: "🗑️",
+  title: "このコメントを削除しますか？",
+  children: "削除したコメントは復元できません。",
+  confirmLabel: "削除する",
+  cancelLabel: "キャンセル",
+};
+
+/** 게시글 삭제 완료 */
+export const POST_DELETE_SUCCESS = {
+  variant: "success",
+  icon: "✅",
+  title: "記事を削除しました",
+  children: "投稿が正常に削除されました。",
+  singleButton: true,
+  confirmLabel: "確認",
+};
+
+/** 댓글 삭제 완료 */
+export const COMMENT_DELETE_SUCCESS = {
+  variant: "success",
+  icon: "✅",
+  title: "コメントを削除しました",
+  children: "コメントが正常に削除されました。",
+  singleButton: true,
+  confirmLabel: "確認",
+};
+
+/** 리뷰 삭제 완료 */
+export const REVIEW_DELETE_SUCCESS = {
+  variant: "success",
+  icon: "✅",
+  title: "レビューを削除しました",
+  children: "レビューが正常に削除されました。",
+  singleButton: true,
+  confirmLabel: "確認",
+};
+
 /** 이미지 업로드 오류 - 용량 초과 */
 export const IMAGE_SIZE_ERROR = {
   variant: "danger",
@@ -262,7 +302,11 @@ export const MODAL = {
   ROUTE_DELETE_CONFIRM,
   // Community / Review
   POST_DELETE_CONFIRM,
+  POST_DELETE_SUCCESS,
+  COMMENT_DELETE_CONFIRM,
+  COMMENT_DELETE_SUCCESS,
   REVIEW_DELETE_CONFIRM,
+  REVIEW_DELETE_SUCCESS,
   IMAGE_SIZE_ERROR,
   IMAGE_FORMAT_ERROR,
   REVIEW_SUCCESS,

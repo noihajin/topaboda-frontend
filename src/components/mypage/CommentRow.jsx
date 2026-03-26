@@ -9,9 +9,8 @@ export default function CommentRow({ item, onEditComment, onDeleteComment }) {
         await onEditComment(item.id, newContent);
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm("コメントを削除しますか？")) return;
-        await onDeleteComment(item.id);
+    const handleDelete = () => {
+        onDeleteComment(item.id);
     };
 
     return (
