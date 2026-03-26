@@ -6,12 +6,11 @@ import Pagination from "../components/Pagination";
 import { API_URL } from "../config/config";
 import TopaModal from "../components/TopaModal";
 import { MODAL } from "../constants/modalConfigs";
+import PopularCard from "../components/community/PopularCard";
+import BoardRow from "../components/community/BoardRow";
 
 import icSearch from "../assets/community/icon_search_navy_c.svg";
 import icPen from "../assets/community/icon_pen_c.svg";
-import icEye from "../assets/community/icon_eye_c.svg";
-import icComment from "../assets/community/icon_comment_c.svg";
-import icHeart from "../assets/community/icon_heart_c_2.svg";
 
 /* ── 색상 ── */
 const C = {
@@ -63,6 +62,7 @@ export default function Community() {
     const [popularVisible, setPopularVisible] = useState(false);
     const [bannerLoaded, setBannerLoaded] = useState(false);
     const [loginModal, setLoginModal] = useState(false);
+    const [popularPosts, setPopularPosts] = useState([]);
     const catRef = useRef(null);
     const popularRef = useRef(null);
 
@@ -151,15 +151,31 @@ export default function Community() {
             .catch((err) => console.error("API 실패", err));
     }, [currentPage, selectedCat, keyword, sortType]);
 
-    /* 인기 리뷰 (좋아요 top 3) */
-    const popularPosts = useMemo(
-        () =>
-            [...posts]
-                .filter((p) => p.category === "レビュー")
-                .sort((a, b) => b.likes - a.likes)
-                .slice(0, 3),
-        [posts],
-    );
+    useEffect(() => {
+        axios
+            .get(`${API_URL}/topaboda/api/rankings/boards`, {
+                params: {
+                    criteria: "LIKE",
+                    limit: 3,
+                },
+            })
+            .then((res) => {
+                console.log(res);
+                const mapped = res.data.boardListResponses.map((item) => ({
+                    id: item.id,
+                    category: item.categories,
+                    title: item.title,
+                    author: item.nickname,
+                    date: item.createdAt.slice(0, 10),
+                    views: item.viewCount,
+                    likes: item.likeCount ?? 0,
+                    comments: item.commentCount ?? 0,
+                    thumbnailUrl: item.thumbnailUrl ?? null,
+                }));
+                setPopularPosts(mapped);
+            })
+            .catch((err) => console.error("인기글 로드 실패:", err));
+    }, []);
 
     return (
         <>
@@ -178,7 +194,7 @@ export default function Community() {
                 <img
                     src="/community_banner.png"
                     alt=""
-                    fetchpriority="high"
+                    fetchPriority="high"
                     decoding="async"
                     onLoad={() => setBannerLoaded(true)}
                     style={{
@@ -570,210 +586,5 @@ export default function Community() {
             onConfirm={() => { setLoginModal(false); navigate("/login"); }}
         />
         </>
-    );
-}
-
-/* ════════════════════════════════════════════════
-   인기 리뷰 카드
-════════════════════════════════════════════════ */
-function PopularCard({ post, rank }) {
-    const navigate = useNavigate();
-
-    return (
-        <div
-            onClick={() => navigate(`/community/${post.id}`)}
-            style={{
-                borderRadius: 18,
-                overflow: "hidden",
-                background: C.white,
-                border: `1px solid ${C.border}`,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                cursor: "pointer",
-                transition: "transform 0.2s, box-shadow 0.2s",
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-5px)";
-                e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.10)";
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)";
-            }}
-        >
-            {/* 썸네일 */}
-            <div style={{ position: "relative", height: 160, background: "#eef1f6", overflow: "hidden" }}>
-                <img
-                    src={post.thumbnailUrl || `${API_URL}/topaboda/boards/default-board-thumbnail.png`}
-                    alt={post.title}
-                    onError={(e) => {
-                        e.currentTarget.src = `${API_URL}/topaboda/boards/default-board-thumbnail.png`;
-                    }}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                />
-                {/* 순위 배지 */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 12,
-                        left: 12,
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        background: "rgba(220,224,232,0.92)",
-                        color: C.navy,
-                        fontSize: 17,
-                        fontWeight: 900,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                        fontFamily: "'Roboto', sans-serif",
-                    }}
-                >
-                    {rank}
-                </div>
-            </div>
-
-            {/* 텍스트 */}
-            <div style={{ padding: "16px 18px 18px" }}>
-                <span
-                    style={{
-                        display: "inline-block",
-                        fontSize: 11,
-                        fontWeight: 800,
-                        color: "#1447e6",
-                        background: "#dbeafe",
-                        padding: "3px 10px",
-                        borderRadius: 6,
-                        marginBottom: 10,
-                        fontFamily: fJP,
-                    }}
-                >
-                    レビュー
-                </span>
-                <p
-                    style={{
-                        fontSize: 15,
-                        fontWeight: 800,
-                        color: C.navy,
-                        lineHeight: 1.4,
-                        margin: "0 0 12px",
-                        fontFamily: fJP,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        minHeight: 42,
-                    }}
-                >
-                    {post.title}
-                </p>
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <span style={{ fontSize: 12, color: C.gray3, fontFamily: fKR }}>
-                        {post.author} · {post.date}
-                    </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
-                            <img src={icHeart} alt="" style={{ width: 12, opacity: 0.5 }} /> {post.likes}
-                        </span>
-                        <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
-                            <img src={icComment} alt="" style={{ width: 12, opacity: 0.5 }} /> {post.comments}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-/* ════════════════════════════════════════════════
-   게시글 행
-════════════════════════════════════════════════ */
-function BoardRow({ post, displayNo }) {
-    const navigate = useNavigate();
-    const cat = CAT[post.category] || { bg: "#eee", color: "#555" };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => navigate(`/community/${post.id}`)}
-            style={{
-                display: "grid",
-                gridTemplateColumns: "60px 110px 1fr 100px 96px 70px",
-                padding: "0 20px",
-                borderBottom: `1px solid ${C.border}`,
-                cursor: "pointer",
-                transition: "background 0.15s",
-                background: "transparent",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f8f9ff")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-        >
-            {/* No */}
-            <div style={{ padding: "16px 8px", textAlign: "center", color: C.gray3, fontSize: 13, fontFamily: "'Roboto', sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>{displayNo}</div>
-
-            {/* 카테고리 */}
-            <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
-                <span
-                    style={{
-                        background: cat.bg,
-                        color: cat.color,
-                        borderRadius: 7,
-                        padding: "4px 10px",
-                        fontSize: 11,
-                        fontWeight: 800,
-                        whiteSpace: "nowrap",
-                        fontFamily: fJP,
-                    }}
-                >
-                    {post.category}
-                </span>
-            </div>
-
-            {/* 제목 */}
-            <div style={{ padding: "16px 8px", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                <span
-                    style={{
-                        fontWeight: 700,
-                        color: C.navy,
-                        fontSize: 14,
-                        fontFamily: fJP,
-                        lineHeight: 1.4,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                    }}
-                >
-                    {post.title}
-                </span>
-                {post.comments > 0 && <span style={{ color: C.red, fontSize: 12, fontWeight: 800, flexShrink: 0, fontFamily: "'Roboto', sans-serif" }}>[{post.comments}]</span>}
-            </div>
-
-            {/* 작성자 */}
-            <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 13, color: C.gray1, fontFamily: fKR, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{post.author}</span>
-            </div>
-
-            {/* 날짜 */}
-            <div style={{ padding: "16px 8px", display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: C.gray2, fontFamily: "'Roboto', sans-serif" }}>{post.date}</span>
-            </div>
-
-            {/* 조회수 */}
-            <div style={{ padding: "16px 8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: C.gray3, fontFamily: "'Roboto', sans-serif" }}>
-                    <img src={icEye} alt="" style={{ width: 13, opacity: 0.4 }} />
-                    {post.views}
-                </span>
-            </div>
-        </motion.div>
     );
 }

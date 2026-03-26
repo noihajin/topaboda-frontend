@@ -12,6 +12,7 @@ const OAuthCallback = () => {
         icon: "",
         title: "",
         content: null,
+        btnMsg: "",
         onMove: () => {},
     });
 
@@ -32,6 +33,7 @@ const OAuthCallback = () => {
                 contentConfig = {
                     icon: "🎉",
                     title: "Welcome to TOPABODA!",
+                    btnMsg: "メインページへ",
                     content: (
                         <>
                             {id}様、会員登録ありがとうございます。
@@ -44,6 +46,7 @@ const OAuthCallback = () => {
                 contentConfig = {
                     icon: "🎉",
                     title: "Welcome back to TOPABODA!",
+                    btnMsg: "メインページへ",
                     content: (
                         <>
                             {id}様、お帰りなさい。
@@ -59,6 +62,7 @@ const OAuthCallback = () => {
                 contentConfig = {
                     icon: "🔍",
                     title: "このアカウントは既に登録済みです",
+                    btnMsg: "ログインページへ",
                     content: (
                         <>
                             ご入力いただいた情報のアカウントは、既に登録されています。
@@ -71,6 +75,7 @@ const OAuthCallback = () => {
                 contentConfig = {
                     icon: "✍️",
                     title: "一致する情報が見고つかりませんでした。",
+                    btnMsg: "ログインページへ",
                     content: (
                         <>
                             ご入力いただいた情報で登録されているアカウントはありません。
@@ -83,6 +88,7 @@ const OAuthCallback = () => {
                 contentConfig = {
                     icon: "⚠️",
                     title: "エラーが発生しました",
+                    btnMsg: "ログインページへ",
                     content: (
                         <>
                             ログイン処理中に予期せぬエラーが発生しました。

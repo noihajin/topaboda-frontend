@@ -162,6 +162,41 @@ export default function MyPage() {
     const [postLkPage, setPostLkPage] = useState(0);
     const [postSaveTab, setPostSaveTab] = useState("bookmark"); // "bookmark" | "like"
     const [postSaveCancelModal, setPostSaveCancelModal] = useState({ open: false, item: null });
+
+    const handlePostSaveCancelClose = () => {
+    setPostSaveCancelModal({ open: false, item: null });
+    };
+
+    const handlePostSaveCancelConfirm = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token || !postSaveCancelModal.item) {
+        console.error("인증 정보 또는 삭제 대상이 없습니다.");
+        return;
+    }
+
+    const boardId = postSaveCancelModal.item.id;
+    const type = postSaveCancelModal.item.type;
+
+    const url = `${API_URL}/topaboda/api/boards/${boardId}/${type === "bookmark" ? "bookmarks" : "likes"}`;
+
+        try {
+            await axios.delete(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (type === "bookmark") {
+                fetchData("/boards/bookmarks/snippet", { page: postBkPage, size: PAGE_SIZE }, setPostBkData);
+            } else {
+                fetchData("/boards/likes/snippet", { page: postLkPage, size: PAGE_SIZE }, setPostLkData);
+            }
+        } catch (error) {
+            console.error(`${url} 삭제 실패:`, error);
+        }
+
+        setPostSaveCancelModal({ open: false, item: null });
+    };
+
     const [commentData, setCommentData] = useState(initialPageData);
     const [commentPage, setCommentPage] = useState(0);
     const [reviewData, setReviewData] = useState(initialPageData);
@@ -818,11 +853,8 @@ export default function MyPage() {
             {/* 게시글 북마크 / 좋아요 취소 확인 모달 */}
             <TopaModal
                 isOpen={postSaveCancelModal.open}
-                onClose={() => setPostSaveCancelModal({ open: false, item: null })}
-                onConfirm={() => {
-                    // TODO: DELETE /api/boards/bookmarks/{id} or DELETE /api/boards/{id}/likes
-                    setPostSaveCancelModal({ open: false, item: null });
-                }}
+                onClose={handlePostSaveCancelClose}
+                onConfirm={handlePostSaveCancelConfirm}
                 variant={postSaveCancelModal.item?.type === "bookmark" ? "info" : "danger"}
                 title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
                 confirmLabel="解除する"
