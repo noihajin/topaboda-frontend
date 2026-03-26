@@ -1,5 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+
+/* ── 섹션 타이틀 아이콘 ── */
+const SectionIcon = ({ children }) => (
+    <div style={{
+        width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+        background: "rgba(0,13,87,0.07)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+        {children}
+    </div>
+);
+const IcRoute = () => (
+    <svg width="16" height="16" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clipPath="url(#clip_route)">
+            <path d="M28.5433 22.686C26.0694 22.686 24.0859 24.6566 24.0859 27.1211C24.0859 29.5857 26.064 31.5617 28.5433 31.5617C31.0227 31.5617 33.0007 29.5911 33.0007 27.1211C33.0007 24.6512 31.0227 22.686 28.5433 22.686ZM28.5433 30.1937C26.8378 30.1937 25.4646 28.8257 25.4646 27.1266C25.4646 25.4274 26.8378 24.0595 28.5433 24.0595C30.2489 24.0595 31.6221 25.4274 31.6221 27.1266C31.6221 28.8257 30.2489 30.1937 28.5433 30.1937Z" fill="#000d57"/>
+            <path d="M22.4941 27.0123C22.4396 26.958 22.712 27.1752 16.9414 22.1375C16.6689 21.8661 16.2275 21.9204 15.9496 22.1918C15.6772 22.4632 15.7317 22.9029 16.0041 23.1798L20.1291 26.7952H9.95558C7.09478 26.7952 4.78435 24.4935 4.78435 21.6435C4.78435 18.7936 7.09478 16.4919 9.95558 16.4919H21.6712C25.2459 16.4919 28.2157 13.5876 28.2157 9.9722C28.2157 6.3568 25.3004 3.45254 21.6712 3.45254H8.80036C8.35898 1.48199 6.54442 0 4.4574 0C1.97804 0 0 1.97055 0 4.44053C0 6.91051 1.97804 8.88107 4.4574 8.88107C6.93676 8.88107 8.74587 7.07337 8.9148 4.77167H21.6767C24.5375 4.77167 26.8479 7.07337 26.8479 9.92334C26.8479 12.7733 24.483 15.1293 21.6767 15.1293H9.96103C6.38639 15.1293 3.41661 18.0336 3.41661 21.649C3.41661 25.2644 6.3319 28.1686 9.96103 28.1686H20.1346L16.0096 31.784C15.7371 32.0554 15.6772 32.4409 15.9551 32.772C16.2275 33.0434 16.6144 33.1031 16.9468 32.8263C22.7229 27.7832 22.445 28.0058 22.4995 27.9515C22.6085 27.8429 22.663 27.68 22.663 27.5118C22.663 27.2946 22.6085 27.1263 22.4995 27.0178L22.4941 27.0123ZM4.4574 7.61622C2.75182 7.61622 1.37863 6.24823 1.37863 4.5491C1.37863 2.84998 2.75182 1.48199 4.4574 1.48199C6.16298 1.48199 7.53616 2.84998 7.53616 4.5491C7.53616 6.24823 6.16298 7.61622 4.4574 7.61622Z" fill="#000d57"/>
+        </g>
+        <defs>
+            <clipPath id="clip_route"><rect width="33" height="33" fill="white"/></clipPath>
+        </defs>
+    </svg>
+);
+const IcHeritage = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="1" /><path d="M12 2L3 11h18L12 2z" /><line x1="9" y1="22" x2="9" y2="15" /><line x1="15" y1="22" x2="15" y2="15" /></svg>;
+const IcCommunity = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>;
+const IcPost = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>;
+const IcTrophy = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 21 12 17 16 21" /><line x1="12" y1="17" x2="12" y2="11" /><path d="M7 4H17v7a5 5 0 01-10 0V4z" /><path d="M7 4H4a2 2 0 00-2 2v2a4 4 0 004 4h1" /><path d="M17 4h3a2 2 0 012 2v2a4 4 0 01-4 4h-1" /></svg>;
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "../components/Pagination";
@@ -215,6 +241,8 @@ export default function MyPage() {
     const [reviewDeleteModal, setReviewDeleteModal] = useState({ open: false, id: null });
     // 삭제 완료 모달
     const [deleteSuccessModal, setDeleteSuccessModal] = useState({ open: false, type: null });
+    const [infoModal, setInfoModal] = useState({ open: false, title: "", message: "", isError: false });
+    const showInfo = (title, message, isError = false) => setInfoModal({ open: true, title, message, isError });
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -282,7 +310,7 @@ export default function MyPage() {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
-                alert("ログイン情報がありません。");
+                showInfo("ログインが必要です", "ログイン情報がありません。", true);
                 return;
             }
             const res = await axios.get(`${API_URL}/topaboda/api/boards/${postId}`, {
@@ -303,7 +331,7 @@ export default function MyPage() {
             });
         } catch (error) {
             console.error("게시글 상세 불러오기 실패:", error);
-            alert("記事情報を読み込めませんでした。");
+            showInfo("エラー", "記事情報を読み込めませんでした。", true);
         }
     };
     // 게시글 삭제
@@ -326,7 +354,7 @@ export default function MyPage() {
     const handleEditComment = async (commentId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("ログイン情報がありません。");
+            showInfo("ログインが必要です", "ログイン情報がありません。", true);
             return;
         }
         try {
@@ -340,13 +368,13 @@ export default function MyPage() {
                     },
                 },
             );
-            alert("コメントが修正されました。");
+            showInfo("修正完了", "コメントが修正されました。");
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
         } catch (error) {
             console.error("댓글 수정 실패:", error);
             console.error("status:", error.response?.status);
             console.error("data:", error.response?.data);
-            alert("コメントの修正に失敗しました。");
+            showInfo("エラー", "コメントの修正に失敗しました。", true);
         }
     };
     // 댓글 삭제
@@ -369,7 +397,7 @@ export default function MyPage() {
     const handleEditReview = async (reviewId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("ログイン情報がありません。");
+            showInfo("ログインが必要です", "ログイン情報がありません。", true);
             return;
         }
         try {
@@ -383,11 +411,11 @@ export default function MyPage() {
                     },
                 },
             );
-            alert("レビューが修正されました。");
+            showInfo("修正完了", "レビューが修正されました。");
             fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
         } catch (error) {
             console.error("리뷰 수정 실패:", error);
-            alert("レビューの修正に失敗しました。");
+            showInfo("エラー", "レビューの修正に失敗しました。", true);
         }
     };
     // 리뷰 삭제
@@ -555,7 +583,7 @@ export default function MyPage() {
                             {/* 헤더 + 화살표 페이지네이션 */}
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                    <SectionIcon><IcRoute /></SectionIcon>
                                     <h3 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>私の探訪路</h3>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -602,7 +630,7 @@ export default function MyPage() {
                         <motion.div {...fadeUp(0.15)} style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                             {/* 섹션 타이틀 */}
                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <SectionIcon><IcHeritage /></SectionIcon>
                                 <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>遺産</span>
                             </div>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
@@ -655,7 +683,7 @@ export default function MyPage() {
                         <motion.div {...fadeUp(0.25)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
                             {/* 섹션 타이틀 */}
                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <SectionIcon><IcCommunity /></SectionIcon>
                                 <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>コミュニティ活動</span>
                             </div>
                             {/* 탭 + 새 글 작성 버튼 */}
@@ -702,7 +730,7 @@ export default function MyPage() {
                         <motion.div {...fadeUp(0.3)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
                             {/* 섹션 타이틀 */}
                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <SectionIcon><IcPost /></SectionIcon>
                                 <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>投稿</span>
                             </div>
                             {/* 탭 헤더 */}
@@ -741,7 +769,7 @@ export default function MyPage() {
                         {/* 헤더 */}
                         <div style={{ marginBottom: 32 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <SectionIcon><IcTrophy /></SectionIcon>
                                 <h2 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>業績ギャラリー</h2>
                             </div>
                             <p style={{ fontSize: 14, color: C.gray2, marginLeft: 14 }}>探検の足跡を記録してください</p>
@@ -811,6 +839,16 @@ export default function MyPage() {
                     </motion.div>
                 </div>
             </div>
+            {/* 수정/오류 안내 모달 */}
+            <TopaModal
+                isOpen={infoModal.open}
+                onClose={() => setInfoModal(p => ({ ...p, open: false }))}
+                onConfirm={() => setInfoModal(p => ({ ...p, open: false }))}
+                variant={infoModal.isError ? "danger" : "info"}
+                title={infoModal.title}
+                confirmLabel="確認"
+                singleButton
+            >{infoModal.message}</TopaModal>
             {/* 게시글 삭제 확인 모달 */}
             <TopaModal
                 {...MODAL.POST_DELETE_CONFIRM}
@@ -844,7 +882,7 @@ export default function MyPage() {
                 onConfirm={() => setDeleteSuccessModal({ open: false, type: null })}
             />
             {/* 북마크 / 좋아요 취소 확인 모달 */}
-            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
+            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{cancelModal.item?.heritageName}</strong>
                     {heritageTab === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
@@ -860,7 +898,7 @@ export default function MyPage() {
                 confirmLabel="解除する"
                 cancelLabel="キャンセル"
                 icon={postSaveCancelModal.item?.type === "bookmark"
-                    ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                     : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 }
             >

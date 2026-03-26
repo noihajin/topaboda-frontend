@@ -228,6 +228,7 @@ export default function Community() {
                         justifyContent: "center",
                         textAlign: "center",
                         padding: isMobile ? "0 20px" : "0 48px",
+                        paddingTop: "7rem",
                     }}
                 >
                     <span
@@ -250,7 +251,7 @@ export default function Community() {
                         style={{
                             color: C.navy,
                             fontFamily: fJPSerif,
-                            fontSize: isMobile ? 34 : 50,
+                            fontSize: isMobile ? 32 : 42,
                             fontWeight: 700,
                             margin: "0 0 16px",
                             lineHeight: 1.2,
