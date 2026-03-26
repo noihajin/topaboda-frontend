@@ -43,35 +43,90 @@ export default function HeritageHero({ searchInput, onSearchChange, onSearch, on
         {/* 텍스트 가독성을 위한 최소 오버레이 */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.38) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 60%, rgba(0,0,0,0.04) 100%)",
           pointerEvents: "none",
         }} />
 
         {/* 텍스트 콘텐츠 */}
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 24px" }}>
-          <h1 style={{
-            fontFamily: fontSerif,
-            fontSize: "clamp(38px, 4.6vw, 66px)",
-            fontWeight: 600,
-            color: "#ffffff",
-            margin: "0 0 28px",
-            lineHeight: 1.11,
-            letterSpacing: "-0.01em",
-            textShadow: "0 2px 16px rgba(0,0,0,0.25)",
-          }}>
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 24px", transform: "translateY(calc(-12% - 80px))" }}>
+          {/* 타이틀 */}
+          <motion.h1
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            style={{
+              fontFamily: fontSerif,
+              fontSize: "clamp(38px, 4.6vw, 66px)",
+              fontWeight: 600,
+              color: "#ffffff",
+              margin: "-20px 0 28px",
+              lineHeight: 1.11,
+              letterSpacing: "-0.01em",
+              textShadow: "0 2px 16px rgba(0,0,0,0.25)",
+            }}
+          >
             国家遺産リスト
-          </h1>
-          <p style={{
-            fontFamily: font,
-            fontSize: "clamp(14px, 1.8vw, 22px)",
-            color: "rgba(255,255,255,0.92)",
-            margin: 0,
-            lineHeight: 1.75,
-            textShadow: "0 1px 8px rgba(0,0,0,0.2)",
+          </motion.h1>
+
+          {/* 통계 수치 행 */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0,
+            flexWrap: "wrap",
+            rowGap: 20,
           }}>
-            国宝や宝物、史跡など、我が国の文化遺産を<br />
-            一か所で検索してみてください。
-          </p>
+            {[
+              { num: "349",    label: "国宝" },
+              { num: "2,220",  label: "宝物" },
+              { num: "536",    label: "史跡" },
+              { num: "473",    label: "天然記念物" },
+              { num: "4,000+", label: "全体遺産" },
+            ].map(({ num, label }, i) => (
+              <div key={label} style={{ display: "flex", alignItems: "center" }}>
+                {i > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
+                    style={{
+                      width: 2, height: 72,
+                      background: "rgba(255,255,255,0.18)",
+                      margin: "0 36px",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.25 + i * 0.1 }}
+                  style={{
+                    display: "flex", flexDirection: "column",
+                    alignItems: "center", gap: 6,
+                  }}
+                >
+                  <span style={{
+                    fontFamily: fontSerif,
+                    fontSize: "clamp(18px, 1.8vw, 24px)",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    lineHeight: 1,
+                    textShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                    letterSpacing: "-0.01em",
+                  }}>{num}</span>
+                  <span style={{
+                    fontFamily: font,
+                    fontSize: "clamp(10px, 0.85vw, 12px)",
+                    fontWeight: 400,
+                    color: "rgba(255,255,255,0.55)",
+                    letterSpacing: "0.02em",
+                  }}>{label}</span>
+                </motion.div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* 하단 바운스 화살표 */}
