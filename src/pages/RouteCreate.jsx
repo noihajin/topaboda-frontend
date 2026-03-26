@@ -1215,7 +1215,7 @@ function RouteMapPane({
     };
   }, [lonelyHeritageId]);
 
-  /** Google Directions — 대중교통: 경유지 waypoints 우선, 실패 시 구간별 연결 */
+  /** Google Directions — 대중교통: TRANSIT는 waypoints 미지원(출발·도착 2점만). 3곳+는 구간별 연결만 */
   useEffect(() => {
     if (!isLoaded || typeof google === "undefined") return;
     if (!transitMode || !transitPlaces?.length || transitPlaces.length < 2) {
@@ -1243,39 +1243,33 @@ function RouteMapPane({
     const run = async () => {
       const o = transitPlaces[0];
       const d = transitPlaces[transitPlaces.length - 1];
-      const waypoints =
-        transitPlaces.length > 2
-          ? transitPlaces.slice(1, -1).map((pt) => ({
-              location: { lat: pt.lat, lng: pt.lng },
-              stopover: true,
-            }))
-          : [];
 
-      const singleReq = {
-        origin: { lat: o.lat, lng: o.lng },
-        destination: { lat: d.lat, lng: d.lng },
-        travelMode: google.maps.TravelMode.TRANSIT,
-        provideRouteAlternatives: true,
-        region: "KR",
-        transitOptions: transitOpts,
-      };
-      if (waypoints.length) {
-        singleReq.waypoints = waypoints;
-      }
-
-      const first = await new Promise((resolve) => {
-        svc.route(singleReq, (res, status) => resolve({ res, status }));
-      });
-      if (cancelled) return;
-      if (first.status === google.maps.DirectionsStatus.OK && first.res?.routes?.length) {
-        transitDirCbRef.current?.({
-          result: first.res,
-          error: null,
-          loading: false,
-          meta: { mode: "single" },
-          mergedPolylinePath: null,
+      /** 2곳만: 출발→도착 단일 요청(대안 여러 개). 실패 시 아래 구간 루프로 동일 구간 재시도 */
+      if (transitPlaces.length === 2) {
+        const first = await new Promise((resolve) => {
+          svc.route(
+            {
+              origin: { lat: o.lat, lng: o.lng },
+              destination: { lat: d.lat, lng: d.lng },
+              travelMode: google.maps.TravelMode.TRANSIT,
+              provideRouteAlternatives: true,
+              region: "KR",
+              transitOptions: transitOpts,
+            },
+            (res, status) => resolve({ res, status }),
+          );
         });
-        return;
+        if (cancelled) return;
+        if (first.status === google.maps.DirectionsStatus.OK && first.res?.routes?.length) {
+          transitDirCbRef.current?.({
+            result: first.res,
+            error: null,
+            loading: false,
+            meta: { mode: "single" },
+            mergedPolylinePath: null,
+          });
+          return;
+        }
       }
 
       const segResults = [];
