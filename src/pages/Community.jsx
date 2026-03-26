@@ -293,6 +293,33 @@ export default function Community() {
           </button>
         </div>
 
+        {/* ── 정렬 토글 (오른쪽 정렬) ── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 4,
+            background: C.white, border: "1px solid rgba(202,202,0,0.4)",
+            borderRadius: 999, padding: "4px",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+          }}>
+            {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => { setSortType(key); setCurrentPage(1); }}
+                style={{
+                  padding: "6px 16px", borderRadius: 999, border: "none",
+                  background: sortType === key ? "#caca00" : "transparent",
+                  color: sortType === key ? C.navy : C.gray3,
+                  fontWeight: 700, fontSize: 12, cursor: "pointer",
+                  transition: "all 0.2s", fontFamily: fJP,
+                  boxShadow: sortType === key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* ── 게시글 리스트 ── */}
         <div style={{
           background: C.white, borderRadius: 20,
@@ -300,52 +327,22 @@ export default function Community() {
           overflow: "hidden",
           boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
         }}>
-          {/* 리스트 헤더 (컬럼 + 정렬 토글) */}
+          {/* 리스트 헤더 */}
           <div style={{
+            display: "grid",
+            gridTemplateColumns: "60px 110px 1fr 100px 96px 70px",
+            padding: "0 20px",
             background: C.navy,
             borderBottom: `1px solid rgba(255,255,255,0.1)`,
-            padding: "0 20px",
-            display: "flex", alignItems: "center",
           }}>
-            {/* 컬럼 라벨 (그리드) */}
-            <div style={{
-              flex: 1,
-              display: "grid",
-              gridTemplateColumns: "60px 110px 1fr 100px 96px 70px",
-            }}>
-              {["No", "カテゴリ", "タイトル", "投稿者", "日付", "閲覧"].map((h, i) => (
-                <div key={i} style={{
-                  padding: "14px 8px",
-                  fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.85)",
-                  fontFamily: fJP,
-                  textAlign: i === 0 || i === 5 ? "center" : "left",
-                }}>{h}</div>
-              ))}
-            </div>
-            {/* 정렬 토글 */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(202,202,0,0.45)",
-              borderRadius: 999, padding: "3px",
-            }}>
-              {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => { setSortType(key); setCurrentPage(1); }}
-                  style={{
-                    padding: "5px 14px", borderRadius: 999, border: "none",
-                    background: sortType === key ? "#caca00" : "transparent",
-                    color: sortType === key ? C.navy : "rgba(255,255,255,0.55)",
-                    fontWeight: 700, fontSize: 11, cursor: "pointer",
-                    transition: "all 0.2s", fontFamily: fJP,
-                    boxShadow: sortType === key ? "0 1px 4px rgba(0,0,0,0.15)" : "none",
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            {["No", "カテゴリ", "タイトル", "投稿者", "日付", "閲覧"].map((h, i) => (
+              <div key={i} style={{
+                padding: "14px 8px",
+                fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.85)",
+                fontFamily: fJP,
+                textAlign: i === 0 || i === 5 ? "center" : "left",
+              }}>{h}</div>
+            ))}
           </div>
 
           {/* 게시글 행 */}
