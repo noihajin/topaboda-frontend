@@ -23,7 +23,7 @@ const SNS_ITEMS = [
         border: "none",
         icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
         lines: ["LINEで", "登録"],
-        url: "http://localhost:9990/topaboda/api/auth/line/signUp",
+        url: "http://localhost:9990/topaboda/api/auth/signup/line",
     },
     {
         key: "google",
@@ -31,7 +31,7 @@ const SNS_ITEMS = [
         border: "1px solid #e2e8f0",
         icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
         lines: ["Googleで", "登録"],
-        url: "",
+        url: "http://localhost:9990/topaboda/api/auth/signup/google",
     },
     {
         key: "x",
