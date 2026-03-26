@@ -58,7 +58,7 @@ const SNS_ITEMS = [
             </svg>
         ),
         lines: ["Xで", "ログイン"],
-        url: "",
+        url: "http://localhost:9990/topaboda/api/auth/login/twitter",
     },
 ];
 
