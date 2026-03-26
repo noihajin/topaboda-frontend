@@ -4,6 +4,7 @@ import TopaModal from "../components/TopaModal";
 import useModal from "../hooks/useModal";
 import { DELETE_ACCOUNT } from "../constants/modalConfigs";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
 const C = {
@@ -61,7 +62,7 @@ export default function EditProfile() {
 
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
+                const response = await axios.get(`${API_URL}/topaboda/api/users/profile/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setPreviewImg(response.data.icon);
@@ -85,7 +86,7 @@ export default function EditProfile() {
         if (!newNickname.trim()) return;
 
         try {
-            const response = await axios.post(`http://localhost:9990/topaboda/api/auth/signUp/nickname`, {
+            const response = await axios.post(`${API_URL}/topaboda/api/auth/signUp/nickname`, {
                 nickname: newNickname,
             });
 
@@ -126,7 +127,7 @@ export default function EditProfile() {
         formData.append("data", new Blob([JSON.stringify(profileData)], { type: "application/json" }));
 
         try {
-            const response = await axios.patch(`http://localhost:9990/topaboda/api/users/profile`, formData, {
+            const response = await axios.patch(`${API_URL}/topaboda/api/users/profile`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

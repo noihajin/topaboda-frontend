@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
 
         setLoading(true);
         try {
-            await axios.patch("http://localhost:9990/topaboda/api/auth/pw/reset", { token: token, password: newPw });
+            await axios.patch(`${API_URL}/topaboda/api/auth/pw/reset`, { token: token, password: newPw });
             setDone(true);
         } catch (err) {
             setError(err.response?.data?.message || "パスワードの再設定に失敗しました。");

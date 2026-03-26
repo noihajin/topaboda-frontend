@@ -4,6 +4,7 @@ import { C, font, fontSerif, MOCK_ACHIEVEMENTS, ITEMS_PER_PAGE } from "../compon
 import AchievementSummary from "../components/achievement/AchievementSummary";
 import AchievementCard from "../components/achievement/AchievementCard";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 export default function Achievement() {
     const [page, setPage] = useState(1);
@@ -27,7 +28,7 @@ export default function Achievement() {
             if (!id || !token) return;
 
             try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/achievements`, {
+                const response = await axios.get(`${API_URL}/topaboda/api/users/achievements`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 

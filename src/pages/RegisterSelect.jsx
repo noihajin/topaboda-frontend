@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
+import { API_URL } from "../config/config";
 
 const C = {
     navy: "#000d57",
@@ -23,7 +24,7 @@ const SNS_ITEMS = [
         border: "none",
         icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
         lines: ["LINEで", "登録"],
-        url: "http://localhost:9990/topaboda/api/auth/signup/line",
+        url: `${API_URL}/topaboda/api/auth/signup/line`,
     },
     {
         key: "google",
@@ -31,7 +32,7 @@ const SNS_ITEMS = [
         border: "1px solid #e2e8f0",
         icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
         lines: ["Googleで", "登録"],
-        url: "http://localhost:9990/topaboda/api/auth/signup/google",
+        url: `${API_URL}/topaboda/api/auth/signup/google`,
     },
     {
         key: "x",
@@ -43,7 +44,7 @@ const SNS_ITEMS = [
             </svg>
         ),
         lines: ["Xで", "登録"],
-        url: "http://localhost:9990/topaboda/api/auth/signup/twitter",
+        url: `${API_URL}/topaboda/api/auth/signup/twitter`,
     },
 ];
 

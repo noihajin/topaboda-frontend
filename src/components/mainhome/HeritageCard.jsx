@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../config/config";
 
 import imgIconLocation from "../../assets/icon_location.svg";
 import imgIconHeart from "../../assets/icon_heart_2.svg";
@@ -39,8 +40,13 @@ export default function HeritageCard({ heritageData, status }) {
         const el = cardRef.current;
         if (!el) return;
         const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-            { threshold: 0.08 }
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisible(true);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.08 },
         );
         observer.observe(el);
         return () => observer.disconnect();
@@ -68,12 +74,12 @@ export default function HeritageCard({ heritageData, status }) {
 
         try {
             if (originalLiked) {
-                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${heritageData.id}/likes`, {
+                await axios.delete(`${API_URL}/topaboda/api/heritages/${heritageData.id}/likes`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
             } else {
                 await axios.post(
-                    `http://localhost:9990/topaboda/api/heritages/${heritageData.id}/likes`,
+                    `${API_URL}/topaboda/api/heritages/${heritageData.id}/likes`,
                     {},
                     {
                         headers: { Authorization: `Bearer ${token}` },
@@ -107,12 +113,12 @@ export default function HeritageCard({ heritageData, status }) {
         setIsBookmarked(!originalBookmarked);
         try {
             if (isBookmarked) {
-                await axios.delete(`http://localhost:9990/topaboda/api/heritages/${heritageData.id}/bookmarks`, {
+                await axios.delete(`${API_URL}/topaboda/api/heritages/${heritageData.id}/bookmarks`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
             } else {
                 await axios.post(
-                    `http://localhost:9990/topaboda/api/heritages/${heritageData.id}/bookmarks`,
+                    `${API_URL}/topaboda/api/heritages/${heritageData.id}/bookmarks`,
                     {},
                     {
                         headers: { Authorization: `Bearer ${token}` },
@@ -152,7 +158,9 @@ export default function HeritageCard({ heritageData, status }) {
             <div className="relative h-[190px] overflow-hidden flex-shrink-0">
                 <img src={heritageData.imageUrl || "/fallback.jpg"} alt={heritageData.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
                 {/* 배지 */}
-                <span className={`absolute top-4 left-4 ${badgeStyle} px-3 py-1 rounded-md text-[11px] font-black shadow-sm`} style={{ fontFamily: cardFont }}>{heritageData.badge}</span>
+                <span className={`absolute top-4 left-4 ${badgeStyle} px-3 py-1 rounded-md text-[11px] font-black shadow-sm`} style={{ fontFamily: cardFont }}>
+                    {heritageData.badge}
+                </span>
                 {/* ── 우측 상단 버튼 그룹 (가로 정렬) ── */}
                 <div className="absolute top-4 right-4 flex flex-row gap-1.5 z-10">
                     {/* 북마크 버튼 */}
@@ -180,12 +188,18 @@ export default function HeritageCard({ heritageData, status }) {
                 {/* 이름 + 주소: 고정 높이로 정렬 일정하게 유지 */}
                 <div className="flex-1">
                     <div className="mb-2" style={{ minHeight: "2.6rem" }}>
-                        <h3 className="text-base font-black text-[#000D57] tracking-tight" style={{ fontFamily: cardFont, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{heritageData.name}</h3>
-                        <span className="text-xs text-gray-400 font-medium" style={{ fontFamily: cardFont }}>| {heritageData.nameKr}</span>
+                        <h3 className="text-base font-black text-[#000D57] tracking-tight" style={{ fontFamily: cardFont, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                            {heritageData.name}
+                        </h3>
+                        <span className="text-xs text-gray-400 font-medium" style={{ fontFamily: cardFont }}>
+                            | {heritageData.nameKr}
+                        </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-400" style={{ height: 18, overflow: "hidden" }}>
                         <img src={imgIconLocation} alt="" className="w-3 h-3 opacity-50" style={{ flexShrink: 0 }} />
-                        <span className="text-xs font-bold" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: cardFont }}>{heritageData.location}</span>
+                        <span className="text-xs font-bold" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: cardFont }}>
+                            {heritageData.location}
+                        </span>
                     </div>
                 </div>
                 {/* 하단: 항상 하단 고정 */}

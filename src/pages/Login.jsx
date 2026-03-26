@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 const C = {
     navy: "#000d57",
@@ -38,7 +39,7 @@ const SNS_ITEMS = [
         border: "none",
         icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" style={{ width: 24 }} />,
         lines: ["LINEで", "ログイン"],
-        url: "http://localhost:9990/topaboda/api/auth/login/line",
+        url: `${API_URL}/topaboda/api/auth/login/line`,
     },
     {
         key: "google",
@@ -46,7 +47,7 @@ const SNS_ITEMS = [
         border: "1px solid #e2e8f0",
         icon: <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" style={{ width: 22 }} />,
         lines: ["Googleで", "ログイン"],
-        url: "http://localhost:9990/topaboda/api/auth/login/google",
+        url: `${API_URL}/topaboda/api/auth/login/google`,
     },
     {
         key: "x",
@@ -58,7 +59,7 @@ const SNS_ITEMS = [
             </svg>
         ),
         lines: ["Xで", "ログイン"],
-        url: "http://localhost:9990/topaboda/api/auth/login/twitter",
+        url: `${API_URL}/topaboda/api/auth/login/twitter`,
     },
 ];
 
@@ -82,7 +83,7 @@ export default function LoginPage() {
 
         try {
             // 3. 실제 API 호출 (엔드포인트는 실제 서버 주소에 맞게 수정)
-            const response = await axios.post("http://localhost:9990/topaboda/api/auth/login", {
+            const response = await axios.post(`${API_URL}/topaboda/api/auth/login`, {
                 id: id,
                 password: password,
             });
