@@ -13,6 +13,8 @@ import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
 import { API_URL } from "../config/config";
 
+import InfoModal from "../components/InfoModal";
+
 const API_ROUTES = "/api/routes";
 // ── 피그마 메달 이미지 ────────────────────────────────────────────
 const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
