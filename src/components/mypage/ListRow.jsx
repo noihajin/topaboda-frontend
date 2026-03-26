@@ -4,7 +4,7 @@ import { CalendarIcon, EyeIcon, SmallHeartIcon, EditIcon, TrashIcon } from "./Ic
 export function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete, onCategoryClick, onTitleClick, showDesc }) {
     const cat = CAT_COLORS[category];
     return (
-        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: showDesc ? "6px 16px" : "10px 16px", background: C.white, marginBottom: 12 }}>
+        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: showDesc ? "9px 20px" : "11px 20px", background: C.white, marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     {showDesc ? (

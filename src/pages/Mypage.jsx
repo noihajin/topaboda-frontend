@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "../components/Pagination";
@@ -11,6 +12,7 @@ import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
 import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
+import { MODAL } from "../constants/modalConfigs";
 import { API_URL } from "../config/config";
 
 import InfoModal from "../components/InfoModal";
@@ -94,7 +96,7 @@ function RouteCard({ route, onClick }) {
                     onClick?.();
                 }
             }}
-            style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
+            style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "9px 14px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = C.navy;
                 e.currentTarget.style.background = "#f8f9fc";
@@ -122,6 +124,12 @@ function RouteCard({ route, onClick }) {
     );
 }
 // ── 메인 컴포넌트 ──────────────────────────────────────────────────
+const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 36 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.52, ease: [0.22, 1, 0.36, 1], delay },
+});
+
 export default function MyPage() {
     const navigate = useNavigate();
     const [postTab, setPostTab] = useState("posts");
@@ -166,6 +174,12 @@ export default function MyPage() {
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
     const PAGE_SIZE = 5;
     const HT_SIZE = 4;
+    // 삭제 확인 모달
+    const [postDeleteModal, setPostDeleteModal] = useState({ open: false, id: null });
+    const [commentDeleteModal, setCommentDeleteModal] = useState({ open: false, id: null });
+    const [reviewDeleteModal, setReviewDeleteModal] = useState({ open: false, id: null });
+    // 삭제 완료 모달
+    const [deleteSuccessModal, setDeleteSuccessModal] = useState({ open: false, type: null });
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -192,7 +206,7 @@ export default function MyPage() {
         }
         setCancelModal({ open: false, item: null });
     };
-    const ROUTE_SIZE = 3;
+    const ROUTE_SIZE = 4;
     const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
     const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
     const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
@@ -258,26 +272,19 @@ export default function MyPage() {
         }
     };
     // 게시글 삭제
+    const handleDeletePostClick = (postId) => setPostDeleteModal({ open: true, id: postId });
     const handleDeletePost = async (postId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
             await axios.delete(`${API_URL}/topaboda/api/boards/${postId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("記事が削除されました。");
-            // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
+            setPostDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "post" });
         } catch (error) {
             console.error("게시글 삭제 실패:", error);
-            console.error("status:", error.response?.status);
-            console.error("data:", error.response?.data);
-            alert("記事の削除に失敗しました。");
         }
     };
     // 댓글 수정
@@ -308,26 +315,19 @@ export default function MyPage() {
         }
     };
     // 댓글 삭제
+    const handleDeleteCommentClick = (commentId) => setCommentDeleteModal({ open: true, id: commentId });
     const handleDeleteComment = async (commentId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
             await axios.delete(`${API_URL}/topaboda/api/comments/${commentId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("コメントが削除されました。");
-            // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
+            setCommentDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "comment" });
         } catch (error) {
             console.error("댓글 삭제 실패:", error);
-            console.error("status:", error.response?.status);
-            console.error("data:", error.response?.data);
-            alert("コメントの削除に失敗しました。");
         }
     };
     // 리뷰 수정
@@ -356,23 +356,19 @@ export default function MyPage() {
         }
     };
     // 리뷰 삭제
+    const handleDeleteReviewClick = (reviewId) => setReviewDeleteModal({ open: true, id: reviewId });
     const handleDeleteReview = async (reviewId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
             await axios.delete(`${API_URL}/topaboda/api/reviews/${reviewId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("レビューが削除されました。");
             fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+            setReviewDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "review" });
         } catch (error) {
             console.error("리뷰 삭제 실패:", error);
-            alert("レビューの削除に失敗しました。");
         }
     };
     useEffect(() => {
@@ -520,10 +516,13 @@ export default function MyPage() {
                     {/* ── 2. 탐방로 & 북마크 (2열 레이아웃) ── */}
                     <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
                         {/* 나의 탐방로 */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        <motion.div {...fadeUp(0.1)} style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                             {/* 헤더 + 화살표 페이지네이션 */}
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <h3 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: 0 }}>私の探訪路</h3>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                    <h3 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>私の探訪路</h3>
+                                </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <button disabled={routePage === 0} onClick={() => setRoutePage((p) => p - 1)} style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage === 0 ? "default" : "pointer", opacity: routePage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
                                         <ChevronLeft />
@@ -533,7 +532,7 @@ export default function MyPage() {
                                     </button>
                                 </div>
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1, marginTop: 4 }}>
                                 {!routesLoading && savedRoutes.length === 0 ? (
                                     /* 목록 없을 때 */
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
@@ -541,7 +540,7 @@ export default function MyPage() {
                                     </div>
                                 ) : (
                                     /* 경로 카드 (최대 3개) */
-                                    displayedRoutes.slice(0, 3).map((r) => <RouteCard key={r.id} route={r} onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)} />)
+                                    displayedRoutes.slice(0, 4).map((r) => <RouteCard key={r.id} route={r} onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)} />)
                                 )}
                             </div>
                             {/* 항상 하단: 새 경로 만들기 버튼 */}
@@ -563,9 +562,14 @@ export default function MyPage() {
                             >
                                 + 新しい探訪路を作る
                             </button>
-                        </div>
+                        </motion.div>
                         {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        <motion.div {...fadeUp(0.15)} style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>遺産</span>
+                            </div>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                                 <div style={{ display: "flex", gap: 24 }}>
                                     <button onClick={() => setHeritageTab("bookmark")} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}>
@@ -608,12 +612,17 @@ export default function MyPage() {
                                     return <div key={`ht-empty-${i}`} style={{ borderRadius: 16, height: 170 }} />;
                                 })}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                     {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
                     <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "stretch" }}>
                         {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+                        <motion.div {...fadeUp(0.25)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>コミュニティ活動</span>
+                            </div>
                             {/* 탭 + 새 글 작성 버튼 */}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -645,17 +654,22 @@ export default function MyPage() {
                                     </p>
                                 ) : (
                                     displayedAct.map((item) => {
-                                        if (postTab === "posts") return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
-                                        if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                        return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReview} />;
+                                        if (postTab === "posts") return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePostClick} />;
+                                        if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteCommentClick} />;
+                                        return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReviewClick} />;
                                     })
                                 )}
                             </div>
                             {/* 페이지네이션 */}
                             <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
-                        </div>
+                        </motion.div>
                         {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+                        <motion.div {...fadeUp(0.3)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>投稿</span>
+                            </div>
                             {/* 탭 헤더 */}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
                                 <div style={{ display: "flex", gap: 8 }}>
@@ -685,14 +699,17 @@ export default function MyPage() {
                                     </>
                                 );
                             })()}
-                        </div>
+                        </motion.div>
                     </div>
                     {/* ── 4. 업적 갤러리 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                    <motion.div {...fadeUp(0.4)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         {/* 헤더 */}
                         <div style={{ marginBottom: 32 }}>
-                            <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
-                            <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                                <div style={{ width: 4, height: 20, borderRadius: 2, background: "linear-gradient(to bottom, #caca00, #000d57)", flexShrink: 0 }} />
+                                <h2 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>業績ギャラリー</h2>
+                            </div>
+                            <p style={{ fontSize: 14, color: C.gray2, marginLeft: 14 }}>探検の足跡を記録してください</p>
                         </div>
                         {/* 16개 메달 그리드 */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px", justifyItems: "center" }}>
@@ -756,9 +773,41 @@ export default function MyPage() {
                                 </div>
                             );
                         })()}
-                    </div>
+                    </motion.div>
                 </div>
             </div>
+            {/* 게시글 삭제 확인 모달 */}
+            <TopaModal
+                {...MODAL.POST_DELETE_CONFIRM}
+                isOpen={postDeleteModal.open}
+                onClose={() => setPostDeleteModal({ open: false, id: null })}
+                onConfirm={() => handleDeletePost(postDeleteModal.id)}
+            />
+            {/* 댓글 삭제 확인 모달 */}
+            <TopaModal
+                {...MODAL.COMMENT_DELETE_CONFIRM}
+                isOpen={commentDeleteModal.open}
+                onClose={() => setCommentDeleteModal({ open: false, id: null })}
+                onConfirm={() => handleDeleteComment(commentDeleteModal.id)}
+            />
+            {/* 리뷰 삭제 확인 모달 */}
+            <TopaModal
+                {...MODAL.REVIEW_DELETE_CONFIRM}
+                isOpen={reviewDeleteModal.open}
+                onClose={() => setReviewDeleteModal({ open: false, id: null })}
+                onConfirm={() => handleDeleteReview(reviewDeleteModal.id)}
+            />
+            {/* 삭제 완료 모달 */}
+            <TopaModal
+                {...(deleteSuccessModal.type === "post"
+                    ? MODAL.POST_DELETE_SUCCESS
+                    : deleteSuccessModal.type === "comment"
+                    ? MODAL.COMMENT_DELETE_SUCCESS
+                    : MODAL.REVIEW_DELETE_SUCCESS)}
+                isOpen={deleteSuccessModal.open}
+                onClose={() => setDeleteSuccessModal({ open: false, type: null })}
+                onConfirm={() => setDeleteSuccessModal({ open: false, type: null })}
+            />
             {/* 북마크 / 좋아요 취소 확인 모달 */}
             <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>

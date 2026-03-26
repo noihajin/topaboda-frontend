@@ -1,25 +1,21 @@
+import { useState } from "react";
 import { C, font, fontSerif } from "./constants";
 import { IconMapPin, IconBookmark, IconHeart, IconShare } from "./DetailUI";
 
 export default function HeritageHero({ data, isLiked, isBookmarked, isLiking, isBookmarking, likeCount, onLike, onBookmark }) {
-    const handleShareClick = () => {
-        const currentUrl = window.location.href;
+    const [copied, setCopied] = useState(false);
 
-        navigator.clipboard
-            .writeText(currentUrl)
-            .then(() => {
-                alert("URLがクリップボードにコピーされました！");
-            })
-            .catch((err) => {
-                console.error("복사 실패:", err);
-                alert("복사에 실패했습니다.");
-            });
+    const handleShareClick = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }).catch((err) => console.error("복사 실패:", err));
     };
 
     const actionBtns = [
         { icon: <IconBookmark active={isBookmarked} />, label: "保存", onClick: onBookmark, disabled: isBookmarking },
         { icon: <IconHeart active={isLiked} />, label: likeCount.toLocaleString(), onClick: onLike, disabled: isLiking },
-        { icon: <IconShare />, label: "共有", onClick: handleShareClick },
+        { icon: <IconShare />, label: "共有", onClick: handleShareClick, isShare: true },
     ];
 
     return (
@@ -111,37 +107,58 @@ export default function HeritageHero({ data, isLiked, isBookmarked, isLiking, is
                 }}
             >
                 {actionBtns.map((btn) => (
-                    <button
-                        key={btn.label}
-                        onClick={btn.onClick}
-                        disabled={btn.disabled}
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 4,
-                            width: 72,
-                            height: 72,
-                            borderRadius: "50%",
-                            background: "white",
-                            border: "none",
-                            cursor: "pointer",
-                            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-                            transition: "transform 0.2s, box-shadow 0.2s",
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = "translateY(-3px)";
-                            e.currentTarget.style.boxShadow = "0 24px 48px rgba(0,0,0,0.3)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = "none";
-                            e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.25)";
-                        }}
-                    >
-                        {btn.icon}
-                        <span style={{ fontSize: 11, fontWeight: 600, color: C.textDark, fontFamily: font }}>{btn.label}</span>
-                    </button>
+                    <div key={btn.label} style={{ position: "relative" }}>
+                        <button
+                            onClick={btn.onClick}
+                            disabled={btn.disabled}
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 4,
+                                width: 72,
+                                height: 72,
+                                borderRadius: "50%",
+                                background: "white",
+                                border: "none",
+                                cursor: "pointer",
+                                boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-3px)";
+                                e.currentTarget.style.boxShadow = "0 24px 48px rgba(0,0,0,0.3)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "none";
+                                e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.25)";
+                            }}
+                        >
+                            {btn.icon}
+                            <span style={{ fontSize: 11, fontWeight: 600, color: C.textDark, fontFamily: font }}>{btn.label}</span>
+                        </button>
+                        {btn.isShare && copied && (
+                            <div style={{
+                                position: "absolute",
+                                bottom: "calc(100% + 8px)",
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                background: C.navy,
+                                color: "#fff",
+                                fontSize: 12,
+                                fontFamily: font,
+                                fontWeight: 600,
+                                padding: "5px 12px",
+                                borderRadius: 8,
+                                whiteSpace: "nowrap",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            }}>
+                                リンクをコピーしました！
+                            </div>
+                        )}
+                    </div>
                 ))}
             </div>
         </div>

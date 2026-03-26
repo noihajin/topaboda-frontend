@@ -91,7 +91,7 @@ export default function HeritageContent({ data, reviews, reviewPage, totalPages,
                                     width: 40,
                                     height: 40,
                                     borderRadius: "50%",
-                                    background: C.navy,
+                                    background: "#e5e7eb",
                                     border: "none",
                                     cursor: "pointer",
                                     display: "flex",
@@ -175,10 +175,10 @@ export default function HeritageContent({ data, reviews, reviewPage, totalPages,
                             fontWeight: 600,
                             cursor: "pointer",
                             fontFamily: font,
-                            transition: "opacity 0.2s",
+                            transition: "transform 0.22s ease",
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-                        onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
                     >
                         レビューを書く
                     </button>
