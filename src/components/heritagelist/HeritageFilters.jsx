@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { C, font, CATEGORIES, REGIONS } from "./constants";
 
 // 카테고리 탭 + 지역 필터
@@ -6,6 +6,15 @@ export default function HeritageFilters({ activeCategory, onCategoryChange, acti
   const regionRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, scrollLeft: 0 });
+  const [fadeLeft, setFadeLeft] = useState(false);
+  const [fadeRight, setFadeRight] = useState(true);
+
+  const onScroll = useCallback(() => {
+    const el = regionRef.current;
+    if (!el) return;
+    setFadeLeft(el.scrollLeft > 8);
+    setFadeRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+  }, []);
 
   const onMouseDown = (e) => {
     setIsDragging(false);
@@ -53,12 +62,31 @@ export default function HeritageFilters({ activeCategory, onCategoryChange, acti
       {/* ── 지역 필터 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "12px 0" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 40px" }}>
+          {/* 페이드 래퍼 */}
+          <div style={{ position: "relative" }}>
+            {/* 왼쪽 페이드 */}
+            {fadeLeft && (
+              <div style={{
+                position: "absolute", left: 0, top: 0, bottom: 0, width: 48, zIndex: 1,
+                background: "linear-gradient(to right, #ffffff, transparent)",
+                pointerEvents: "none",
+              }} />
+            )}
+            {/* 오른쪽 페이드 */}
+            {fadeRight && (
+              <div style={{
+                position: "absolute", right: 0, top: 0, bottom: 0, width: 48, zIndex: 1,
+                background: "linear-gradient(to left, #ffffff, transparent)",
+                pointerEvents: "none",
+              }} />
+            )}
           <div
             ref={regionRef}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}
             onMouseLeave={onMouseLeave}
+            onScroll={onScroll}
             style={{
               display: "flex", gap: 8,
               flexWrap: "nowrap",
@@ -77,9 +105,9 @@ export default function HeritageFilters({ activeCategory, onCategoryChange, acti
                   key={reg}
                   onClick={() => { if (!isDragging) onRegionChange(reg); }}
                   style={{
-                    background: isActive ? C.navy : C.white,
+                    background: isActive ? C.navy : "#f3f4f6",
                     color: isActive ? "white" : C.textBody,
-                    border: `2px solid ${isActive ? C.navy : C.border}`,
+                    border: `2px solid ${isActive ? C.navy : "transparent"}`,
                     borderRadius: 999, padding: "6px 16px",
                     fontSize: 13, fontWeight: isActive ? 600 : 400,
                     cursor: "pointer", fontFamily: font, transition: "all 0.2s",
@@ -91,6 +119,7 @@ export default function HeritageFilters({ activeCategory, onCategoryChange, acti
               );
             })}
           </div>
+          </div>{/* 페이드 래퍼 끝 */}
         </div>
       </div>
     </>

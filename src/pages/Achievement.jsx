@@ -25,27 +25,33 @@ export default function Achievement() {
             const id = localStorage.getItem("id");
             const token = localStorage.getItem("token");
 
-            if (!id || !token) return;
-
             try {
-                const response = await axios.get(`${API_URL}/topaboda/api/users/achievements`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                if (id && token) {
+                    const response = await axios.get(`${API_URL}/topaboda/api/users/achievements`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
 
-                const rawData = response.data.contents || response.data;
+                    const rawData = response.data.contents || response.data;
 
-                rawData.sort((a, b) => {
-                    if (a.achieved !== b.achieved) {
-                        return b.achieved - a.achieved;
-                    }
+                    rawData.sort((a, b) => {
+                        if (a.achieved !== b.achieved) {
+                            return b.achieved - a.achieved;
+                        }
 
-                    const aRatio = (Number(a.current) || 0) / (Number(a.total) || 1);
-                    const bRatio = (Number(b.current) || 0) / (Number(b.total) || 1);
+                        const aRatio = (Number(a.current) || 0) / (Number(a.total) || 1);
+                        const bRatio = (Number(b.current) || 0) / (Number(b.total) || 1);
 
-                    return bRatio - aRatio;
-                });
+                        return bRatio - aRatio;
+                    });
 
-                setAchievements({ contents: rawData });
+                    setAchievements({ contents: rawData });
+                } else {
+                    const response = await axios.get(`${API_URL}/topaboda/api/achievements`);
+
+                    const data = response.data.contents || response.data;
+
+                    setAchievements({ contents: data });
+                }
             } catch (error) {
                 console.error("업적 로드 실패:", error);
             }

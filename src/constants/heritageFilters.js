@@ -6,15 +6,22 @@ import { REGION_CODE_MAP, TYPE_CODE_MAP_R } from "../components/heritagelist/con
 export { REGIONS, REGION_CODE_MAP, CATEGORIES, TYPE_CODE_MAP, TYPE_CODE_MAP_R } from "../components/heritagelist/constants.js";
 
 /**
- * GET /api/maps/heritage の themeCode（DB heritage.theme 単一値）と一致するか。
- * 旧レスポンスの themeMask 名は後方互換のため参照するが、値はビットマスクではない。
+ * heritage.theme は theme.id(ビット) の OR。themeIndex は選択した theme.id（文字列可）。
+ * (placeMask & bit) !== 0 なら一致。
  */
-export function matchesThemeCode(place, themeIndex) {
-  if (themeIndex == null || themeIndex === "" || Number(themeIndex) < 1) return true;
-  const want = Number(themeIndex);
-  if (Number.isNaN(want)) return true;
-  const code = Number(place?.themeCode ?? place?.themeMask ?? 0);
-  return code === want;
+export function matchesThemeCode(place, themeBit) {
+  if (themeBit == null || themeBit === "") return true;
+  const t = String(themeBit).trim();
+  if (t === "" || t === "0") return true;
+  try {
+    const want = BigInt(t);
+    if (want <= 0n) return true;
+    const raw = place?.themeMask ?? place?.themeCode ?? 0;
+    const code = BigInt(String(raw));
+    return (code & want) !== 0n;
+  } catch {
+    return true;
+  }
 }
 
 /** 地域コード(例 11) → フィルタ用ラベル(例 ソウル)。一致しなければ null */
