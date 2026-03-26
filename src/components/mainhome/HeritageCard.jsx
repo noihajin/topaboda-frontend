@@ -141,7 +141,7 @@ export default function HeritageCard({ heritageData, status }) {
         <div
             ref={cardRef}
             onClick={() => navigate(`/heritage/${heritageData.id}`)}
-            className="bg-white rounded-[20px] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_14px_28px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 border border-gray-50 group cursor-pointer flex flex-col"
+            className="bg-white rounded-[20px] overflow-hidden hover:-translate-y-2 transition-all duration-500 border border-gray-200 group cursor-pointer flex flex-col"
             style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? "translateY(0)" : "translateY(32px)",
