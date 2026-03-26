@@ -150,11 +150,20 @@ export default function Community() {
         {/* ── 인기 리뷰 ── */}
         {popularPosts.length > 0 && (
           <section style={{ marginBottom: isMobile ? 56 : 80 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+              {/* Figma 아이콘: gold 그라디언트 + trending-up */}
               <div style={{
-                width: 6, height: 28, borderRadius: 3,
-                background: `linear-gradient(to bottom, ${C.gold}, ${C.goldD})`,
-              }} />
+                width: 38, height: 38, borderRadius: 11, flexShrink: 0,
+                background: "linear-gradient(to bottom, #caca00, #a0a000)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 3px 8px rgba(160,160,0,0.30)",
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="#000d57" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              </div>
               <h2 style={{ color: C.navy, fontSize: isMobile ? 20 : 24, fontWeight: 900, margin: 0, fontFamily: fJP }}>
                 人気のレビュー
               </h2>
