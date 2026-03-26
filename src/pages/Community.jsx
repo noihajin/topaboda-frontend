@@ -295,12 +295,7 @@ export default function Community() {
 
         {/* ── 정렬 토글 (오른쪽 정렬) ── */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 4,
-            background: C.white, border: "1px solid rgba(202,202,0,0.4)",
-            borderRadius: 999, padding: "4px",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
               <button
                 key={key}
@@ -310,8 +305,7 @@ export default function Community() {
                   background: sortType === key ? "#caca00" : "transparent",
                   color: sortType === key ? C.navy : C.gray3,
                   fontWeight: 700, fontSize: 12, cursor: "pointer",
-                  transition: "all 0.2s", fontFamily: fJP,
-                  boxShadow: sortType === key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                  transition: "all 0.25s", fontFamily: fJP,
                 }}
               >
                 {label}
