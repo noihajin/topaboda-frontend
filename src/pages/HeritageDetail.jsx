@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-import { C, font, MOCK_HERITAGE, MOCK_REVIEWS } from "../components/heritagedetail/constants";
+import { C, font } from "../components/heritagedetail/constants";
 import HeritageHero from "../components/heritagedetail/HeritageHero";
 import HeritageContent from "../components/heritagedetail/HeritageContent";
 import HeritageSidebar from "../components/heritagedetail/HeritageSidebar";
 import { API_URL } from "../config/config";
+
+import InfoModal from "../components/InfoModal";
 
 export default function HeritageDetail() {
     const { heritageId } = useParams();
@@ -27,6 +29,15 @@ export default function HeritageDetail() {
     const [likeCount, setLikeCount] = useState(0);
     const [isLiking, setIsLiking] = useState(false);
     const [isBookmarking, setIsBookmarking] = useState(false);
+
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
 
     const fetchReviews = async () => {
         try {
@@ -78,7 +89,16 @@ export default function HeritageDetail() {
         const token = localStorage.getItem("token");
 
         if (!id || !token) {
-            alert("ログインが必要です。");
+            setPopupContent({
+                icon: "⚠️",
+                title: "アカウントエラー",
+                content: "ログインが必要です。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
             return;
         }
 
@@ -121,7 +141,16 @@ export default function HeritageDetail() {
         const token = localStorage.getItem("token");
 
         if (!id || !token) {
-            alert("ログインが必要です。");
+            setPopupContent({
+                icon: "⚠️",
+                title: "アカウントエラー",
+                content: "ログインが必要です。",
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
             return;
         }
 
@@ -159,25 +188,28 @@ export default function HeritageDetail() {
 
     if (!data) return <div>Loading...</div>;
     return (
-        <div style={{ fontFamily: font, background: C.bg, minHeight: "100vh" }}>
-            {/* 히어로 섹션 */}
-            <HeritageHero data={data} isLiked={isLiked} isBookmarked={isBookmarked} likeCount={likeCount} isLiking={isLiking} isBookmarking={isBookmarking} onLike={handleLike} onBookmark={handleBookmark} />
+        <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} btnMsg={popupContent.btnMsg} content={popupContent.content} onMove={popupContent.onMove} />
+            <div style={{ fontFamily: font, background: C.bg, minHeight: "100vh" }}>
+                {/* 히어로 섹션 */}
+                <HeritageHero data={data} isLiked={isLiked} isBookmarked={isBookmarked} likeCount={likeCount} isLiking={isLiking} isBookmarking={isBookmarking} onLike={handleLike} onBookmark={handleBookmark} />
 
-            {/* 메인 콘텐츠 */}
-            <div
-                style={{
-                    background: C.bg,
-                    padding: "60px 72px",
-                    display: "flex",
-                    gap: 48,
-                    alignItems: "stretch",
-                    maxWidth: 1920,
-                    margin: "0 auto",
-                }}
-            >
-                <HeritageContent data={data} reviews={reviewData.content} reviewPage={reviewPage} totalPages={reviewData.totalPages} setReviewPage={setReviewPage} fetchReviews={fetchReviews} galleryRef={galleryRef} scrollGallery={scrollGallery} />
-                <HeritageSidebar data={data} heritageId={heritageId} />
+                {/* 메인 콘텐츠 */}
+                <div
+                    style={{
+                        background: C.bg,
+                        padding: "60px 72px",
+                        display: "flex",
+                        gap: 48,
+                        alignItems: "stretch",
+                        maxWidth: 1920,
+                        margin: "0 auto",
+                    }}
+                >
+                    <HeritageContent data={data} reviews={reviewData.content} reviewPage={reviewPage} totalPages={reviewData.totalPages} setReviewPage={setReviewPage} fetchReviews={fetchReviews} galleryRef={galleryRef} scrollGallery={scrollGallery} />
+                    <HeritageSidebar data={data} heritageId={heritageId} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
