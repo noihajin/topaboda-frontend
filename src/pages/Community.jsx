@@ -180,17 +180,15 @@ export default function Community() {
             <button
               onClick={() => setIsCatOpen(v => !v)}
               style={{
-                height: 48, padding: "0 40px 0 22px",
-                background: "#f9fafb", border: "1px solid #f3f4f6",
+                height: 48, padding: "0 40px 0 18px",
+                background: C.white, border: `1.5px solid ${C.border}`,
                 borderRadius: 999, outline: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 700, fontFamily: fJP,
-                color: C.navy, whiteSpace: "nowrap",
+                fontSize: 13, fontWeight: 600, fontFamily: fJP,
+                color: C.gray1, whiteSpace: "nowrap",
                 display: "flex", alignItems: "center",
-                transition: "background 0.2s",
+                transition: "border-color 0.2s",
                 position: "relative",
               }}
-              onMouseEnter={e => e.currentTarget.style.background = C.white}
-              onMouseLeave={e => e.currentTarget.style.background = "#f9fafb"}
             >
               {selectedCat}
               {/* chevron */}
@@ -201,7 +199,7 @@ export default function Community() {
                   transition: "transform 0.3s", opacity: 0.4, pointerEvents: "none",
                 }}
                 width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="#000d57" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                stroke={C.gray3} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
