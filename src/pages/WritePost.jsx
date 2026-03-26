@@ -494,7 +494,7 @@ export default function WritePost() {
                             <button
                                 onClick={() => {
                                     window.scrollTo({ top: 0 });
-                                    navigate("/community");
+                                    navigate(isEdit ? "/mypage" : "/community");
                                 }}
                                 style={{
                                     padding: "10px 24px",
