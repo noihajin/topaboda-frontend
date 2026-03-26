@@ -109,25 +109,46 @@ export default function PopularHeritageSection() {
         <section
             ref={sectionRef}
             className="w-full bg-[#F8F9FC] pt-32 pb-20 px-[10%]"
-            style={{
-                opacity: sectionVisible ? 1 : 0,
-                transition: "opacity 0.8s ease",
-                fontFamily: "'Noto Sans JP', 'Noto Sans KR', 'Roboto', sans-serif",
-            }}
+            style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', 'Roboto', sans-serif" }}
         >
             {/* 헤더 영역 */}
             <div className="flex items-end justify-between mb-12">
-                {/* 왼쪽: 뱃지 + 타이틀 + 서브 */}
+                {/* 왼쪽: 뱃지 + 타이틀 + 서브 — 순차 올라오는 애니메이션 */}
                 <div className="flex flex-col items-start">
-                    <span className="bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-5" style={{ fontFamily: "'Roboto', sans-serif" }}>
-                        CURATION
-                    </span>
-                    <h2 className="text-4xl lg:text-5xl font-bold text-[#000D57] mb-4 tracking-tight" style={{ fontFamily: "'Noto Serif JP', serif" }}>
-                        人気の国の遺産
-                    </h2>
-                    <p className="text-gray-500 text-base" style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}>
-                        多くの人々に愛される、韓国を代表する文化遺産をご紹介します
-                    </p>
+                    {[
+                        {
+                            el: "span",
+                            className: "bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-5",
+                            style: { fontFamily: "'Roboto', sans-serif" },
+                            content: "CURATION",
+                            delay: 0,
+                        },
+                        {
+                            el: "h2",
+                            className: "text-4xl lg:text-5xl font-bold text-[#000D57] mb-4 tracking-tight",
+                            style: { fontFamily: "'Noto Serif JP', serif" },
+                            content: "人気の国の遺産",
+                            delay: 0.13,
+                        },
+                        {
+                            el: "p",
+                            className: "text-gray-500 text-base",
+                            style: { fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" },
+                            content: "多くの人々に愛される、韓国を代表する文化遺産をご紹介します",
+                            delay: 0.26,
+                        },
+                    ].map(({ el, className, style, content, delay }) => (
+                        <motion.div
+                            key={content}
+                            initial={{ opacity: 0, y: 22 }}
+                            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
+                            transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                            {el === "span" && <span className={className} style={style}>{content}</span>}
+                            {el === "h2"   && <h2   className={className} style={style}>{content}</h2>}
+                            {el === "p"    && <p    className={className} style={style}>{content}</p>}
+                        </motion.div>
+                    ))}
                 </div>
 
                 {/* 오른쪽: 정렬 탭 + 화살표 */}
