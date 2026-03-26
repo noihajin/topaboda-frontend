@@ -182,14 +182,14 @@ export default function PopularHeritageSection() {
             {/* 화살표 + 더보기 버튼 */}
             <div className="flex items-center justify-between">
                 {/* 화살표 (왼쪽 정렬) */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
                     <button
                         onClick={handlePrev}
                         disabled={carouselIdx === 0}
                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
                             ${carouselIdx === 0
                                 ? "text-gray-300 cursor-not-allowed"
-                                : "text-[#000D57] hover:bg-[#000D57]/10"
+                                : "text-[#000D57]"
                             }`}
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -202,7 +202,7 @@ export default function PopularHeritageSection() {
                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200
                             ${carouselIdx >= totalSlides - 1
                                 ? "text-gray-300 cursor-not-allowed"
-                                : "text-[#000D57] hover:bg-[#000D57]/10"
+                                : "text-[#000D57]"
                             }`}
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
