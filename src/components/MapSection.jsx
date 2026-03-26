@@ -143,13 +143,33 @@ function getGcodeBadgeStyle(gcodeName) {
   return { bg: `linear-gradient(180deg, ${PANEL_C.navy} 0%, #001070 100%)`, color: "#fff" };
 }
 
-function formatReviewDate(iso) {
-  if (!iso) return "";
+/** GET /api/heritages/{id}/reviews — ReviewResponse: name, text, date (LocalDateTime → ISO 또는 배열) */
+function formatReviewDate(value) {
+  if (value == null || value === "") return "";
   try {
-    return new Date(iso).toLocaleDateString("ja-JP");
+    if (Array.isArray(value) && value.length >= 3) {
+      const [y, m, d] = value;
+      const dt = new Date(Number(y), Number(m) - 1, Number(d));
+      if (!Number.isNaN(dt.getTime())) return dt.toLocaleDateString("ja-JP");
+    }
+    if (typeof value === "string") {
+      const d = new Date(value);
+      if (!Number.isNaN(d.getTime())) return d.toLocaleDateString("ja-JP");
+    }
   } catch {
-    return "";
+    /* ignore */
   }
+  return "";
+}
+
+function reviewDisplayName(r) {
+  const n = r?.name ?? r?.nickname;
+  return (typeof n === "string" && n.trim()) ? n.trim() : "ユーザー";
+}
+
+function reviewBodyText(r) {
+  const t = r?.text ?? r?.content;
+  return typeof t === "string" ? t : "";
 }
 
 /** GET /api/maps/heritages/{id}/panel 의 ccbaAsdt (ISO 문자열 또는 Spring 배열) */
@@ -260,13 +280,8 @@ function getThemeCacheKey(regionCode, themeIndex) {
   return `${HERITAGE_SESSION_CACHE_PREFIX}${regionCode}-${themeIndex}`;
 }
 
-/** 지도 패널 / reviews — 동일 핀 재선택 시 API 부하 완화 */
-const HERITAGE_DETAIL_REVIEWS_PREFIX = "map-heritage-detail-reviews:";
+/** 지도 패널 메타 — 동일 핀 재선택 시 API 부하 완화 (리뷰는 매번 최신 조회) */
 const HERITAGE_DETAIL_PANEL_PREFIX = "map-heritage-detail-panel:";
-
-function getHeritageDetailReviewsKey(heritageId) {
-  return `${HERITAGE_DETAIL_REVIEWS_PREFIX}${encodeURIComponent(heritageId)}`;
-}
 
 function getHeritageDetailPanelKey(heritageId) {
   return `${HERITAGE_DETAIL_PANEL_PREFIX}${encodeURIComponent(heritageId)}`;
@@ -639,15 +654,9 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       return;
     }
     const hid = selectedPin.id;
-    const reviewsKey = getHeritageDetailReviewsKey(hid);
-    const cached = readSessionJson(reviewsKey);
-    if (Array.isArray(cached)) {
-      setPinReviews(cached.slice(0, 5));
-      setReviewsLoading(false);
-      return;
-    }
     let cancelled = false;
     setReviewsLoading(true);
+    setPinReviews([]);
     const q = new URLSearchParams({
       size: "5",
       page: "0",
@@ -661,10 +670,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
       .then((page) => {
         const raw = page?.content;
         const list = Array.isArray(raw) ? raw.slice(0, 5) : [];
-        if (!cancelled) {
-          setPinReviews(list);
-          writeSessionJson(reviewsKey, list);
-        }
+        if (!cancelled) setPinReviews(list);
       })
       .catch(() => {
         if (!cancelled) setPinReviews([]);
@@ -2249,7 +2255,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
                                 fontFamily: "'Noto Sans KR', sans-serif",
                               }}
                             >
-                              {r.nickname || "ユーザー"}
+                              {reviewDisplayName(r)}
                             </div>
                             <p
                               style={{
@@ -2264,7 +2270,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
                                 overflow: "hidden",
                               }}
                             >
-                              {r.content}
+                              {reviewBodyText(r)}
                             </p>
                             <div
                               style={{
@@ -2274,7 +2280,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
                                 fontFamily: "'Noto Sans KR', sans-serif",
                               }}
                             >
-                              {formatReviewDate(r.createdAt)}
+                              {formatReviewDate(r.date ?? r.createdAt)}
                             </div>
                           </div>
                         ))}
