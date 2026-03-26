@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -54,8 +54,10 @@ export default function Community() {
   const [searchInput, setSearchInput]       = useState("");
   const [keyword, setKeyword]               = useState("");
   const [selectedCat, setSelectedCat]       = useState("すべて");
+  const [isCatOpen, setIsCatOpen]           = useState(false);
   const [sortType, setSortType]             = useState("latest");
   const [windowWidth, setWindowWidth]       = useState(window.innerWidth);
+  const catRef = useRef(null);
 
   const isMobile = windowWidth <= 768;
 
@@ -69,6 +71,13 @@ export default function Community() {
   /* 검색 */
   const handleSearch = () => { setCurrentPage(1); setKeyword(searchInput.trim()); };
   const handleKeyDown = (e) => { if (e.key === "Enter") { e.preventDefault(); handleSearch(); } };
+
+  /* 카테고리 드롭다운 외부 클릭 닫기 */
+  useEffect(() => {
+    const handler = (e) => { if (catRef.current && !catRef.current.contains(e.target)) setIsCatOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   /* 카테고리 변경 시 검색 초기화 */
   useEffect(() => { setSearchInput(""); setKeyword(""); }, [selectedCat]);
@@ -166,33 +175,72 @@ export default function Community() {
           gap: 10, marginBottom: 24,
           flexWrap: isMobile ? "wrap" : "nowrap",
         }}>
-          {/* 카테고리 드롭다운 */}
-          <div style={{ position: "relative", flexShrink: 0 }}>
-            <select
-              value={selectedCat}
-              onChange={e => { setSelectedCat(e.target.value); setCurrentPage(1); }}
+          {/* 카테고리 드롭다운 — SearchFilter 스타일 */}
+          <div ref={catRef} style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={() => setIsCatOpen(v => !v)}
               style={{
-                height: 48, padding: "0 40px 0 18px",
-                border: `1.5px solid ${C.border}`, borderRadius: 999,
-                background: C.white, fontSize: 13, fontFamily: fJP,
-                outline: "none", color: C.gray1,
-                cursor: "pointer", appearance: "none",
-                boxSizing: "border-box", fontWeight: 600,
-                transition: "border-color 0.2s",
+                height: 48, padding: "0 40px 0 22px",
+                background: "#f9fafb", border: "1px solid #f3f4f6",
+                borderRadius: 999, outline: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 700, fontFamily: fJP,
+                color: C.navy, whiteSpace: "nowrap",
+                display: "flex", alignItems: "center",
+                transition: "background 0.2s",
+                position: "relative",
               }}
-              onFocus={e  => e.target.style.borderColor = C.navy}
-              onBlur={e   => e.target.style.borderColor = C.border}
+              onMouseEnter={e => e.currentTarget.style.background = C.white}
+              onMouseLeave={e => e.currentTarget.style.background = "#f9fafb"}
             >
-              {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            {/* 커스텀 화살표 */}
-            <svg
-              style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
-              width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke={C.gray3} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+              {selectedCat}
+              {/* chevron */}
+              <svg
+                style={{
+                  position: "absolute", right: 14, top: "50%",
+                  transform: `translateY(-50%) rotate(${isCatOpen ? 180 : 0}deg)`,
+                  transition: "transform 0.3s", opacity: 0.4, pointerEvents: "none",
+                }}
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#000d57" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <AnimatePresence>
+              {isCatOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.18 }}
+                  style={{
+                    position: "absolute", top: "calc(100% + 8px)", left: 0,
+                    minWidth: "100%", background: C.white,
+                    borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
+                    border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 100,
+                  }}
+                >
+                  {CATEGORIES.map(cat => (
+                    <div
+                      key={cat}
+                      onClick={() => { setSelectedCat(cat); setCurrentPage(1); setIsCatOpen(false); }}
+                      style={{
+                        padding: "13px 22px", fontSize: 13, fontWeight: 700,
+                        fontFamily: fJP, cursor: "pointer", whiteSpace: "nowrap",
+                        color: selectedCat === cat ? C.navy : C.gray1,
+                        background: selectedCat === cat ? "rgba(0,13,87,0.05)" : "transparent",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={e => { if (selectedCat !== cat) e.currentTarget.style.background = "#f9fafb"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = selectedCat === cat ? "rgba(0,13,87,0.05)" : "transparent"; }}
+                    >
+                      {cat}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* 검색바 */}
