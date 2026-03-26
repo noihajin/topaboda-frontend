@@ -91,6 +91,8 @@ function RouteCard({ route, onClick }) {
                 }
             }}
             style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.navy; e.currentTarget.style.background = "#f8f9fc"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; }}
         >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontWeight: 700, color: C.navy }}>{route.title}</span>
@@ -535,14 +537,18 @@ export default function MyPage() {
                             {/* 항상 하단: 새 경로 만들기 버튼 */}
                             <button
                                 onClick={() => navigate("/route/create")}
-                                style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+                                style={{ border: "2px dashed #d1d5db", borderRadius: 12, padding: "14px", background: "#f5f5f5", color: "#9ca3af", fontWeight: 700, cursor: "pointer", transition: "all 0.25s ease", width: "100%" }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = C.red;
-                                    e.currentTarget.style.color = "white";
+                                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(202,202,0,0.10) 0%, rgba(202,202,0,0.05) 100%)";
+                                    e.currentTarget.style.borderColor = "#caca00";
+                                    e.currentTarget.style.color = "#9a9a00";
+                                    e.currentTarget.style.transform = "scale(1.02)";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = "white";
-                                    e.currentTarget.style.color = C.red;
+                                    e.currentTarget.style.background = "#f5f5f5";
+                                    e.currentTarget.style.borderColor = "#d1d5db";
+                                    e.currentTarget.style.color = "#9ca3af";
+                                    e.currentTarget.style.transform = "scale(1)";
                                 }}
                             >
                                 + 新しい探訪路を作る
