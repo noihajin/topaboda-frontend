@@ -1,12 +1,17 @@
 // OAuthCallback.jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import InfoModal from "../components/InfoModal";
 
 const OAuthCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
     useEffect(() => {
+        const [onMove, setOnMove] = useState(() => navigate("/", { replace: true }));
+
+        const [openPopup, setOpenPopup] = useState(false);
+
         // 1. URL 파라미터에서 token과 status 읽기
         const token = searchParams.get("token");
         const id = searchParams.get("id");
@@ -19,30 +24,87 @@ const OAuthCallback = () => {
 
             // 3. 상태에 따른 알림 처리
             if (status === "signup_success") {
-                alert("가입을 축하합니다! 자동으로 로그인되었습니다.");
+                setPopupContent({
+                    icon: "🎉",
+                    title: "Welcome to TOPABODA!",
+                    content: (
+                        <>
+                            ${id}様、会員登録ありがとうございます。
+                            <br />
+                            探訪の旅を今すぐ始めましょう！
+                        </>
+                    ),
+                    onMove: onMove,
+                });
             } else if (status === "login_success") {
-                console.log("로그인 성공");
+                setPopupContent({
+                    icon: "🎉",
+                    title: "Welcome back to TOPABODA!",
+                    content: (
+                        <>
+                            ${id}様、お帰りなさい。
+                            <br />
+                            今日も新しい探訪の旅を続けましょう！
+                        </>
+                    ),
+                    onMove: onMove,
+                });
             }
-
-            // 4. 메인 페이지로 이동 (URL에서 토큰이 사라짐)
-            navigate("/", { replace: true });
+            openPopup(true);
         } else {
-            // 에러 처리
+            // 에러 처리 로직
             if (status === "already_exists") {
-                alert("이미 가입된 계정입니다. 로그인을 시도해주세요.");
+                setOnMove(() => navigate("/login", { replace: true }));
+                setPopupContent({
+                    icon: "🔍",
+                    title: "이미 가입된 계정입니다",
+                    content: (
+                        <>
+                            입력하신 정보로 등록된 계정이 이미 존재합니다.
+                            <br />
+                            로그인 페이지에서 접속을 시도해주세요!
+                        </>
+                    ),
+                    onMove: onMove,
+                });
             } else if (status === "user_not_found") {
-                alert("등록된 정보가 없습니다. 회원가입을 먼저 진행해주세요.");
+                setPopupContent({
+                    icon: "✍️",
+                    title: "등록된 정보 없음",
+                    content: (
+                        <>
+                            찾으시는 회원 정보가 존재하지 않습니다.
+                            <br />
+                            TOPABODA의 새로운 가족이 되어보시겠어요?
+                        </>
+                    ),
+                    onMove: onMove,
+                });
             } else {
-                alert("로그인 중 오류가 발생했습니다.");
+                setPopupContent({
+                    icon: "⚠️",
+                    title: "오류 발생",
+                    content: (
+                        <>
+                            로그인 처리 중 예기치 못한 문제가 발생했습니다.
+                            <br />
+                            잠시 후 다시 시도해 주세요.
+                        </>
+                    ),
+                    onMove: onMove,
+                });
             }
-            navigate("/login", { replace: true });
+            openPopup(true);
         }
     }, [searchParams, navigate]);
 
     return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-            <p>인증 처리 중입니다. 잠시만 기다려주세요...</p>
-        </div>
+        <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} content={popupContent.content} onMove={"/"} />
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+                <p>인증 처리 중입니다. 잠시만 기다려주세요...</p>
+            </div>
+        </>
     );
 };
 
