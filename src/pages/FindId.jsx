@@ -64,7 +64,7 @@ export default function FindIdPage() {
 
         setLoading(true);
         try {
-            await axios.post("http://localhost:9990/topaboda/api/auth/id/email", { email: email });
+            await axios.post(`${API_URL}/topaboda/api/auth/id/email`, { email: email });
             setNotice("認証番号をメールに送信しました。");
             setStep("code");
         } catch (err) {
@@ -87,7 +87,7 @@ export default function FindIdPage() {
 
         setVerifying(true);
         try {
-            const response = await axios.post("http://localhost:9990/topaboda/api/auth/id/verify", { email: email, token: code });
+            const response = await axios.post(`${API_URL}/topaboda/api/auth/id/verify`, { email: email, token: code });
             setResult({ id: response.data.id });
             setStep("done");
             setNotice("");

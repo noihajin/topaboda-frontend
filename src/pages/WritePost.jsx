@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from "../config/config";
 
 // ── Design Tokens ─────────────────────────────────────────────
 const C = {
@@ -85,7 +86,7 @@ export default function WritePost() {
             formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
 
             if (isEdit && editPost?.id) {
-                await axios.patch(`http://localhost:9990/topaboda/api/boards/${editPost.id}`, formData, {
+                await axios.patch(`${API_URL}/topaboda/api/boards/${editPost.id}`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -95,7 +96,7 @@ export default function WritePost() {
                 navigate("/mypage");
                 return;
             } else {
-                await axios.post("http://localhost:9990/topaboda/api/boards", formData, {
+                await axios.post(`${API_URL}/topaboda/api/boards`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

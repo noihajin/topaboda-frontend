@@ -4,6 +4,7 @@ import { SectionTitle, ReviewCard, IconChevronLeft, IconChevronRight } from "./D
 import Pagination from "../Pagination";
 import ReviewWriteModal from "./ReviewWriteModal";
 import axios from "axios";
+import { API_URL } from "../../config/config";
 
 export default function HeritageContent({ data, reviews, reviewPage, totalPages, setReviewPage, fetchReviews, galleryRef, scrollGallery }) {
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function HeritageContent({ data, reviews, reviewPage, totalPages,
 
         try {
             await axios.post(
-                `http://localhost:9990/topaboda/api/heritages/${data.id}/reviews`,
+                `${API_URL}/topaboda/api/heritages/${data.id}/reviews`,
                 { content: text },
                 {
                     headers: { Authorization: `Bearer ${token}` },

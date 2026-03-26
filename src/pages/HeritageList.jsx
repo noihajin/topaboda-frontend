@@ -6,6 +6,7 @@ import { C, font, PAGE_SIZE, TYPE_CODE_MAP, REGION_CODE_MAP, TYPE_CODE_MAP_R } f
 import HeritageHero from "../components/heritagelist/HeritageHero";
 import HeritageFilters from "../components/heritagelist/HeritageFilters";
 import HeritageCard from "../components/heritagelist/HeritageCard";
+import { API_URL } from "../config/config";
 
 export default function HeritageList() {
     const location = useLocation();
@@ -27,7 +28,7 @@ export default function HeritageList() {
             try {
                 setLoading(true);
 
-                const response = await axios.get("http://localhost:9990/topaboda/api/heritages", {
+                const response = await axios.get(`${API_URL}/topaboda/api/heritages`, {
                     params: {
                         page: currentPage,
                         size: PAGE_SIZE,

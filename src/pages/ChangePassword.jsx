@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
 const C = {
@@ -127,7 +128,7 @@ export default function ChangePassword() {
 
         try {
             const response = await axios.patch(
-                `http://localhost:9990/topaboda/api/auth/pw/reset/login`,
+                `${API_URL}/topaboda/api/auth/pw/reset/login`,
                 {
                     oldPassword: currentPw,
                     newPassword: newPw,
