@@ -4,7 +4,7 @@ import { CalendarIcon, EyeIcon, SmallHeartIcon, EditIcon, TrashIcon } from "./Ic
 export function ListRow({ category, title, desc, date, views, likes, onEdit, onDelete, onCategoryClick, onTitleClick, showDesc }) {
     const cat = CAT_COLORS[category];
     return (
-        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: showDesc ? "8px 16px" : "12px 16px", background: C.white, marginBottom: 8 }}>
+        <div style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: showDesc ? "6px 16px" : "10px 16px", background: C.white, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     {showDesc ? (
@@ -105,7 +105,7 @@ export function ListRow({ category, title, desc, date, views, likes, onEdit, onD
                     )}
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
-                            <CalendarIcon /> {date}
+                            <CalendarIcon /> {date?.slice(0, 10) ?? date}
                         </span>
                         {views !== undefined && (
                             <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.gray3 }}>
