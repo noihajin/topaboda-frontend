@@ -3,7 +3,7 @@ export const C = {
     navy: "#000d57",
     red: "#6e0000",
     gold: "#caca00",
-    bg: "#f3f3f5",
+    bg: "#f8f9fc",
     white: "#ffffff",
     border: "rgba(0,13,87,0.1)",
     textSub: "rgba(0,13,87,0.5)",
