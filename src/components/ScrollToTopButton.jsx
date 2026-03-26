@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 // TOP 버튼을 숨길 경로
-const HIDE_PATHS = ["/login", "/register", "/register/form", "/register/select"];
+const HIDE_PATHS = ["/", "/login", "/register", "/register/form", "/register/select"];
 
 export default function ScrollToTopButton() {
   const { pathname } = useLocation();
@@ -12,11 +12,10 @@ export default function ScrollToTopButton() {
   const isHidden = HIDE_PATHS.includes(pathname);
 
   useEffect(() => {
-    const threshold = pathname === "/" ? 550 : 300;
-    const onScroll = () => setVisible(window.scrollY > threshold);
+    const onScroll = () => setVisible(window.scrollY > 300);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [pathname]);
+  }, []);
 
   if (isHidden) return null;
 
