@@ -15,6 +15,7 @@ const API_MAP_CONFIG = "/api/maps/config";
 const API_TMAP_ROUTE = "/api/maps/tmap-route";
 /** 지도와 동일 핀 목록 — regionCode=ZZ → 서버에서 전체(ALL) 로드 (MapHeritageCacheService) */
 const API_MAPS_HERITAGE = "/api/maps/heritage";
+const API_MAPS_THEMES = "/api/maps/themes";
 const SESSION_MAP_HERITAGE_PINS = "routeCreate_mapHeritagePins_v6";
 /** 「すべての遺産」一覧 — DOM 負荷軽減のため 100 件ずつ表示 */
 const ALL_HERITAGE_PAGE_SIZE = 100;
@@ -2092,8 +2093,9 @@ export default function RouteCreate() {
   const [allFilterRegion, setAllFilterRegion] = useState("すべての地域");
   /** 国宝/史跡など — GET /heritages と同じ ccba_kdcd（TYPE_CODE_MAP） */
   const [allFilterCategory, setAllFilterCategory] = useState("すべて");
-  /** DB heritage.theme 単一コードと一致（themeCode）／空＝すべて */
+  /** theme.id（ビット）— matchesThemeCode でマスク AND／空＝すべて */
   const [allFilterTheme, setAllFilterTheme] = useState("");
+  const [routeThemeOptions, setRouteThemeOptions] = useState([]);
   const [allFilterName, setAllFilterName] = useState("");
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
@@ -2232,6 +2234,21 @@ export default function RouteCreate() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_MAPS_THEMES)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data)) setRouteThemeOptions(data);
+      })
+      .catch(() => {
+        if (!cancelled) setRouteThemeOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   /** 지도 API 핀 전체 — sessionStorage + Strict Mode 대응(ref로 재실행 막지 않음) */
   useEffect(() => {
     if (allHeritagePlaces.length > 0) return;
@@ -2282,10 +2299,7 @@ export default function RouteCreate() {
       }
     }
     if (allFilterTheme !== "") {
-      const idx = Number.parseInt(allFilterTheme, 10);
-      if (!Number.isNaN(idx) && idx >= 1) {
-        list = list.filter((p) => matchesThemeCode(p, idx));
-      }
+      list = list.filter((p) => matchesThemeCode(p, allFilterTheme));
     }
     const q = (allFilterName || "").trim().toLowerCase();
     if (q) {
@@ -2321,25 +2335,33 @@ export default function RouteCreate() {
     return arr;
   }, [bookmarkPlaces, added]);
 
-  /** ロード済みピンに実際に存在するテーマコードのみ（昇順） */
-  const allHeritageThemeCodes = useMemo(() => {
-    const s = new Set();
-    for (const p of allHeritagePlaces) {
-      const c = p.themeCode;
-      if (c != null && Number.isFinite(Number(c)) && Number(c) >= 1) {
-        s.add(Number(c));
+  /** API 테마 중 로드된 핀과 비트가 겹치는 것만（ドロップダウン用） */
+  const allHeritageThemeOptions = useMemo(() => {
+    if (!routeThemeOptions.length) return [];
+    return routeThemeOptions.filter((t) => {
+      let tid;
+      try {
+        tid = BigInt(String(t.id));
+      } catch {
+        return false;
       }
-    }
-    return Array.from(s).sort((a, b) => a - b);
-  }, [allHeritagePlaces]);
+      if (tid <= 0n) return false;
+      return allHeritagePlaces.some((p) => {
+        try {
+          const m = BigInt(String(p.themeMask ?? p.themeCode ?? 0));
+          return (m & tid) !== 0n;
+        } catch {
+          return false;
+        }
+      });
+    });
+  }, [routeThemeOptions, allHeritagePlaces]);
 
   useEffect(() => {
     if (allFilterTheme === "") return;
-    const n = Number.parseInt(allFilterTheme, 10);
-    if (Number.isNaN(n) || !allHeritageThemeCodes.includes(n)) {
-      setAllFilterTheme("");
-    }
-  }, [allHeritageThemeCodes, allFilterTheme]);
+    const ok = allHeritageThemeOptions.some((t) => String(t.id) === allFilterTheme);
+    if (!ok) setAllFilterTheme("");
+  }, [allHeritageThemeOptions, allFilterTheme]);
 
   const hasMoreAllHeritage = allHeritageVisibleCount < sortedFilteredAllHeritagePlaces.length;
   const visibleAllHeritagePlaces = useMemo(
@@ -3001,9 +3023,9 @@ export default function RouteCreate() {
                         }}
                       >
                         <option value="">すべて</option>
-                        {allHeritageThemeCodes.map((n) => (
-                          <option key={n} value={String(n)}>
-                            {n}
+                        {allHeritageThemeOptions.map((t) => (
+                          <option key={String(t.id)} value={String(t.id)}>
+                            {t.name != null ? t.name : String(t.id)}
                           </option>
                         ))}
                       </select>
