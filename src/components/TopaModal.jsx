@@ -91,18 +91,6 @@ export default function TopaModal({
             border: `1px solid rgba(0,13,87,0.10)`,
           }}
         >
-          {/* 상단 포인트 라인 */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: 5,
-              background: theme.bar,
-              borderRadius: "20px 20px 0 0",
-            }}
-          />
 
           {/* 아이콘 */}
           {icon && (
@@ -131,7 +119,7 @@ export default function TopaModal({
               fontWeight: 900,
               marginBottom: 12,
               letterSpacing: "-0.3px",
-              fontFamily: "'Noto Serif JP', serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
             }}
           >
             {title}

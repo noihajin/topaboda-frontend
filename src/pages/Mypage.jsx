@@ -752,7 +752,7 @@ export default function MyPage() {
                 </div>
             </div>
             {/* 북마크 / 좋아요 취소 확인 모달 */}
-            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? "🔖" : "❤️"}>
+            <TopaModal isOpen={cancelModal.open} onClose={handleCancelClose} onConfirm={handleCancelConfirm} variant={heritageTab === "bookmark" ? "info" : "danger"} title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"} confirmLabel="解除する" cancelLabel="キャンセル" icon={heritageTab === "bookmark" ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}>
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{cancelModal.item?.heritageName}</strong>
                     {heritageTab === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
@@ -770,7 +770,10 @@ export default function MyPage() {
                 title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
                 confirmLabel="解除する"
                 cancelLabel="キャンセル"
-                icon={postSaveCancelModal.item?.type === "bookmark" ? "🔖" : "❤️"}
+                icon={postSaveCancelModal.item?.type === "bookmark"
+                    ? <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    : <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                }
             >
                 <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
                     <strong style={{ color: "#000d57" }}>{postSaveCancelModal.item?.title}</strong>
