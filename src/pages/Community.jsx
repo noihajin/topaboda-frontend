@@ -115,45 +115,26 @@ export default function Community() {
 
         {/* ── 헤더 ── */}
         <header style={{ marginBottom: isMobile ? 48 : 80 }}>
-          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "flex-end", justifyContent: "space-between", gap: 24 }}>
-            <div>
-              <span style={{
-                display: "inline-block",
-                background: `${C.gold}22`, color: C.goldD,
-                fontSize: 11, fontWeight: 900, letterSpacing: "0.12em",
-                padding: "5px 14px", borderRadius: 999, marginBottom: 16,
-                fontFamily: "'Roboto', sans-serif",
-              }}>
-                COMMUNITY
-              </span>
-              <h1 style={{
-                color: C.navy, fontFamily: fJPSerif,
-                fontSize: isMobile ? 34 : 52, fontWeight: 900,
-                margin: "0 0 12px", lineHeight: 1.15, letterSpacing: "-0.02em",
-              }}>
-                コミュニティ
-              </h1>
-              <p style={{ color: C.gray2, fontSize: isMobile ? 14 : 17, fontFamily: fJP, margin: 0, lineHeight: 1.7 }}>
-                国家遺産探訪の体験を共有し、交流しましょう
-              </p>
-            </div>
-            {/* 투고 버튼 */}
-            <button
-              onClick={() => navigate("/community/write")}
-              style={{
-                display: "flex", alignItems: "center", gap: 10,
-                background: C.red, color: C.white, border: "none",
-                borderRadius: 14, height: 52, padding: "0 28px",
-                fontWeight: 800, fontSize: 15, cursor: "pointer",
-                transition: "all 0.2s", flexShrink: 0, fontFamily: fJP,
-                boxShadow: "0 4px 14px rgba(110,0,0,0.25)",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = C.red;    e.currentTarget.style.transform = "none"; }}
-            >
-              <img src={icPen} alt="" style={{ width: 18 }} />
-              投稿する
-            </button>
+          <div>
+            <span style={{
+              display: "inline-block",
+              background: `${C.gold}22`, color: C.goldD,
+              fontSize: 11, fontWeight: 900, letterSpacing: "0.12em",
+              padding: "5px 14px", borderRadius: 999, marginBottom: 16,
+              fontFamily: "'Roboto', sans-serif",
+            }}>
+              COMMUNITY
+            </span>
+            <h1 style={{
+              color: C.navy, fontFamily: fJPSerif,
+              fontSize: isMobile ? 34 : 52, fontWeight: 900,
+              margin: "0 0 12px", lineHeight: 1.15, letterSpacing: "-0.02em",
+            }}>
+              コミュニティ
+            </h1>
+            <p style={{ color: C.gray2, fontSize: isMobile ? 14 : 17, fontFamily: fJP, margin: 0, lineHeight: 1.7 }}>
+              国家遺産探訪の体験を共有し、交流しましょう
+            </p>
           </div>
         </header>
 
@@ -179,38 +160,43 @@ export default function Community() {
           </section>
         )}
 
-        {/* ── 카테고리 탭 ── */}
+        {/* ── 컨트롤 바: 카테고리 드롭다운 + 검색바 + 정렬 토글 + 투고하기 ── */}
         <div style={{
-          display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16,
+          display: "flex", alignItems: "center",
+          gap: 10, marginBottom: 24,
+          flexWrap: isMobile ? "wrap" : "nowrap",
         }}>
-          {CATEGORIES.map(cat => {
-            const active = selectedCat === cat;
-            const c = CAT[cat];
-            return (
-              <button
-                key={cat}
-                onClick={() => { setSelectedCat(cat); setCurrentPage(1); }}
-                style={{
-                  padding: "8px 20px", borderRadius: 999,
-                  border: active ? "none" : `1px solid ${C.border}`,
-                  background: active ? C.navy : C.white,
-                  color: active ? C.white : C.gray2,
-                  fontWeight: active ? 800 : 600,
-                  fontSize: 13, cursor: "pointer",
-                  transition: "all 0.2s", fontFamily: fJP,
-                  boxShadow: active ? "0 4px 12px rgba(0,13,87,0.18)" : "none",
-                }}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
+          {/* 카테고리 드롭다운 */}
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <select
+              value={selectedCat}
+              onChange={e => { setSelectedCat(e.target.value); setCurrentPage(1); }}
+              style={{
+                height: 48, padding: "0 40px 0 18px",
+                border: `1.5px solid ${C.border}`, borderRadius: 999,
+                background: C.white, fontSize: 13, fontFamily: fJP,
+                outline: "none", color: C.gray1,
+                cursor: "pointer", appearance: "none",
+                boxSizing: "border-box", fontWeight: 600,
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e  => e.target.style.borderColor = C.navy}
+              onBlur={e   => e.target.style.borderColor = C.border}
+            >
+              {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            {/* 커스텀 화살표 */}
+            <svg
+              style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke={C.gray3} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
 
-        {/* ── 검색 + 정렬 ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           {/* 검색바 */}
-          <div style={{ flex: 1, position: "relative" }}>
+          <div style={{ flex: 1, position: "relative", minWidth: isMobile ? "100%" : 0 }}>
             <input
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
@@ -218,8 +204,8 @@ export default function Community() {
               placeholder="キーワードで検索..."
               style={{
                 width: "100%", height: 48, boxSizing: "border-box",
-                padding: "0 56px 0 20px",
-                border: `1.5px solid ${C.border}`, borderRadius: 12,
+                padding: "0 56px 0 22px",
+                border: `1.5px solid ${C.border}`, borderRadius: 999,
                 background: C.white, fontSize: 14, fontFamily: fJP,
                 outline: "none", color: C.gray1,
                 transition: "border-color 0.2s",
@@ -231,7 +217,7 @@ export default function Community() {
               onClick={handleSearch}
               style={{
                 position: "absolute", right: 6, top: 6, bottom: 6, width: 38,
-                background: C.navy, border: "none", borderRadius: 8,
+                background: C.navy, border: "none", borderRadius: 999,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", transition: "background 0.2s",
               }}
@@ -241,28 +227,50 @@ export default function Community() {
               <img src={icSearch} alt="" style={{ width: 16, filter: "brightness(0) invert(1)" }} />
             </button>
           </div>
-          {/* 정렬 */}
+
+          {/* 정렬 토글 — PopularHeritageSection 스타일과 동일 */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 4,
-            background: C.white, border: `1px solid ${C.border}`,
-            borderRadius: 10, padding: "4px",
+            display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
+            background: C.white,
+            border: "1px solid rgba(202,202,0,0.4)",
+            borderRadius: 999, padding: "4px",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
           }}>
             {[{ key: "latest", label: "最新" }, { key: "views", label: "閲覧" }].map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => { setSortType(key); setCurrentPage(1); }}
                 style={{
-                  padding: "6px 16px", borderRadius: 7, border: "none",
-                  background: sortType === key ? C.navy : "transparent",
-                  color: sortType === key ? C.white : C.gray3,
+                  padding: "6px 16px", borderRadius: 999, border: "none",
+                  background: sortType === key ? "#caca00" : "transparent",
+                  color: sortType === key ? C.navy : C.gray3,
                   fontWeight: 700, fontSize: 12, cursor: "pointer",
                   transition: "all 0.2s", fontFamily: fJP,
+                  boxShadow: sortType === key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
                 }}
               >
                 {label}
               </button>
             ))}
           </div>
+
+          {/* 투고 버튼 */}
+          <button
+            onClick={() => navigate("/community/write")}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: C.red, color: C.white, border: "none",
+              borderRadius: 999, height: 48, padding: "0 24px",
+              fontWeight: 800, fontSize: 14, cursor: "pointer",
+              transition: "all 0.2s", flexShrink: 0, fontFamily: fJP,
+              boxShadow: "0 4px 14px rgba(110,0,0,0.22)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#8e0000"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.red;    e.currentTarget.style.transform = "none"; }}
+          >
+            <img src={icPen} alt="" style={{ width: 16 }} />
+            投稿する
+          </button>
         </div>
 
         {/* ── 게시글 리스트 ── */}
