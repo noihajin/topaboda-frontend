@@ -118,16 +118,18 @@ export default function PopularHeritageSection() {
                     {[
                         {
                             el: "span",
-                            className: "bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase mb-5",
+                            className: "bg-[#CACA00]/15 text-[#A0A000] px-5 py-2 rounded-full text-xs font-black tracking-widest uppercase",
                             style: { fontFamily: "'Roboto', sans-serif" },
                             content: "CURATION",
+                            wrapperClass: "mb-5",
                             delay: 0,
                         },
                         {
                             el: "h2",
-                            className: "text-4xl lg:text-5xl font-bold text-[#000D57] mb-4 tracking-tight",
+                            className: "text-4xl lg:text-5xl font-bold text-[#000D57] tracking-tight",
                             style: { fontFamily: "'Noto Serif JP', serif" },
                             content: "人気の国の遺産",
+                            wrapperClass: "mb-4",
                             delay: 0.13,
                         },
                         {
@@ -135,11 +137,13 @@ export default function PopularHeritageSection() {
                             className: "text-gray-500 text-base",
                             style: { fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" },
                             content: "多くの人々に愛される、韓国を代表する文化遺産をご紹介します",
+                            wrapperClass: "",
                             delay: 0.26,
                         },
-                    ].map(({ el, className, style, content, delay }) => (
+                    ].map(({ el, className, style, content, wrapperClass, delay }) => (
                         <motion.div
                             key={content}
+                            className={wrapperClass}
                             initial={{ opacity: 0, y: 22 }}
                             animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
                             transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
