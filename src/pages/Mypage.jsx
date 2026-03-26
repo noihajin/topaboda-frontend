@@ -93,8 +93,14 @@ function RouteCard({ route, onClick }) {
                 }
             }}
             style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.navy; e.currentTarget.style.background = "#f8f9fc"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.white; }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = "#f8f9fc";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.white;
+            }}
         >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontWeight: 700, color: C.navy }}>{route.title}</span>
@@ -492,7 +498,7 @@ export default function MyPage() {
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 28, fontWeight: 900, color: C.navy, margin: "0 0 4px" }}>{user?.nickname || "ゲスト"}</h1>
-                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email || "example@email.com"}</p>
+                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email && !user.email.trim().includes("@") ? "SNSアカウント" : user?.email || "example@email.com"}</p>
                                 <div style={{ display: "flex", gap: 24 }}>
                                     <div>
                                         <p style={{ fontSize: 12, color: C.gray4, margin: 0 }}>登録日</p>
