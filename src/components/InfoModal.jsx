@@ -43,7 +43,7 @@ function ModalButton({ children, onClick }) {
     );
 }
 
-const InfoModal = ({ open, icon, title, content, onClose, onMove }) => {
+const InfoModal = ({ open, icon, title, content, btnMsg, onClose, onMove }) => {
     return (
         <AnimatePresence>
             {open && (
@@ -87,7 +87,7 @@ const InfoModal = ({ open, icon, title, content, onClose, onMove }) => {
 
                         <p style={{ color: C.gray2, lineHeight: 1.6, marginBottom: 30, fontSize: 14 }}>{content}</p>
 
-                        <ModalButton onClick={onMove}>メインページへ</ModalButton>
+                        <ModalButton onClick={onMove}>{btnMsg}</ModalButton>
                     </motion.div>
                 </motion.div>
             )}
