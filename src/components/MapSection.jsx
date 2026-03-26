@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useJsApiLoader, GoogleMap } from "@react-google-maps/api";
 import { KOREA_MAP_RESTRICTION } from "../constants/mapKoreaBounds";
@@ -45,7 +46,48 @@ const mapContainerStyle = {
   borderRadius: "1.5rem",
 };
 
-const sectionClass = "w-full px-[10%] pt-24 pb-0 scroll-mt-[11.9rem]";
+const sectionClass = "w-full px-[10%] pt-12 pb-0 scroll-mt-[11.9rem]";
+
+/** 인기 유산 섹션과 동일한 스크롤 인 + fade-up (뷰에서 벗어났다가 다시 들어올 때마다 재생) */
+function MapSectionTitleBlock() {
+  const titleRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={titleRef} className="flex flex-col items-center w-full">
+      <motion.h2
+        className="text-4xl lg:text-5xl font-bold text-[#000D57] text-center tracking-tight mb-4"
+        style={{ fontFamily: "'Noto Serif JP', serif" }}
+        initial={{ opacity: 0, y: 22 }}
+        animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
+        transition={{ duration: 0.8, delay: 0, ease: [0.22, 1, 0.36, 1] }}
+      >
+        地域別の国宝探索
+      </motion.h2>
+      <motion.p
+        className="text-gray-500 text-lg text-center mb-10"
+        style={{ fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" }}
+        initial={{ opacity: 0, y: 22 }}
+        animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
+        transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      >
+        多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
+      </motion.p>
+    </div>
+  );
+}
 
 const COLOR_DEFAULT = "#b8d4f0";
 const COLOR_SELECTED = "#1e3a8a";
@@ -196,25 +238,6 @@ function formatPanelTypeLabel(raw) {
   return t;
 }
 
-const TAGS = [
-  { id: "tag-1", label: "테마 1", count: 54 },
-  { id: "tag-2", label: "테마 2", count: 12 },
-  { id: "tag-3", label: "테마 3", count: 8 },
-  { id: "tag-4", label: "테마 4", count: 15 },
-  { id: "tag-5", label: "테마 5", count: 23 },
-  { id: "tag-6", label: "테마 6", count: 9 },
-  { id: "tag-7", label: "테마 7", count: 17 },
-  { id: "tag-8", label: "테마 8", count: 4 },
-  { id: "tag-9", label: "테마 9", count: 19 },
-  { id: "tag-10", label: "테마 10", count: 6 },
-  { id: "tag-11", label: "테마 11", count: 14 },
-  { id: "tag-12", label: "테마 12", count: 27 },
-  { id: "tag-13", label: "테마 13", count: 5 },
-  { id: "tag-14", label: "테마 14", count: 31 },
-  { id: "tag-15", label: "테마 15", count: 11 },
-  { id: "tag-16", label: "테마 16", count: 20 },
-];
-
 function coordsToPath(rings) {
   const ring = rings?.[0] || rings || [];
   if (ring.length < 3) return null;
@@ -258,16 +281,24 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function getThemeIndexFromTagId(tagId) {
-  const parsed = Number(String(tagId || "").replace("tag-", ""));
-  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 16 ? parsed : 1;
-}
-
-function getThemeIndexesFromTagIds(tagIds) {
-  return Array.from(tagIds)
-    .map(getThemeIndexFromTagId)
-    .filter((v, idx, arr) => arr.indexOf(v) === idx)
-    .sort((a, b) => a - b);
+/** activeTagIds — theme 테이블 id(비트) 문자열, 예 "1","2","4" */
+function getThemeBitStrings(tagIds) {
+  const out = [];
+  for (const s of tagIds) {
+    const t = String(s ?? "").trim();
+    if (t && /^[0-9]+$/.test(t) && t !== "0") out.push(t);
+  }
+  return [...new Set(out)].sort((a, b) => {
+    try {
+      const ba = BigInt(a);
+      const bb = BigInt(b);
+      if (ba < bb) return -1;
+      if (ba > bb) return 1;
+      return 0;
+    } catch {
+      return a.localeCompare(b);
+    }
+  });
 }
 
 function getSelectedRegionCode(selectedSet) {
@@ -276,8 +307,8 @@ function getSelectedRegionCode(selectedSet) {
   return REGION_NAME_TO_CODE[selected[0]] || null;
 }
 
-function getThemeCacheKey(regionCode, themeIndex) {
-  return `${HERITAGE_SESSION_CACHE_PREFIX}${regionCode}-${themeIndex}`;
+function getThemeCacheKey(regionCode, themeBitStr) {
+  return `${HERITAGE_SESSION_CACHE_PREFIX}${regionCode}-${themeBitStr}`;
 }
 
 /** 지도 패널 메타 — 동일 핀 재선택 시 API 부하 완화 (리뷰는 매번 최신 조회) */
@@ -317,11 +348,16 @@ function writeSessionJson(key, value) {
   }
 }
 
-function hasThemeBit(pin, themeIndex) {
-  const want = Number(themeIndex);
-  if (!Number.isFinite(want) || want < 1) return true;
-  const code = Number(pin?.themeCode ?? pin?.themeMask ?? 0);
-  return code === want;
+function hasThemeBit(pin, themeBitStr) {
+  try {
+    const want = BigInt(String(themeBitStr));
+    if (want <= 0n) return true;
+    const raw = pin?.themeMask ?? pin?.themeCode ?? 0;
+    const code = BigInt(String(raw));
+    return (code & want) !== 0n;
+  } catch {
+    return false;
+  }
 }
 
 function dedupePinsById(pins) {
@@ -537,9 +573,27 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   const [useGoogleBaseMap, setUseGoogleBaseMap] = useState(false);
   const [showTagBar, setShowTagBar] = useState(false);
   const [activeTagIds, setActiveTagIds] = useState(new Set());
+  const [mapThemes, setMapThemes] = useState([]);
   const [heritagePins, setHeritagePins] = useState([]);
-  const themeIndexes = getThemeIndexesFromTagIds(activeTagIds);
+  const activeTagKey = useMemo(() => Array.from(activeTagIds).sort().join(","), [activeTagIds]);
+  const themeBitStrings = useMemo(() => getThemeBitStrings(activeTagIds), [activeTagKey]);
   const selectedRegionCode = getSelectedRegionCode(selectedSet);
+
+  useEffect(() => {
+    if (!mapConfig?.endpoints) return;
+    let cancelled = false;
+    const themesUrl = mapConfig.endpoints.themes || "/api/maps/themes";
+    loadJson(themesUrl)
+      .then((rows) => {
+        if (!cancelled && Array.isArray(rows)) setMapThemes(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setMapThemes([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mapConfig?.endpoints]);
 
   useEffect(() => {
     setClusterListPinsRef.current = setClusterListPins;
@@ -777,7 +831,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   useEffect(() => {
     if (!mapConfig?.endpoints) return;
     const hasSelectedRegion = Boolean(selectedRegionCode);
-    const hasSelectedTheme = themeIndexes.length > 0;
+    const hasSelectedTheme = themeBitStrings.length > 0;
     if (!hasSelectedRegion || !hasSelectedTheme) {
       setHeritagePins([]);
       return;
@@ -788,23 +842,23 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
     const cachedByTheme = new Map();
     const missingThemes = [];
-    themeIndexes.forEach((themeIndex) => {
-      const key = getThemeCacheKey(selectedRegionCode, themeIndex);
+    themeBitStrings.forEach((themeBitStr) => {
+      const key = getThemeCacheKey(selectedRegionCode, themeBitStr);
       try {
         const raw = sessionStorage.getItem(key);
         if (!raw) {
-          missingThemes.push(themeIndex);
+          missingThemes.push(themeBitStr);
           return;
         }
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          cachedByTheme.set(themeIndex, parsed);
+          cachedByTheme.set(themeBitStr, parsed);
         } else {
-          missingThemes.push(themeIndex);
+          missingThemes.push(themeBitStr);
         }
       } catch (e) {
         console.warn("[MapSection] session cache parse 실패:", e);
-        missingThemes.push(themeIndex);
+        missingThemes.push(themeBitStr);
       }
     });
 
@@ -812,7 +866,9 @@ function MapWithGoogle({ apiKey, mapConfig }) {
     setHeritagePins(cachedPins);
 
     if (missingThemes.length === 0) {
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
 
     const baseHeritageUrl = mapConfig.endpoints.heritage || "/api/maps/heritage";
@@ -828,21 +884,21 @@ function MapWithGoogle({ apiKey, mapConfig }) {
         const fetchedPins = Array.isArray(rows) ? rows : [];
         const fetchedByTheme = new Map(missingThemes.map((t) => [t, []]));
         fetchedPins.forEach((pin) => {
-          missingThemes.forEach((themeIndex) => {
-            if (hasThemeBit(pin, themeIndex)) {
-              fetchedByTheme.get(themeIndex).push(pin);
+          missingThemes.forEach((themeBitStr) => {
+            if (hasThemeBit(pin, themeBitStr)) {
+              fetchedByTheme.get(themeBitStr).push(pin);
             }
           });
         });
 
-        fetchedByTheme.forEach((pins, themeIndex) => {
+        fetchedByTheme.forEach((pins, themeBitStr) => {
           const deduped = dedupePinsById(pins);
           try {
-            sessionStorage.setItem(getThemeCacheKey(selectedRegionCode, themeIndex), JSON.stringify(deduped));
+            sessionStorage.setItem(getThemeCacheKey(selectedRegionCode, themeBitStr), JSON.stringify(deduped));
           } catch (e) {
             console.warn("[MapSection] session cache 저장 실패:", e);
           }
-          cachedByTheme.set(themeIndex, deduped);
+          cachedByTheme.set(themeBitStr, deduped);
         });
 
         const mergedPins = dedupePinsById(Array.from(cachedByTheme.values()).flat());
@@ -853,8 +909,10 @@ function MapWithGoogle({ apiKey, mapConfig }) {
         console.error("[MapSection] Heritage 핀 로드 실패:", err);
       });
 
-    return () => { cancelled = true; };
-  }, [mapConfig?.endpoints, selectedRegionCode, themeIndexes.join(",")]);
+    return () => {
+      cancelled = true;
+    };
+  }, [mapConfig?.endpoints, selectedRegionCode, themeBitStrings.join(",")]);
 
   // selectedSetRef를 state와 동기화해 클릭 핸들러에서 최신 값 사용
   const selectSingleRegionByName = useCallback((rname) => {
@@ -1575,12 +1633,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (loadError) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-          地域別の国宝探索
-        </h2>
-        <p className="text-gray-500 text-lg text-center mb-10">
-          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-        </p>
+        <MapSectionTitleBlock />
         <div
           className="w-full bg-red-50 rounded-3xl border-2 border-red-200 flex items-center justify-center text-red-600"
           style={{ minHeight: 560, height: "80vh" }}
@@ -1594,12 +1647,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (!isLoaded) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-          地域別の国宝探索
-        </h2>
-        <p className="text-gray-500 text-lg text-center mb-10">
-          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-        </p>
+        <MapSectionTitleBlock />
         <div
           className="w-full bg-gray-100 rounded-3xl flex items-center justify-center text-gray-600"
           style={{ minHeight: 560, height: "80vh" }}
@@ -1613,12 +1661,7 @@ function MapWithGoogle({ apiKey, mapConfig }) {
   if (geoError) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-          地域別の国宝探索
-        </h2>
-        <p className="text-gray-500 text-lg text-center mb-10">
-          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-        </p>
+        <MapSectionTitleBlock />
         <div
           className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center"
           style={{ minHeight: 560, height: "80vh" }}
@@ -1631,42 +1674,40 @@ function MapWithGoogle({ apiKey, mapConfig }) {
 
   return (
     <section className={sectionClass}>
-      <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-        地域別の国宝探索
-      </h2>
-      <p className="text-gray-500 text-lg text-center mb-10">
-        多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-      </p>
+      <MapSectionTitleBlock />
       <div
         id="map-container"
         className="w-full rounded-3xl overflow-hidden border-2 border-gray-200 shadow-lg relative"
         style={{ minHeight: 560, height: "80vh" }}
       >
         {showTagBar && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 w-[92%] overflow-x-auto">
+          <div className="absolute top-3 left-0 right-0 z-30 flex justify-center px-3 pointer-events-none">
+            <div className="w-max max-w-[min(100%,96vw)] overflow-x-auto pointer-events-auto">
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 width: "max-content",
-                minWidth: "100%",
                 padding: "6px",
                 borderRadius: "999px",
                 background: "rgba(255,255,255,0.96)",
                 boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
               }}
             >
-              {TAGS.map((tag) => {
-                const isActive = activeTagIds.has(tag.id);
+              {mapThemes.map((tag) => {
+                const bitId = String(tag.id);
+                const isActive = activeTagIds.has(bitId);
+                const label = tag.name != null ? String(tag.name) : bitId;
                 return (
                   <button
-                    key={tag.id}
+                    key={bitId}
+                    type="button"
                     onClick={() =>
                       setActiveTagIds((prev) => {
                         const next = new Set(prev);
-                        if (next.has(tag.id)) next.delete(tag.id);
-                        else next.add(tag.id);
+                        if (next.has(bitId)) next.delete(bitId);
+                        else next.add(bitId);
                         return next;
                       })
                     }
@@ -1683,10 +1724,11 @@ function MapWithGoogle({ apiKey, mapConfig }) {
                       transition: "all 0.2s ease",
                     }}
                   >
-                    <span style={{ fontSize: "14px", fontWeight: 500 }}>#{tag.label}</span>
+                    <span style={{ fontSize: "14px", fontWeight: 500 }}>#{label}</span>
                   </button>
                 );
               })}
+            </div>
             </div>
           </div>
         )}
@@ -2365,12 +2407,7 @@ export default function MapSection() {
   if (configLoading) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-          地域別の国宝探索
-        </h2>
-        <p className="text-gray-500 text-lg text-center mb-10">
-          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-        </p>
+        <MapSectionTitleBlock />
         <div
           className="w-full bg-gray-100 rounded-3xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500"
           style={{ minHeight: 560, height: "80vh" }}
@@ -2384,12 +2421,7 @@ export default function MapSection() {
   if (configError || !apiKey) {
     return (
       <section className={sectionClass}>
-        <h2 className="text-4xl lg:text-5xl font-bold font-title text-[#000D57] text-center tracking-tight mb-4">
-          地域別の国宝探索
-        </h2>
-        <p className="text-gray-500 text-lg text-center mb-10">
-          多くの人が訪れる韓国の代表的な文化遺産に出会いましょう
-        </p>
+        <MapSectionTitleBlock />
         <div
           className="w-full bg-amber-50 rounded-3xl border-2 border-amber-200 flex items-center justify-center text-amber-800 px-6 text-center"
           style={{ minHeight: 560, height: "80vh" }}

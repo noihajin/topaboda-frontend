@@ -27,10 +27,7 @@ export default function PopularHeritageSection() {
         if (!el) return;
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    setSectionVisible(true);
-                    observer.disconnect();
-                }
+                setSectionVisible(entry.isIntersecting);
             },
             { threshold: 0.05 },
         );
@@ -109,8 +106,8 @@ export default function PopularHeritageSection() {
     // 슬라이드 애니메이션 variants
     const variants = {
         enter: (dir) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
-        center: { x: 0, opacity: 1, transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] } },
-        exit: (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }),
+        center: { x: 0, opacity: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+        exit: (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] } }),
     };
 
     return (
@@ -134,7 +131,7 @@ export default function PopularHeritageSection() {
                             style: { fontFamily: "'Noto Serif JP', serif" },
                             content: "人気の国の遺産",
                             wrapperClass: "mb-4",
-                            delay: 0.13,
+                            delay: 0.18,
                         },
                         {
                             el: "p",
@@ -142,10 +139,10 @@ export default function PopularHeritageSection() {
                             style: { fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif" },
                             content: "多くの人々に愛される、韓国を代表する文化遺産をご紹介します",
                             wrapperClass: "",
-                            delay: 0.26,
+                            delay: 0.36,
                         },
                     ].map(({ el, className, style, content, wrapperClass, delay }) => (
-                        <motion.div key={content} className={wrapperClass} initial={{ opacity: 0, y: 22 }} animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }} transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}>
+                        <motion.div key={content} className={wrapperClass} initial={{ opacity: 0, y: 22 }} animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }} transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}>
                             {el === "span" && (
                                 <span className={className} style={style}>
                                     {content}
