@@ -51,7 +51,7 @@ export default function HeritageFilters({ activeCategory, onCategoryChange, acti
 
       {/* ── 지역 필터 ── */}
       <div style={{ background: C.white, borderBottom: `1.5px solid ${C.border}`, padding: "12px 0" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 6%" }}>
           <div style={{ position: "relative" }}>
           <div
             ref={regionRef}
