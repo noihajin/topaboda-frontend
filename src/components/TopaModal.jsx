@@ -31,18 +31,24 @@ export default function TopaModal({
   const config = {
     success: {
       primary: "#CACA00",
-      bg: "rgba(202,202,0,0.12)",
-      btn: { background: "#CACA00", color: "#000d57" },
+      bg: "rgba(202,202,0,0.10)",
+      gradient: "linear-gradient(135deg, #caca00 0%, #a0a000 100%)",
+      btn: { color: "#000d57" },
+      bar: "linear-gradient(90deg, #caca00, #a0a000)",
     },
     danger: {
       primary: "#6E0000",
-      bg: "rgba(110,0,0,0.08)",
-      btn: { background: "#6E0000", color: "white" },
+      bg: "rgba(110,0,0,0.07)",
+      gradient: "linear-gradient(135deg, #6e0000 0%, #000d57 100%)",
+      btn: { color: "white" },
+      bar: "linear-gradient(90deg, #6e0000, #000d57)",
     },
     info: {
       primary: "#000d57",
-      bg: "rgba(0,13,87,0.08)",
-      btn: { background: "#000d57", color: "white" },
+      bg: "rgba(0,13,87,0.07)",
+      gradient: "linear-gradient(135deg, #000d57 0%, #1a2fa0 100%)",
+      btn: { color: "white" },
+      bar: "linear-gradient(90deg, #000d57, #1a2fa0)",
     },
   };
 
@@ -74,15 +80,15 @@ export default function TopaModal({
           onClick={(e) => e.stopPropagation()}
           style={{
             background: "white",
-            padding: "40px 40px 36px",
-            borderRadius: 32,
-            boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+            padding: "40px 36px 32px",
+            borderRadius: 20,
+            boxShadow: "0 12px 40px rgba(0,13,87,0.13)",
             textAlign: "center",
             width: "90%",
-            maxWidth: 420,
+            maxWidth: 400,
             position: "relative",
             overflow: "hidden",
-            border: `1px solid ${theme.primary}22`,
+            border: `1px solid rgba(0,13,87,0.10)`,
           }}
         >
           {/* 상단 포인트 라인 */}
@@ -92,8 +98,9 @@ export default function TopaModal({
               top: 0,
               left: 0,
               width: "100%",
-              height: 6,
-              background: theme.primary,
+              height: 5,
+              background: theme.bar,
+              borderRadius: "20px 20px 0 0",
             }}
           />
 
@@ -101,15 +108,15 @@ export default function TopaModal({
           {icon && (
             <div
               style={{
-                width: 76,
-                height: 76,
-                borderRadius: "50%",
+                width: 68,
+                height: 68,
+                borderRadius: 18,
                 background: theme.bg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 20px",
-                fontSize: 34,
+                margin: "0 auto 18px",
+                fontSize: 30,
               }}
             >
               {icon}
@@ -144,9 +151,18 @@ export default function TopaModal({
           </div>
 
           {/* 버튼 영역 */}
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8 }}>
             {!singleButton && (
-              <button onClick={onClose} style={cancelBtnStyle}>
+              <button
+                onClick={onClose}
+                style={cancelBtnStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(0,13,87,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
                 {cancelLabel}
               </button>
             )}
@@ -154,12 +170,13 @@ export default function TopaModal({
               onClick={handleConfirm}
               style={{
                 ...confirmBtnBase,
+                background: theme.gradient,
                 ...theme.btn,
                 flex: singleButton ? "unset" : 1,
                 width: singleButton ? "100%" : undefined,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.12)")}
-              onMouseLeave={(e) => (e.currentTarget.style.filter = "brightness(1)")}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
               {confirmLabel}
             </button>
@@ -187,13 +204,13 @@ const overlayStyle = {
 
 const cancelBtnStyle = {
   flex: 1,
-  padding: "14px 0",
-  borderRadius: 16,
-  border: "2px solid #e2e8f0",
-  background: "white",
-  color: "#99a1af",
+  padding: "12px 0",
+  borderRadius: 999,
+  border: "1.5px solid rgba(0,13,87,0.25)",
+  background: "transparent",
+  color: "#000d57",
   fontWeight: 700,
-  fontSize: 15,
+  fontSize: 14,
   cursor: "pointer",
   fontFamily: "'Noto Sans JP', sans-serif",
   transition: "background 0.15s",
@@ -201,13 +218,13 @@ const cancelBtnStyle = {
 
 const confirmBtnBase = {
   flex: 1,
-  padding: "14px 0",
-  borderRadius: 16,
+  padding: "12px 0",
+  borderRadius: 999,
   border: "none",
-  fontWeight: 900,
-  fontSize: 15,
+  fontWeight: 700,
+  fontSize: 14,
   cursor: "pointer",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+  boxShadow: "0 4px 14px rgba(0,13,87,0.18)",
   fontFamily: "'Noto Sans JP', sans-serif",
-  transition: "filter 0.15s, transform 0.1s",
+  transition: "opacity 0.15s",
 };
