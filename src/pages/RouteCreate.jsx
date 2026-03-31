@@ -15,6 +15,7 @@ const API_MAP_CONFIG = "/api/maps/config";
 const API_TMAP_ROUTE = "/api/maps/tmap-route";
 /** 지도와 동일 핀 목록 — regionCode=ZZ → 서버에서 전체(ALL) 로드 (MapHeritageCacheService) */
 const API_MAPS_HERITAGE = "/api/maps/heritage";
+const API_MAPS_THEMES = "/api/maps/themes";
 const SESSION_MAP_HERITAGE_PINS = "routeCreate_mapHeritagePins_v6";
 /** 「すべての遺産」一覧 — DOM 負荷軽減のため 100 件ずつ表示 */
 const ALL_HERITAGE_PAGE_SIZE = 100;
@@ -172,12 +173,27 @@ const RouteIcon = () => (
   </svg>
 );
 const ChevronDownIcon = ({ open }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-    style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-    <polyline points="6 9 12 15 18 9"/>
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden={true}
+    style={{
+      display: "block",
+      transform: open ? "rotate(180deg)" : "rotate(0deg)",
+      transformOrigin: "center center",
+      transition: "transform 0.2s",
+    }}
+  >
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
-/** 저장 루트 카드: 이동 수단. 도보·차량=TMAP、대중교통=右パネル+Directions */
+/** 저장 루트 카드: 이동 수단. 도보·차량=TMAP、대중교통=右パネル+Directions — 세그먼트 1덩어리(칩 사이 간격 없음) */
 function TransportModeSegment({ value, onChange }) {
   const modes = [
     { v: 0, label: "도보" },
@@ -191,16 +207,17 @@ function TransportModeSegment({ value, onChange }) {
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
+        display: "inline-flex",
+        alignItems: "stretch",
         flexShrink: 0,
         flexWrap: "nowrap",
-        justifyContent: "flex-end",
-        minWidth: 0,
+        borderRadius: 6,
+        overflow: "hidden",
+        border: `1.5px solid ${C.border}`,
+        background: C.white,
       }}
     >
-      {modes.map(({ v, label }) => {
+      {modes.map(({ v, label }, i) => {
         const active = Number(value) === Number(v);
         return (
           <button
@@ -211,17 +228,19 @@ function TransportModeSegment({ value, onChange }) {
               onChange(v);
             }}
             style={{
-              padding: "4px 7px",
-              borderRadius: 8,
-              border: `1.5px solid ${active ? C.navy : C.border}`,
-              background: active ? "rgba(0,13,87,0.1)" : C.white,
+              margin: 0,
+              padding: "5px 7px",
+              border: "none",
+              borderLeft: i > 0 ? `1px solid ${C.border}` : undefined,
+              borderRadius: 0,
+              background: active ? "rgba(0,13,87,0.12)" : C.white,
               color: active ? C.navy : C.gray3,
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: active ? 700 : 500,
               cursor: "pointer",
               fontFamily: font,
               whiteSpace: "nowrap",
-              transition: "all 0.15s",
+              transition: "background 0.15s, color 0.15s",
             }}
           >
             {label}
@@ -1196,7 +1215,7 @@ function RouteMapPane({
     };
   }, [lonelyHeritageId]);
 
-  /** Google Directions — 대중교통: 경유지 waypoints 우선, 실패 시 구간별 연결 */
+  /** Google Directions — 대중교통: TRANSIT는 waypoints 미지원(출발·도착 2점만). 3곳+는 구간별 연결만 */
   useEffect(() => {
     if (!isLoaded || typeof google === "undefined") return;
     if (!transitMode || !transitPlaces?.length || transitPlaces.length < 2) {
@@ -1224,39 +1243,33 @@ function RouteMapPane({
     const run = async () => {
       const o = transitPlaces[0];
       const d = transitPlaces[transitPlaces.length - 1];
-      const waypoints =
-        transitPlaces.length > 2
-          ? transitPlaces.slice(1, -1).map((pt) => ({
-              location: { lat: pt.lat, lng: pt.lng },
-              stopover: true,
-            }))
-          : [];
 
-      const singleReq = {
-        origin: { lat: o.lat, lng: o.lng },
-        destination: { lat: d.lat, lng: d.lng },
-        travelMode: google.maps.TravelMode.TRANSIT,
-        provideRouteAlternatives: true,
-        region: "KR",
-        transitOptions: transitOpts,
-      };
-      if (waypoints.length) {
-        singleReq.waypoints = waypoints;
-      }
-
-      const first = await new Promise((resolve) => {
-        svc.route(singleReq, (res, status) => resolve({ res, status }));
-      });
-      if (cancelled) return;
-      if (first.status === google.maps.DirectionsStatus.OK && first.res?.routes?.length) {
-        transitDirCbRef.current?.({
-          result: first.res,
-          error: null,
-          loading: false,
-          meta: { mode: "single" },
-          mergedPolylinePath: null,
+      /** 2곳만: 출발→도착 단일 요청(대안 여러 개). 실패 시 아래 구간 루프로 동일 구간 재시도 */
+      if (transitPlaces.length === 2) {
+        const first = await new Promise((resolve) => {
+          svc.route(
+            {
+              origin: { lat: o.lat, lng: o.lng },
+              destination: { lat: d.lat, lng: d.lng },
+              travelMode: google.maps.TravelMode.TRANSIT,
+              provideRouteAlternatives: true,
+              region: "KR",
+              transitOptions: transitOpts,
+            },
+            (res, status) => resolve({ res, status }),
+          );
         });
-        return;
+        if (cancelled) return;
+        if (first.status === google.maps.DirectionsStatus.OK && first.res?.routes?.length) {
+          transitDirCbRef.current?.({
+            result: first.res,
+            error: null,
+            loading: false,
+            meta: { mode: "single" },
+            mergedPolylinePath: null,
+          });
+          return;
+        }
       }
 
       const segResults = [];
@@ -1583,9 +1596,19 @@ function RouteMapPane({
                           />
                         </div>
                       ) : null}
-                      <div style={{ padding: "14px 16px" }}>
+                      <div
+                        style={{
+                          padding: "14px 16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 10,
+                        }}
+                      >
                         <div
                           style={{
+                            flex: "1 1 0%",
+                            minWidth: 0,
                             fontSize: 15,
                             fontWeight: 700,
                             color: "#1a1a1a",
@@ -1597,6 +1620,25 @@ function RouteMapPane({
                         >
                           {previewName}
                         </div>
+                        <Link
+                          to={`/heritage/${encodeURIComponent(String(m.heritageId))}`}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            flexShrink: 0,
+                            textDecoration: "none",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: C.navy,
+                            padding: "6px 12px",
+                            borderRadius: 8,
+                            border: `1.5px solid ${C.navy}`,
+                            background: "rgba(0,13,87,0.06)",
+                            fontFamily: "'Noto Sans JP', 'Noto Sans KR', sans-serif",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          詳細
+                        </Link>
                       </div>
                     </div>
                   </InfoWindow>
@@ -1730,6 +1772,8 @@ function SavedRouteCard({
         border: `2px solid ${isOpen ? C.navy : hovered ? "#c0c4d0" : C.border}`,
         transition: "border-color 0.18s",
         background: C.white,
+        minWidth: 0,
+        width: "100%",
       }}
     >
       {/* 루트 헤더: 좌측=펼침, 우측=삭제+치브론 */}
@@ -1746,16 +1790,16 @@ function SavedRouteCard({
           borderRadius: isOpen ? `${rIn}px ${rIn}px 0 0` : rIn,
         }}
       >
-        {/* 1행: 제목·뱃지 | 이동수단 | 삭제·펼침 · 2행: 날짜만(왼쪽 정렬) */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, minWidth: 0 }}>
+        {/* 1행: 제목+뱃지 | 휴지통 / 2행: 날짜+이동수단 | 치브론 — 세로 중앙·32px 터치 영역 통일 */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0, width: "100%", paddingTop: 2 }}>
           <div
             style={{
-              flex: "1 1 0%",
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) auto",
+              gap: 10,
+              alignItems: "center",
+              width: "100%",
               minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              gap: 4,
             }}
           >
             <div
@@ -1772,7 +1816,7 @@ function SavedRouteCard({
                 cursor: "pointer",
                 outline: "none",
                 display: "flex",
-                alignItems: "center",
+                alignItems: "flex-start",
                 gap: 8,
                 minWidth: 0,
                 width: "100%",
@@ -1780,19 +1824,25 @@ function SavedRouteCard({
             >
               <span
                 style={{
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: 700,
                   color: C.navy,
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  lineHeight: 1.4,
+                  wordBreak: "break-word",
+                  minWidth: 0,
+                  flex: "1 1 0%",
+                  paddingTop: 1,
                 }}
               >
                 {route.title}
               </span>
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   padding: "2px 8px",
                   borderRadius: 99,
                   background: "rgba(0,13,87,0.08)",
@@ -1800,10 +1850,94 @@ function SavedRouteCard({
                   fontWeight: 600,
                   whiteSpace: "nowrap",
                   flexShrink: 0,
+                  marginTop: 3,
                 }}
               >
                 {(Array.isArray(route.places) ? route.places.length : route.spots) ?? 0}か所
               </span>
+            </div>
+            <button
+              type="button"
+              aria-label="ルートを削除"
+              title="削除"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(e);
+              }}
+              disabled={deleting}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                border: `1.5px solid ${deleting ? C.border : "rgba(110,0,0,0.35)"}`,
+                background: deleting ? "#f1f5f9" : "white",
+                color: deleting ? C.gray4 : C.red,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: deleting ? "default" : "pointer",
+                flexShrink: 0,
+                boxSizing: "border-box",
+                transition: "background 0.15s, border-color 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                if (!deleting) {
+                  e.currentTarget.style.background = "rgba(110,0,0,0.08)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = deleting ? "#f1f5f9" : "white";
+              }}
+            >
+              <TrashIcon />
+            </button>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) auto",
+              alignItems: "center",
+              gap: 8,
+              minWidth: 0,
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 0,
+                rowGap: 6,
+                columnGap: 0,
+                justifyContent: "flex-start",
+                minWidth: 0,
+              }}
+            >
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={onClick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick();
+                  }
+                }}
+                style={{
+                  fontSize: 13,
+                  color: C.gray4,
+                  lineHeight: 1.35,
+                  cursor: "pointer",
+                  outline: "none",
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  paddingRight: 10,
+                }}
+              >
+                {route.date}
+              </div>
+              <TransportModeSegment value={transportMode} onChange={onTransportChange} />
             </div>
             <div
               role="button"
@@ -1816,67 +1950,21 @@ function SavedRouteCard({
                 }
               }}
               style={{
-                fontSize: 12,
-                color: C.gray4,
-                lineHeight: 1.3,
                 cursor: "pointer",
-                outline: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: C.navy,
+                width: 32,
+                height: 32,
+                flexShrink: 0,
+                boxSizing: "border-box",
+                padding: 0,
               }}
             >
-              {route.date}
+              <ChevronDownIcon open={isOpen} />
             </div>
           </div>
-          <TransportModeSegment value={transportMode} onChange={onTransportChange} />
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-          <button
-            type="button"
-            aria-label="ルートを削除"
-            title="削除"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.(e);
-            }}
-            disabled={deleting}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              border: `1.5px solid ${deleting ? C.border : "rgba(110,0,0,0.35)"}`,
-              background: deleting ? "#f1f5f9" : "white",
-              color: deleting ? C.gray4 : C.red,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: deleting ? "default" : "pointer",
-              flexShrink: 0,
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              if (!deleting) {
-                e.currentTarget.style.background = "rgba(110,0,0,0.08)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = deleting ? "#f1f5f9" : "white";
-            }}
-          >
-            <TrashIcon />
-          </button>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={onClick}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onClick();
-              }
-            }}
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", color: C.navy, padding: 4 }}
-          >
-            <ChevronDownIcon open={isOpen} />
-          </div>
-        </div>
         </div>
       </div>
 
@@ -2092,8 +2180,9 @@ export default function RouteCreate() {
   const [allFilterRegion, setAllFilterRegion] = useState("すべての地域");
   /** 国宝/史跡など — GET /heritages と同じ ccba_kdcd（TYPE_CODE_MAP） */
   const [allFilterCategory, setAllFilterCategory] = useState("すべて");
-  /** DB heritage.theme 単一コードと一致（themeCode）／空＝すべて */
+  /** theme.id（ビット）— matchesThemeCode でマスク AND／空＝すべて */
   const [allFilterTheme, setAllFilterTheme] = useState("");
+  const [routeThemeOptions, setRouteThemeOptions] = useState([]);
   const [allFilterName, setAllFilterName] = useState("");
   const [savedRoutes, setSavedRoutes] = useState([]);
   const [routesLoading, setRoutesLoading] = useState(() => !!localStorage.getItem("token"));
@@ -2232,6 +2321,21 @@ export default function RouteCreate() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_MAPS_THEMES)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data)) setRouteThemeOptions(data);
+      })
+      .catch(() => {
+        if (!cancelled) setRouteThemeOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   /** 지도 API 핀 전체 — sessionStorage + Strict Mode 대응(ref로 재실행 막지 않음) */
   useEffect(() => {
     if (allHeritagePlaces.length > 0) return;
@@ -2282,10 +2386,7 @@ export default function RouteCreate() {
       }
     }
     if (allFilterTheme !== "") {
-      const idx = Number.parseInt(allFilterTheme, 10);
-      if (!Number.isNaN(idx) && idx >= 1) {
-        list = list.filter((p) => matchesThemeCode(p, idx));
-      }
+      list = list.filter((p) => matchesThemeCode(p, allFilterTheme));
     }
     const q = (allFilterName || "").trim().toLowerCase();
     if (q) {
@@ -2321,25 +2422,33 @@ export default function RouteCreate() {
     return arr;
   }, [bookmarkPlaces, added]);
 
-  /** ロード済みピンに実際に存在するテーマコードのみ（昇順） */
-  const allHeritageThemeCodes = useMemo(() => {
-    const s = new Set();
-    for (const p of allHeritagePlaces) {
-      const c = p.themeCode;
-      if (c != null && Number.isFinite(Number(c)) && Number(c) >= 1) {
-        s.add(Number(c));
+  /** API 테마 중 로드된 핀과 비트가 겹치는 것만（ドロップダウン用） */
+  const allHeritageThemeOptions = useMemo(() => {
+    if (!routeThemeOptions.length) return [];
+    return routeThemeOptions.filter((t) => {
+      let tid;
+      try {
+        tid = BigInt(String(t.id));
+      } catch {
+        return false;
       }
-    }
-    return Array.from(s).sort((a, b) => a - b);
-  }, [allHeritagePlaces]);
+      if (tid <= 0n) return false;
+      return allHeritagePlaces.some((p) => {
+        try {
+          const m = BigInt(String(p.themeMask ?? p.themeCode ?? 0));
+          return (m & tid) !== 0n;
+        } catch {
+          return false;
+        }
+      });
+    });
+  }, [routeThemeOptions, allHeritagePlaces]);
 
   useEffect(() => {
     if (allFilterTheme === "") return;
-    const n = Number.parseInt(allFilterTheme, 10);
-    if (Number.isNaN(n) || !allHeritageThemeCodes.includes(n)) {
-      setAllFilterTheme("");
-    }
-  }, [allHeritageThemeCodes, allFilterTheme]);
+    const ok = allHeritageThemeOptions.some((t) => String(t.id) === allFilterTheme);
+    if (!ok) setAllFilterTheme("");
+  }, [allHeritageThemeOptions, allFilterTheme]);
 
   const hasMoreAllHeritage = allHeritageVisibleCount < sortedFilteredAllHeritagePlaces.length;
   const visibleAllHeritagePlaces = useMemo(
@@ -3001,9 +3110,9 @@ export default function RouteCreate() {
                         }}
                       >
                         <option value="">すべて</option>
-                        {allHeritageThemeCodes.map((n) => (
-                          <option key={n} value={String(n)}>
-                            {n}
+                        {allHeritageThemeOptions.map((t) => (
+                          <option key={String(t.id)} value={String(t.id)}>
+                            {t.name != null ? t.name : String(t.id)}
                           </option>
                         ))}
                       </select>

@@ -1,4 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
+/* ── 섹션 타이틀 아이콘 ── */
+const SectionIcon = ({ children }) => (
+    <div style={{
+        width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+        background: "rgba(0,13,87,0.07)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+        {children}
+    </div>
+);
+const IcRoute = () => (
+    <svg width="16" height="16" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clipPath="url(#clip_route)">
+            <path d="M28.5433 22.686C26.0694 22.686 24.0859 24.6566 24.0859 27.1211C24.0859 29.5857 26.064 31.5617 28.5433 31.5617C31.0227 31.5617 33.0007 29.5911 33.0007 27.1211C33.0007 24.6512 31.0227 22.686 28.5433 22.686ZM28.5433 30.1937C26.8378 30.1937 25.4646 28.8257 25.4646 27.1266C25.4646 25.4274 26.8378 24.0595 28.5433 24.0595C30.2489 24.0595 31.6221 25.4274 31.6221 27.1266C31.6221 28.8257 30.2489 30.1937 28.5433 30.1937Z" fill="#000d57"/>
+            <path d="M22.4941 27.0123C22.4396 26.958 22.712 27.1752 16.9414 22.1375C16.6689 21.8661 16.2275 21.9204 15.9496 22.1918C15.6772 22.4632 15.7317 22.9029 16.0041 23.1798L20.1291 26.7952H9.95558C7.09478 26.7952 4.78435 24.4935 4.78435 21.6435C4.78435 18.7936 7.09478 16.4919 9.95558 16.4919H21.6712C25.2459 16.4919 28.2157 13.5876 28.2157 9.9722C28.2157 6.3568 25.3004 3.45254 21.6712 3.45254H8.80036C8.35898 1.48199 6.54442 0 4.4574 0C1.97804 0 0 1.97055 0 4.44053C0 6.91051 1.97804 8.88107 4.4574 8.88107C6.93676 8.88107 8.74587 7.07337 8.9148 4.77167H21.6767C24.5375 4.77167 26.8479 7.07337 26.8479 9.92334C26.8479 12.7733 24.483 15.1293 21.6767 15.1293H9.96103C6.38639 15.1293 3.41661 18.0336 3.41661 21.649C3.41661 25.2644 6.3319 28.1686 9.96103 28.1686H20.1346L16.0096 31.784C15.7371 32.0554 15.6772 32.4409 15.9551 32.772C16.2275 33.0434 16.6144 33.1031 16.9468 32.8263C22.7229 27.7832 22.445 28.0058 22.4995 27.9515C22.6085 27.8429 22.663 27.68 22.663 27.5118C22.663 27.2946 22.6085 27.1263 22.4995 27.0178L22.4941 27.0123ZM4.4574 7.61622C2.75182 7.61622 1.37863 6.24823 1.37863 4.5491C1.37863 2.84998 2.75182 1.48199 4.4574 1.48199C6.16298 1.48199 7.53616 2.84998 7.53616 4.5491C7.53616 6.24823 6.16298 7.61622 4.4574 7.61622Z" fill="#000d57"/>
+        </g>
+        <defs>
+            <clipPath id="clip_route"><rect width="33" height="33" fill="white"/></clipPath>
+        </defs>
+    </svg>
+);
+const IcHeritage = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="1" /><path d="M12 2L3 11h18L12 2z" /><line x1="9" y1="22" x2="9" y2="15" /><line x1="15" y1="22" x2="15" y2="15" /></svg>;
+const IcCommunity = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>;
+const IcPost = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>;
+const IcTrophy = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 21 12 17 16 21" /><line x1="12" y1="17" x2="12" y2="11" /><path d="M7 4H17v7a5 5 0 01-10 0V4z" /><path d="M7 4H4a2 2 0 00-2 2v2a4 4 0 004 4h1" /><path d="M17 4h3a2 2 0 012 2v2a4 4 0 01-4 4h-1" /></svg>;
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "../components/Pagination";
@@ -11,11 +38,13 @@ import ReviewRow from "../components/mypage/ReviewRow";
 import PostRow from "../components/mypage/PostRow";
 import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
+import { MODAL } from "../constants/modalConfigs";
+import { API_URL } from "../config/config";
+import { MEDAL_INFO } from "../components/achievement/constants";
+
+import InfoModal from "../components/InfoModal";
+
 const API_ROUTES = "/api/routes";
-// ── 피그마 메달 이미지 ────────────────────────────────────────────
-const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
-const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
-const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
 // ── 서브 컴포넌트: 업적/탐방로 복구 ──────────────────────────────────────
 function AchievementProgressBar({ progress }) {
     return (
@@ -90,7 +119,15 @@ function RouteCard({ route, onClick }) {
                     onClick?.();
                 }
             }}
-            style={{ border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "16px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
+            style={{ border: `1.5px solid ${C.border}`, borderRadius: 10, padding: "9px 14px", background: C.white, transition: "all 0.2s", cursor: onClick ? "pointer" : "default" }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = "#f8f9fc";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.background = C.white;
+            }}
         >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontWeight: 700, color: C.navy }}>{route.title}</span>
@@ -110,6 +147,12 @@ function RouteCard({ route, onClick }) {
     );
 }
 // ── 메인 컴포넌트 ──────────────────────────────────────────────────
+const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 36 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.52, ease: [0.22, 1, 0.36, 1], delay },
+});
+
 export default function MyPage() {
     const navigate = useNavigate();
     const [postTab, setPostTab] = useState("posts");
@@ -142,6 +185,61 @@ export default function MyPage() {
     const [postLkPage, setPostLkPage] = useState(0);
     const [postSaveTab, setPostSaveTab] = useState("bookmark"); // "bookmark" | "like"
     const [postSaveCancelModal, setPostSaveCancelModal] = useState({ open: false, item: null });
+
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
+
+    const showError = (title, message) => {
+        setPopupContent({
+            icon: "⚠️",
+            title: title,
+            content: message,
+            btnMsg: "確認",
+            onMove: () => setOpenPopup(false),
+        });
+        setOpenPopup(true);
+    };
+
+    const handlePostSaveCancelClose = () => {
+        setPostSaveCancelModal({ open: false, item: null });
+    };
+
+    const handlePostSaveCancelConfirm = async () => {
+        const token = localStorage.getItem("token");
+
+        if (!token || !postSaveCancelModal.item) {
+            console.error("인증 정보 또는 삭제 대상이 없습니다.");
+            return;
+        }
+
+        const boardId = postSaveCancelModal.item.id;
+        const type = postSaveCancelModal.item.type;
+
+        const url = `${API_URL}/topaboda/api/boards/${boardId}/${type === "bookmark" ? "bookmarks" : "likes"}`;
+
+        try {
+            await axios.delete(url, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (type === "bookmark") {
+                fetchData("/boards/bookmarks/snippet", { page: postBkPage, size: PAGE_SIZE }, setPostBkData);
+            } else {
+                fetchData("/boards/likes/snippet", { page: postLkPage, size: PAGE_SIZE }, setPostLkData);
+            }
+        } catch (error) {
+            console.error(`${url} 삭제 실패:`, error);
+        }
+
+        setPostSaveCancelModal({ open: false, item: null });
+    };
+
     const [commentData, setCommentData] = useState(initialPageData);
     const [commentPage, setCommentPage] = useState(0);
     const [reviewData, setReviewData] = useState(initialPageData);
@@ -154,6 +252,12 @@ export default function MyPage() {
     const currentPageNum = postTab === "posts" ? postPage : postTab === "comments" ? commentPage : reviewPage;
     const PAGE_SIZE = 5;
     const HT_SIZE = 4;
+    // 삭제 확인 모달
+    const [postDeleteModal, setPostDeleteModal] = useState({ open: false, id: null });
+    const [commentDeleteModal, setCommentDeleteModal] = useState({ open: false, id: null });
+    const [reviewDeleteModal, setReviewDeleteModal] = useState({ open: false, id: null });
+    // 삭제 완료 모달
+    const [deleteSuccessModal, setDeleteSuccessModal] = useState({ open: false, type: null });
     // 북마크/좋아요 취소 모달
     const [cancelModal, setCancelModal] = useState({ open: false, item: null });
     const handleCancelRequest = (item) => setCancelModal({ open: true, item });
@@ -165,7 +269,7 @@ export default function MyPage() {
             console.error("인증 정보가 없습니다.");
             return;
         }
-        const url = `http://localhost:9990/topaboda/api/heritages/${cancelModal.item.heritageId}/${heritageTab === "bookmark" ? "bookmarks" : "likes"}`;
+        const url = `${API_URL}/topaboda/api/heritages/${cancelModal.item.heritageId}/${heritageTab === "bookmark" ? "bookmarks" : "likes"}`;
         try {
             await axios.delete(url, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -180,7 +284,7 @@ export default function MyPage() {
         }
         setCancelModal({ open: false, item: null });
     };
-    const ROUTE_SIZE = 3;
+    const ROUTE_SIZE = 4;
     const totalRoutePages = Math.max(1, Math.ceil(savedRoutes.length / ROUTE_SIZE));
     const displayedRoutes = savedRoutes.slice(routePage * ROUTE_SIZE, (routePage + 1) * ROUTE_SIZE);
     const currentActData = postTab === "posts" ? postData.contents : postTab === "comments" ? commentData.contents : reviewData.contents;
@@ -200,7 +304,7 @@ export default function MyPage() {
             return;
         }
         try {
-            const response = await axios.get(`http://localhost:9990/topaboda/api${url}`, {
+            const response = await axios.get(`${API_URL}/topaboda/api${url}`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: params,
             });
@@ -221,10 +325,10 @@ export default function MyPage() {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
-                alert("ログイン情報がありません。");
+                showError("ログインが必要です", "ログイン情報がありません。");
                 return;
             }
-            const res = await axios.get(`http://localhost:9990/topaboda/api/boards/${postId}`, {
+            const res = await axios.get(`${API_URL}/topaboda/api/boards/${postId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -242,42 +346,35 @@ export default function MyPage() {
             });
         } catch (error) {
             console.error("게시글 상세 불러오기 실패:", error);
-            alert("記事情報を読み込めませんでした。");
+            showError("エラー", "記事情報を読み込めませんでした。");
         }
     };
     // 게시글 삭제
+    const handleDeletePostClick = (postId) => setPostDeleteModal({ open: true, id: postId });
     const handleDeletePost = async (postId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
-            await axios.delete(`http://localhost:9990/topaboda/api/boards/${postId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            await axios.delete(`${API_URL}/topaboda/api/boards/${postId}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("記事が削除されました。");
-            // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/boards/snippet", { page: postPage, size: PAGE_SIZE }, setPostData);
+            setPostDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "post" });
         } catch (error) {
             console.error("게시글 삭제 실패:", error);
-            console.error("status:", error.response?.status);
-            console.error("data:", error.response?.data);
-            alert("記事の削除に失敗しました。");
         }
     };
     // 댓글 수정
     const handleEditComment = async (commentId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("ログイン情報がありません。");
+            showError("ログインが必要です", "ログイン情報がありません。");
             return;
         }
         try {
             await axios.patch(
-                `http://localhost:9990/topaboda/api/comments/${commentId}`,
+                `${API_URL}/topaboda/api/comments/${commentId}`,
                 { content: newContent },
                 {
                     headers: {
@@ -286,48 +383,48 @@ export default function MyPage() {
                     },
                 },
             );
-            alert("コメントが修正されました。");
+            setPopupContent({
+                icon: "✅",
+                title: "コメント修正",
+                content: "コメントが修正されました。",
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+            setOpenPopup(true);
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
         } catch (error) {
             console.error("댓글 수정 실패:", error);
             console.error("status:", error.response?.status);
             console.error("data:", error.response?.data);
-            alert("コメントの修正に失敗しました。");
+            showError("エラー", "コメントの修正に失敗しました。");
         }
     };
     // 댓글 삭제
+    const handleDeleteCommentClick = (commentId) => setCommentDeleteModal({ open: true, id: commentId });
     const handleDeleteComment = async (commentId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
-            await axios.delete(`http://localhost:9990/topaboda/api/comments/${commentId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            await axios.delete(`${API_URL}/topaboda/api/comments/${commentId}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("コメントが削除されました。");
-            // 삭제 후 현재 게시글 목록 다시 불러오기
             fetchData("/users/me/comments/snippet", { page: commentPage, size: PAGE_SIZE }, setCommentData);
+            setCommentDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "comment" });
         } catch (error) {
             console.error("댓글 삭제 실패:", error);
-            console.error("status:", error.response?.status);
-            console.error("data:", error.response?.data);
-            alert("コメントの削除に失敗しました。");
         }
     };
     // 리뷰 수정
     const handleEditReview = async (reviewId, newContent) => {
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("ログイン情報がありません。");
+            showError("エラー", "ログイン情報がありません。");
             return;
         }
         try {
             await axios.patch(
-                `http://localhost:9990/topaboda/api/reviews/${reviewId}`,
+                `${API_URL}/topaboda/api/reviews/${reviewId}`,
                 { content: newContent },
                 {
                     headers: {
@@ -336,31 +433,34 @@ export default function MyPage() {
                     },
                 },
             );
-            alert("レビューが修正されました。");
+            setPopupContent({
+                icon: "✅",
+                title: "レビュー修正",
+                content: "レビューが修正されました。",
+                btnMsg: "確認",
+                onMove: () => setOpenPopup(false),
+            });
+            setOpenPopup(true);
             fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
         } catch (error) {
             console.error("리뷰 수정 실패:", error);
-            alert("レビューの修正に失敗しました。");
+            showError("エラー", "レビューの修正に失敗しました。");
         }
     };
     // 리뷰 삭제
+    const handleDeleteReviewClick = (reviewId) => setReviewDeleteModal({ open: true, id: reviewId });
     const handleDeleteReview = async (reviewId) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            alert("ログイン情報がありません。");
-            return;
-        }
+        if (!token) return;
         try {
-            await axios.delete(`http://localhost:9990/topaboda/api/reviews/${reviewId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            await axios.delete(`${API_URL}/topaboda/api/reviews/${reviewId}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert("レビューが削除されました。");
             fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
+            setReviewDeleteModal({ open: false, id: null });
+            setDeleteSuccessModal({ open: true, type: "review" });
         } catch (error) {
             console.error("리뷰 삭제 실패:", error);
-            alert("レビューの削除に失敗しました。");
         }
     };
     useEffect(() => {
@@ -372,7 +472,7 @@ export default function MyPage() {
         }
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/profile/${id}`, {
+                const response = await axios.get(`${API_URL}/topaboda/api/users/profile/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log("profile response:", response.data);
@@ -405,17 +505,12 @@ export default function MyPage() {
         fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
     }, [reviewPage]);
     useEffect(() => {
-        const MEDAL_MAP = {
-            金: MEDAL_GOLD,
-            銀: MEDAL_SILVER,
-            銅: MEDAL_BRONZE,
-        };
         const fetchAchievements = async () => {
             const id = localStorage.getItem("id");
             const token = localStorage.getItem("token");
             if (!id || !token) return;
             try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/achievements/snippet`, {
+                const response = await axios.get(`${API_URL}/topaboda/api/users/achievements/snippet`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const rawData = response.data.contents || response.data;
@@ -423,7 +518,7 @@ export default function MyPage() {
                     id: item.id,
                     title: item.title || item.name,
                     grade: item.grade || item.rarity,
-                    medal: MEDAL_MAP[item.grade || item.rarity] || MEDAL_BRONZE,
+                    medal: MEDAL_INFO[item.grade || item.rarity]?.img ?? MEDAL_INFO.銅.img,
                     achieved: !!item.achieved,
                     progress: item.progress,
                 }));
@@ -473,6 +568,7 @@ export default function MyPage() {
     }, [savedRoutes.length, routePage]);
     return (
         <>
+            <InfoModal open={openPopup} icon={popupContent.icon} title={popupContent.title} btnMsg={popupContent.btnMsg} content={popupContent.content} onMove={popupContent.onMove} />
             <div style={{ minHeight: "100vh", background: C.bg, fontFamily: font, paddingBottom: 100 }}>
                 <style>{`
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -488,7 +584,7 @@ export default function MyPage() {
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 28, fontWeight: 900, color: C.navy, margin: "0 0 4px" }}>{user?.nickname || "ゲスト"}</h1>
-                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email || "example@email.com"}</p>
+                                <p style={{ fontSize: 15, color: C.gray3, marginBottom: 16 }}>{user?.email && !user.email.trim().includes("@") ? "SNSアカウント" : user?.email || "example@email.com"}</p>
                                 <div style={{ display: "flex", gap: 24 }}>
                                     <div>
                                         <p style={{ fontSize: 12, color: C.gray4, margin: 0 }}>登録日</p>
@@ -508,10 +604,13 @@ export default function MyPage() {
                     {/* ── 2. 탐방로 & 북마크 (2열 레이아웃) ── */}
                     <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 24 }}>
                         {/* 나의 탐방로 */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        <motion.div {...fadeUp(0.1)} style={{ background: C.white, borderRadius: 24, padding: "28px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                             {/* 헤더 + 화살표 페이지네이션 */}
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <h3 style={{ fontSize: 20, fontWeight: 800, color: C.navy, margin: 0 }}>私の探訪路</h3>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <SectionIcon><IcRoute /></SectionIcon>
+                                    <h3 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>私の探訪路</h3>
+                                </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <button disabled={routePage === 0} onClick={() => setRoutePage((p) => p - 1)} style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: routePage === 0 ? "default" : "pointer", opacity: routePage === 0 ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}>
                                         <ChevronLeft />
@@ -521,7 +620,7 @@ export default function MyPage() {
                                     </button>
                                 </div>
                             </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1, marginTop: 4 }}>
                                 {!routesLoading && savedRoutes.length === 0 ? (
                                     /* 목록 없을 때 */
                                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 0" }}>
@@ -529,40 +628,43 @@ export default function MyPage() {
                                     </div>
                                 ) : (
                                     /* 경로 카드 (최대 3개) */
-                                    displayedRoutes.slice(0, 3).map((r) => <RouteCard key={r.id} route={r} onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)} />)
+                                    displayedRoutes.slice(0, 4).map((r) => <RouteCard key={r.id} route={r} onClick={() => navigate(`/route/create?routeId=${encodeURIComponent(r.id)}`)} />)
                                 )}
                             </div>
                             {/* 항상 하단: 새 경로 만들기 버튼 */}
                             <button
                                 onClick={() => navigate("/route/create")}
-                                style={{ border: `2px solid ${C.red}`, borderRadius: 12, padding: "14px", background: "white", color: C.red, fontWeight: 700, cursor: "pointer", transition: "background 0.2s, color 0.2s" }}
+                                style={{ border: "2px dashed #d1d5db", borderRadius: 12, padding: "14px", background: "#f5f5f5", color: "#9ca3af", fontWeight: 700, cursor: "pointer", transition: "all 0.25s ease", width: "100%" }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = C.red;
-                                    e.currentTarget.style.color = "white";
+                                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(202,202,0,0.10) 0%, rgba(202,202,0,0.05) 100%)";
+                                    e.currentTarget.style.borderColor = "#caca00";
+                                    e.currentTarget.style.color = "#9a9a00";
+                                    e.currentTarget.style.transform = "scale(1.02)";
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = "white";
-                                    e.currentTarget.style.color = C.red;
+                                    e.currentTarget.style.background = "#f5f5f5";
+                                    e.currentTarget.style.borderColor = "#d1d5db";
+                                    e.currentTarget.style.color = "#9ca3af";
+                                    e.currentTarget.style.transform = "scale(1)";
                                 }}
                             >
                                 + 新しい探訪路を作る
                             </button>
-                        </div>
+                        </motion.div>
                         {/* 북마크 & 좋아요 (호버 효과 + 화살표 페이지네이션) */}
-                        <div style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                        <motion.div {...fadeUp(0.15)} style={{ background: C.white, borderRadius: 24, padding: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <SectionIcon><IcHeritage /></SectionIcon>
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>遺産</span>
+                            </div>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                                 <div style={{ display: "flex", gap: 24 }}>
-                                    <button
-                                        onClick={() => setHeritageTab("bookmark")}
-                                        style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
-                                    >
+                                    <button onClick={() => setHeritageTab("bookmark")} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "bookmark" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}>
                                         <BookmarkIcon active={heritageTab === "bookmark"} />
                                         ブックマーク
                                     </button>
-                                    <button
-                                        onClick={() => setHeritageTab("like")}
-                                        style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}
-                                    >
+                                    <button onClick={() => setHeritageTab("like")} style={{ background: "none", border: "none", fontSize: 18, fontWeight: 800, color: heritageTab === "like" ? C.navy : C.gray4, cursor: "pointer", paddingBottom: 4, borderBottom: "none", display: "flex", alignItems: "center", gap: 7 }}>
                                         <HeartIcon active={heritageTab === "like"} />
                                         いいね
                                     </button>
@@ -570,14 +672,20 @@ export default function MyPage() {
                                 <div style={{ display: "flex", gap: 8 }}>
                                     <button
                                         disabled={heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0}
-                                        onClick={() => { if (heritageTab === "bookmark") setHtBkPage((p) => p - 1); else setHtLkPage((p) => p - 1); }}
+                                        onClick={() => {
+                                            if (heritageTab === "bookmark") setHtBkPage((p) => p - 1);
+                                            else setHtLkPage((p) => p - 1);
+                                        }}
                                         style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage === 0 : htLkPage === 0) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
                                     >
                                         <ChevronLeft />
                                     </button>
                                     <button
                                         disabled={heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1}
-                                        onClick={() => { if (heritageTab === "bookmark") setHtBkPage((p) => p + 1); else setHtLkPage((p) => p + 1); }}
+                                        onClick={() => {
+                                            if (heritageTab === "bookmark") setHtBkPage((p) => p + 1);
+                                            else setHtLkPage((p) => p + 1);
+                                        }}
                                         style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border}`, background: "white", cursor: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? "default" : "pointer", opacity: (heritageTab === "bookmark" ? htBkPage >= totalHtPagesWithAdd - 1 : htLkPage >= totalHtPagesWithAdd - 1) ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
                                     >
                                         <ChevronRight />
@@ -592,118 +700,104 @@ export default function MyPage() {
                                     return <div key={`ht-empty-${i}`} style={{ borderRadius: 16, height: 170 }} />;
                                 })}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
-                {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "stretch" }}>
-                    {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
-                        {/* 탭 + 새 글 작성 버튼 */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
-                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                {[
-                                    { key: "posts",    label: "投稿した記事", count: postData.totalElements },
-                                    { key: "comments", label: "コメント",      count: commentData.totalElements },
-                                    { key: "reviews",  label: "レビュー",      count: reviewData.totalElements },
-                                ].map(({ key, label, count }) => {
-                                    const isActive = postTab === key;
-                                    return (
-                                        <button
-                                            key={key}
-                                            onClick={() => setPostTab(key)}
-                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
-                                        >
-                                            {label}
-                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
-                                        </button>
-                                    );
-                                })}
+                    {/* ── 3. 활동 리스트 (2/3) + 게시글 북마크/좋아요 (1/3) ── */}
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "stretch" }}>
+                        {/* ── 왼쪽: 투고/댓글/리뷰 ── */}
+                        <motion.div {...fadeUp(0.25)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <SectionIcon><IcCommunity /></SectionIcon>
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>コミュニティ活動</span>
                             </div>
-                            <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 700, fontSize: 15, lineHeight: 1, cursor: "pointer", transition: "0.2s", flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
-                                <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
-                            </button>
-                        </div>
-                        {/* 리스트 */}
-                        <div style={{ minHeight: 320, flex: 1 }}>
-                            {displayedAct.length === 0 ? (
-                                <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
-                                    {postTab === "posts"    && "投稿した記事がありません。"}
-                                    {postTab === "comments" && "コメントがありません。"}
-                                    {postTab === "reviews"  && "レビューがありません。"}
-                                </p>
-                            ) : (
-                                displayedAct.map((item) => {
-                                    if (postTab === "posts")    return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
-                                    if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteComment} />;
-                                    return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReview} />;
-                                })
-                            )}
-                        </div>
-                        {/* 페이지네이션 */}
-                        <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
-                    </div>
-                    {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
-                        {/* 탭 헤더 */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
-                            <div style={{ display: "flex", gap: 8 }}>
-                                {[
-                                    { key: "bookmark", label: "ブックマーク", count: postBkData.totalElements },
-                                    { key: "like",     label: "いいね",       count: postLkData.totalElements },
-                                ].map(({ key, label, count }) => {
-                                    const isActive = postSaveTab === key;
-                                    return (
-                                        <button
-                                            key={key}
-                                            onClick={() => setPostSaveTab(key)}
-                                            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}
-                                        >
-                                            {label}
-                                            <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
-                                        </button>
-                                    );
-                                })}
+                            {/* 탭 + 새 글 작성 버튼 */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                    {[
+                                        { key: "posts", label: "投稿した記事", count: postData.totalElements },
+                                        { key: "comments", label: "コメント", count: commentData.totalElements },
+                                        { key: "reviews", label: "レビュー", count: reviewData.totalElements },
+                                    ].map(({ key, label, count }) => {
+                                        const isActive = postTab === key;
+                                        return (
+                                            <button key={key} onClick={() => setPostTab(key)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}>
+                                                {label}
+                                                <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <button onClick={() => navigate("/community/write")} style={{ display: "flex", alignItems: "center", gap: 8, background: C.red, color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 700, fontSize: 15, lineHeight: 1, cursor: "pointer", transition: "0.2s", flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")} onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
+                                    <img src={icPen} alt="" style={{ width: 18 }} /> 投稿する
+                                </button>
                             </div>
-                        </div>
-                        {/* 리스트 */}
-                        {(() => {
-                            const saveData = postSaveTab === "bookmark" ? postBkData : postLkData;
-                            const savePage = postSaveTab === "bookmark" ? postBkPage : postLkPage;
-                            const setPage  = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
-                            return (
-                                <>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 320, flex: 1 }}>
-                                        {saveData.contents.length === 0 ? (
-                                            <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
-                                                {postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}
-                                            </p>
-                                        ) : (
-                                            saveData.contents.map((item) => (
-                                                <PostSaveCard
-                                                    key={item.id}
-                                                    item={item}
-                                                    type={postSaveTab}
-                                                    onCancel={(it) => setPostSaveCancelModal({ open: true, item: { ...it, type: postSaveTab } })}
-                                                />
-                                            ))
-                                        )}
-                                    </div>
-                                    <Pagination
-                                        currentPage={savePage + 1}
-                                        totalPages={saveData.totalPages}
-                                        onPageChange={(p) => setPage(p - 1)}
-                                    />
-                                </>
-                            );
-                        })()}
+                            {/* 리스트 */}
+                            <div style={{ minHeight: 320, flex: 1 }}>
+                                {displayedAct.length === 0 ? (
+                                    <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>
+                                        {postTab === "posts" && "投稿した記事がありません。"}
+                                        {postTab === "comments" && "コメントがありません。"}
+                                        {postTab === "reviews" && "レビューがありません。"}
+                                    </p>
+                                ) : (
+                                    displayedAct.map((item) => {
+                                        if (postTab === "posts") return <PostRow key={item.id} item={item} navigate={navigate} onEditPost={handleEditPost} onDeletePost={handleDeletePostClick} />;
+                                        if (postTab === "comments") return <CommentRow key={item.id} item={item} onEditComment={handleEditComment} onDeleteComment={handleDeleteCommentClick} />;
+                                        return <ReviewRow key={item.id} item={item} onEditReview={handleEditReview} onDeleteReview={handleDeleteReviewClick} />;
+                                    })
+                                )}
+                            </div>
+                            {/* 페이지네이션 */}
+                            <Pagination currentPage={currentPageNum + 1} totalPages={currentTabData.totalPages} onPageChange={(p) => currentSetPage(p - 1)} />
+                        </motion.div>
+                        {/* ── 오른쪽: 게시글 북마크/좋아요 ── */}
+                        <motion.div {...fadeUp(0.3)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+                            {/* 섹션 타이틀 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                                <SectionIcon><IcPost /></SectionIcon>
+                                <span style={{ fontSize: 17, fontWeight: 800, color: C.navy, fontFamily: font }}>投稿</span>
+                            </div>
+                            {/* 탭 헤더 */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, height: 46 }}>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    {[
+                                        { key: "bookmark", label: "ブックマーク", count: postBkData.totalElements },
+                                        { key: "like", label: "いいね", count: postLkData.totalElements },
+                                    ].map(({ key, label, count }) => {
+                                        const isActive = postSaveTab === key;
+                                        return (
+                                            <button key={key} onClick={() => setPostSaveTab(key)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 10, border: "none", background: isActive ? C.navy : "white", color: isActive ? "white" : C.gray3, cursor: "pointer", fontWeight: 500, fontSize: 15, lineHeight: 1, boxShadow: isActive ? "0 4px 12px rgba(0,13,87,0.2)" : "none", transition: "all 0.2s" }}>
+                                                {label}
+                                                <span style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#f3f4f6", color: isActive ? "white" : C.gray3, borderRadius: 99, padding: "1px 8px", fontSize: 13 }}>{count}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            {/* 리스트 */}
+                            {(() => {
+                                const saveData = postSaveTab === "bookmark" ? postBkData : postLkData;
+                                const savePage = postSaveTab === "bookmark" ? postBkPage : postLkPage;
+                                const setPage = postSaveTab === "bookmark" ? setPostBkPage : setPostLkPage;
+                                return (
+                                    <>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 320, flex: 1 }}>{saveData.contents.length === 0 ? <p style={{ textAlign: "center", color: C.gray3, padding: "60px 0", fontSize: 14 }}>{postSaveTab === "bookmark" ? "ブックマークした記事がありません。" : "いいねした記事がありません。"}</p> : saveData.contents.map((item) => <PostSaveCard key={item.id} item={item} type={postSaveTab} onCancel={(it) => setPostSaveCancelModal({ open: true, item: { ...it, type: postSaveTab } })} />)}</div>
+                                        <Pagination currentPage={savePage + 1} totalPages={saveData.totalPages} onPageChange={(p) => setPage(p - 1)} />
+                                    </>
+                                );
+                            })()}
+                        </motion.div>
                     </div>
-                </div>
                     {/* ── 4. 업적 갤러리 ── */}
-                    <div style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                    <motion.div {...fadeUp(0.4)} style={{ background: C.white, borderRadius: 24, padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                         {/* 헤더 */}
                         <div style={{ marginBottom: 32 }}>
-                            <h2 style={{ fontSize: 22, fontWeight: 800, color: C.navy, margin: "0 0 6px" }}>業績ギャラリー</h2>
-                            <p style={{ fontSize: 14, color: C.gray2 }}>探検の足跡を記録してください</p>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                                <SectionIcon><IcTrophy /></SectionIcon>
+                                <h2 style={{ fontSize: 17, fontWeight: 800, color: C.navy, margin: 0, fontFamily: font }}>業績ギャラリー</h2>
+                            </div>
+                            <p style={{ fontSize: 14, color: C.gray2, marginLeft: 14 }}>探検の足跡を記録してください</p>
                         </div>
                         {/* 16개 메달 그리드 */}
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "20px", justifyItems: "center" }}>
@@ -767,52 +861,69 @@ export default function MyPage() {
                                 </div>
                             );
                         })()}
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        {/* 북마크 / 좋아요 취소 확인 모달 */}
-        <TopaModal
-            isOpen={cancelModal.open}
-            onClose={handleCancelClose}
-            onConfirm={handleCancelConfirm}
-            variant={heritageTab === "bookmark" ? "info" : "danger"}
-            title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"}
-            confirmLabel="解除する"
-            cancelLabel="キャンセル"
-            icon={heritageTab === "bookmark" ? "🔖" : "❤️"}
-        >
-            <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
-                <strong style={{ color: "#000d57" }}>
-                    {cancelModal.item?.heritageName}
-                </strong>
-                {heritageTab === "bookmark"
-                    ? " のブックマークを解除しますか？"
-                    : " のいいねを解除しますか？"}
-            </p>
-        </TopaModal>
-        {/* 게시글 북마크 / 좋아요 취소 확인 모달 */}
-        <TopaModal
-            isOpen={postSaveCancelModal.open}
-            onClose={() => setPostSaveCancelModal({ open: false, item: null })}
-            onConfirm={() => {
-                // TODO: DELETE /api/boards/bookmarks/{id} or DELETE /api/boards/{id}/likes
-                setPostSaveCancelModal({ open: false, item: null });
-            }}
-            variant={postSaveCancelModal.item?.type === "bookmark" ? "info" : "danger"}
-            title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
-            confirmLabel="解除する"
-            cancelLabel="キャンセル"
-            icon={postSaveCancelModal.item?.type === "bookmark" ? "🔖" : "❤️"}
-        >
-            <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
-                <strong style={{ color: "#000d57" }}>
-                    {postSaveCancelModal.item?.title}
-                </strong>
-                {postSaveCancelModal.item?.type === "bookmark"
-                    ? " のブックマークを解除しますか？"
-                    : " のいいねを解除しますか？"}
-            </p>
-        </TopaModal>
+            {/* 게시글 삭제 확인 모달 */}
+            <TopaModal {...MODAL.POST_DELETE_CONFIRM} isOpen={postDeleteModal.open} onClose={() => setPostDeleteModal({ open: false, id: null })} onConfirm={() => handleDeletePost(postDeleteModal.id)} />
+            {/* 댓글 삭제 확인 모달 */}
+            <TopaModal {...MODAL.COMMENT_DELETE_CONFIRM} isOpen={commentDeleteModal.open} onClose={() => setCommentDeleteModal({ open: false, id: null })} onConfirm={() => handleDeleteComment(commentDeleteModal.id)} />
+            {/* 리뷰 삭제 확인 모달 */}
+            <TopaModal {...MODAL.REVIEW_DELETE_CONFIRM} isOpen={reviewDeleteModal.open} onClose={() => setReviewDeleteModal({ open: false, id: null })} onConfirm={() => handleDeleteReview(reviewDeleteModal.id)} />
+            {/* 삭제 완료 모달 */}
+            <TopaModal {...(deleteSuccessModal.type === "post" ? MODAL.POST_DELETE_SUCCESS : deleteSuccessModal.type === "comment" ? MODAL.COMMENT_DELETE_SUCCESS : MODAL.REVIEW_DELETE_SUCCESS)} isOpen={deleteSuccessModal.open} onClose={() => setDeleteSuccessModal({ open: false, type: null })} onConfirm={() => setDeleteSuccessModal({ open: false, type: null })} />
+            {/* 북마크 / 좋아요 취소 확인 모달 */}
+            <TopaModal
+                isOpen={cancelModal.open}
+                onClose={handleCancelClose}
+                onConfirm={handleCancelConfirm}
+                variant={heritageTab === "bookmark" ? "info" : "danger"}
+                title={heritageTab === "bookmark" ? "ブックマーク解除" : "いいね解除"}
+                confirmLabel="解除する"
+                cancelLabel="キャンセル"
+                icon={
+                    heritageTab === "bookmark" ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    )
+                }
+            >
+                <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
+                    <strong style={{ color: "#000d57" }}>{cancelModal.item?.heritageName}</strong>
+                    {heritageTab === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
+                </p>
+            </TopaModal>
+            {/* 게시글 북마크 / 좋아요 취소 확인 모달 */}
+            <TopaModal
+                isOpen={postSaveCancelModal.open}
+                onClose={handlePostSaveCancelClose}
+                onConfirm={handlePostSaveCancelConfirm}
+                variant={postSaveCancelModal.item?.type === "bookmark" ? "info" : "danger"}
+                title={postSaveCancelModal.item?.type === "bookmark" ? "ブックマーク解除" : "いいね解除"}
+                confirmLabel="解除する"
+                cancelLabel="キャンセル"
+                icon={
+                    postSaveCancelModal.item?.type === "bookmark" ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000d57" stroke="#000d57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#6e0000" stroke="#6e0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    )
+                }
+            >
+                <p style={{ margin: 0, fontSize: 15, color: "#4a5565", lineHeight: 1.7 }}>
+                    <strong style={{ color: "#000d57" }}>{postSaveCancelModal.item?.title}</strong>
+                    {postSaveCancelModal.item?.type === "bookmark" ? " のブックマークを解除しますか？" : " のいいねを解除しますか？"}
+                </p>
+            </TopaModal>
         </>
     );
 }

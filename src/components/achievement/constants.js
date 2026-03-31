@@ -6,7 +6,7 @@ export const C = {
   goldDark:"#DAA520",
   silver:  "#C0C0C0",
   bronze:  "#CD7F32",
-  bg:      "#F3F3F5",
+  bg:      "#f8f9fc",
   white:   "#FFFFFF",
   border:  "#E5E7EB",
   text:    "#1A1A2E",
@@ -17,19 +17,20 @@ export const font      = "'Noto Sans JP', 'Roboto', sans-serif";
 export const fontSerif = "'Noto Serif JP', serif";
 
 // ── メダル情報マップ ──
+/** public/achievements — Vite는 public을 루트로 제공 */
 export const MEDAL_INFO = {
   金: {
-    img:   "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c",
+    img:   "/achievements/medal-gold.png",
     color: C.gold,
     emoji: "🥇",
   },
   銀: {
-    img:   "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a",
+    img:   "/achievements/medal-silver.png",
     color: C.silver,
     emoji: "🥈",
   },
   銅: {
-    img:   "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36",
+    img:   "/achievements/medal-bronze.png",
     color: C.bronze,
     emoji: "🥉",
   },

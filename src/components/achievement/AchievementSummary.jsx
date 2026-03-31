@@ -1,9 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import { C, font } from "./constants";
 import { CircleProgress, BadgeStat } from "./AchievementUI";
 
 // 업적 달성도 요약 카드 (원형 진행도 + 메달 통계 + 마이페이지 버튼)
-export default function AchievementSummary({ achievedCount, totalCount, progressPct, goldCount, silverCount, bronzeCount, onBack }) {
+export default function AchievementSummary({ achievedCount, totalCount, progressPct, goldCount, silverCount, bronzeCount }) {
     const safePct = Number(progressPct) || 0;
+    const isLoggedIn = !!localStorage.getItem("token");
+    const navigate = useNavigate();
 
     return (
         <div
@@ -69,33 +72,58 @@ export default function AchievementSummary({ achievedCount, totalCount, progress
                 </div>
             </div>
 
-            {/* マイページボタン */}
-            <button
-                onClick={onBack}
-                style={{
-                    background: "transparent",
-                    border: `2px solid ${C.navy}`,
-                    color: C.navy,
-                    padding: "11px 22px",
-                    borderRadius: 10,
-                    fontWeight: 700,
-                    fontSize: 14,
-                    fontFamily: font,
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = C.navy;
-                    e.currentTarget.style.color = C.white;
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = C.navy;
-                }}
-            >
-                ← マイページに戻る
-            </button>
+            {/* 비로그인 시 로그인 버튼 */}
+            {!isLoggedIn && (
+                <>
+                    <div style={{ width: 1, height: 120, background: C.border, flexShrink: 0 }} />
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                        <p style={{ margin: 0, fontSize: 13, color: C.sub, fontWeight: 600, fontFamily: font, textAlign: "center" }}>
+                            ログインして<br />業績を獲得しよう
+                        </p>
+                        <button
+                            onClick={() => navigate("/login")}
+                            style={{
+                                background: "rgba(0,13,87,0.07)",
+                                color: C.navy,
+                                border: "none",
+                                borderRadius: 999,
+                                padding: "10px 20px",
+                                height: 44,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                cursor: "pointer",
+                                transition: "background 0.2s, color 0.2s",
+                                flexShrink: 0,
+                                fontSize: 13,
+                                fontWeight: 700,
+                                fontFamily: font,
+                                whiteSpace: "nowrap",
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = C.navy;
+                                e.currentTarget.style.color = "#fff";
+                                e.currentTarget.querySelector("svg").style.stroke = "#fff";
+                                e.currentTarget.querySelector("svg").style.transform = "translateX(4px)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = "rgba(0,13,87,0.07)";
+                                e.currentTarget.style.color = C.navy;
+                                e.currentTarget.querySelector("svg").style.stroke = C.navy;
+                                e.currentTarget.querySelector("svg").style.transform = "translateX(0)";
+                            }}
+                        >
+                            ログイン
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000d57" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                                style={{ transition: "transform 0.25s ease, stroke 0.2s" }}>
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                                <polyline points="12 5 19 12 12 19" />
+                            </svg>
+                        </button>
+                    </div>
+                </>
+            )}
+
         </div>
     );
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import imgLogoBlkSmall from "../assets/logo_black_small.svg";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 const C = {
     navy: "#000d57",
@@ -49,7 +50,7 @@ export default function FindPasswordPage() {
 
         setLoading(true);
         try {
-            await axios.post("http://localhost:9990/topaboda/api/auth/pw/email", { id: userId, email: email });
+            await axios.post(`${API_URL}/topaboda/api/auth/pw/email`, { id: userId, email: email });
             setSent(true);
         } catch (err) {
             setError(err.response?.data?.message || "該当するアカウントが見つかりませんでした。");

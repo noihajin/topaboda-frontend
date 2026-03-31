@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../config/config";
+
+import InfoModal from "../components/InfoModal";
 
 // ── 디자인 토큰 ─────────────────────────────────────────────────────
 const C = {
@@ -102,6 +105,15 @@ export default function ChangePassword() {
     const [hoverSave, setHoverSave] = useState(false);
     const [hoverCancel, setHoverCancel] = useState(false);
 
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({
+        icon: "",
+        title: "",
+        content: null,
+        btnMsg: "",
+        onMove: () => {},
+    });
+
     const validate = () => {
         const e = {};
         if (!currentPw) e.currentPw = "現在のパスワードを入力してください。";
@@ -127,7 +139,7 @@ export default function ChangePassword() {
 
         try {
             const response = await axios.patch(
-                `http://localhost:9990/topaboda/api/auth/pw/reset/login`,
+                `${API_URL}/topaboda/api/auth/pw/reset/login`,
                 {
                     oldPassword: currentPw,
                     newPassword: newPw,
@@ -137,13 +149,30 @@ export default function ChangePassword() {
                 },
             );
             if (response.status === 200) {
-                alert("パスワードを変更しました！");
-                navigate("/mypage/edit");
+                setPopupContent({
+                    icon: "✅",
+                    title: "パスワード変更",
+                    content: "パスワードを変更しました！",
+                    btnMsg: "確認",
+                    onMove: () => {
+                        navigate("/mypage/edit");
+                    },
+                });
+                setOpenPopup(true);
             }
         } catch (e) {
             console.error("비밀번호 변경 오류:", e);
             const errorMsg = e.response?.data?.message || "패스워드 변경 중 문제가 발생했습니다.";
-            alert(errorMsg);
+            setPopupContent({
+                icon: "⚠️",
+                title: "変更エラー",
+                content: errorMsg,
+                btnMsg: "確認",
+                onMove: () => {
+                    setOpenPopup(false);
+                },
+            });
+            setOpenPopup(true);
         }
     };
 

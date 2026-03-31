@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Pagination from "../components/Pagination";
 import { C, font, fontSerif, MOCK_ACHIEVEMENTS, ITEMS_PER_PAGE } from "../components/achievement/constants";
 import AchievementSummary from "../components/achievement/AchievementSummary";
 import AchievementCard from "../components/achievement/AchievementCard";
 import axios from "axios";
+import { API_URL } from "../config/config";
 
 export default function Achievement() {
-    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [achievements, setAchievements] = useState({ contents: [] });
 
@@ -26,27 +26,33 @@ export default function Achievement() {
             const id = localStorage.getItem("id");
             const token = localStorage.getItem("token");
 
-            if (!id || !token) return;
-
             try {
-                const response = await axios.get(`http://localhost:9990/topaboda/api/users/achievements`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                if (id && token) {
+                    const response = await axios.get(`${API_URL}/topaboda/api/users/achievements`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
 
-                const rawData = response.data.contents || response.data;
+                    const rawData = response.data.contents || response.data;
 
-                rawData.sort((a, b) => {
-                    if (a.achieved !== b.achieved) {
-                        return b.achieved - a.achieved;
-                    }
+                    rawData.sort((a, b) => {
+                        if (a.achieved !== b.achieved) {
+                            return b.achieved - a.achieved;
+                        }
 
-                    const aRatio = (Number(a.current) || 0) / (Number(a.total) || 1);
-                    const bRatio = (Number(b.current) || 0) / (Number(b.total) || 1);
+                        const aRatio = (Number(a.current) || 0) / (Number(a.total) || 1);
+                        const bRatio = (Number(b.current) || 0) / (Number(b.total) || 1);
 
-                    return bRatio - aRatio;
-                });
+                        return bRatio - aRatio;
+                    });
 
-                setAchievements({ contents: rawData });
+                    setAchievements({ contents: rawData });
+                } else {
+                    const response = await axios.get(`${API_URL}/topaboda/api/achievements`);
+
+                    const data = response.data.contents || response.data;
+
+                    setAchievements({ contents: data });
+                }
             } catch (error) {
                 console.error("업적 로드 실패:", error);
             }
@@ -61,8 +67,12 @@ export default function Achievement() {
             <div
                 style={{
                     background: `linear-gradient(135deg, ${C.navy} 0%, #001a6e 50%, #0a2280 100%)`,
-                    paddingTop: 140,
-                    paddingBottom: 72,
+                    height: 460,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingTop: "7rem",
                     textAlign: "center",
                     position: "relative",
                     overflow: "hidden",
@@ -88,19 +98,29 @@ export default function Achievement() {
                     ACHIEVEMENTS
                 </span>
                 <h1 style={{ color: C.white, fontSize: 42, fontWeight: 900, fontFamily: fontSerif, margin: "0 0 12px", letterSpacing: -0.5 }}>全ての業績</h1>
-                <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, margin: 0, fontFamily: font }}>文化遺産探訪の記録と達成度</p>
+                <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, margin: 0, fontFamily: font }}>遺産を訪れて実績を達成してみてください</p>
             </div>
 
             {/* コンテンツ */}
-            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 40px 80px" }}>
-                <AchievementSummary achievedCount={achievedCount} totalCount={totalCount} progressPct={progressPct} goldCount={goldCount} silverCount={silverCount} bronzeCount={bronzeCount} onBack={() => navigate("/mypage")} />
+            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "48px 6% 80px" }}>
+                <AchievementSummary achievedCount={achievedCount} totalCount={totalCount} progressPct={progressPct} goldCount={goldCount} silverCount={silverCount} bronzeCount={bronzeCount} />
 
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: C.navy, fontFamily: font, margin: "0 0 20px" }}>業績詳細</h2>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 40 }}>
-                    {paginated.map((item) => (
-                        <AchievementCard key={item.id} item={item} />
-                    ))}
+                    <AnimatePresence mode="wait">
+                        {paginated.map((item, idx) => (
+                            <motion.div
+                                key={item.id}
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: idx * 0.07 }}
+                            >
+                                <AchievementCard item={item} />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
 
                 <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

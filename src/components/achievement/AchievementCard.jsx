@@ -50,7 +50,7 @@ export default function AchievementCard({ item }) {
       </div>
 
       {/* コンテンツ */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, maxWidth: 820 }}>
         {/* タイトル行 */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
           <h3 style={{
