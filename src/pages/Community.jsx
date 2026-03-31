@@ -32,14 +32,6 @@ const fJP = "'Noto Sans JP', sans-serif";
 const fJPSerif = "'Noto Serif JP', serif";
 const fKR = "'Noto Sans KR', sans-serif";
 
-/* ── 카테고리 색상 ── */
-const CAT = {
-    レビュー: { bg: "#dbeafe", color: "#1447e6" },
-    ヒント: { bg: "#ffedd4", color: "#ca3500" },
-    フリートーク: { bg: "#f3e8ff", color: "#8200db" },
-    質問: { bg: "#dcfce7", color: "#008236" },
-};
-
 const CATEGORIES = ["すべて", "レビュー", "ヒント", "フリートーク", "質問"];
 const POSTS_PER_PAGE = 10;
 

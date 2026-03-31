@@ -40,14 +40,11 @@ import PostSaveCard from "../components/mypage/PostSaveCard";
 import TopaModal from "../components/TopaModal";
 import { MODAL } from "../constants/modalConfigs";
 import { API_URL } from "../config/config";
+import { MEDAL_INFO } from "../components/achievement/constants";
 
 import InfoModal from "../components/InfoModal";
 
 const API_ROUTES = "/api/routes";
-// ── 피그마 메달 이미지 ────────────────────────────────────────────
-const MEDAL_GOLD = "https://www.figma.com/api/mcp/asset/957a3774-c31f-43e0-954d-aab098bc294c";
-const MEDAL_SILVER = "https://www.figma.com/api/mcp/asset/701eea58-d86c-4cc1-b8da-deb09d7d608a";
-const MEDAL_BRONZE = "https://www.figma.com/api/mcp/asset/6001625a-0a5c-44ae-908d-a9f8aa3bdb36";
 // ── 서브 컴포넌트: 업적/탐방로 복구 ──────────────────────────────────────
 function AchievementProgressBar({ progress }) {
     return (
@@ -508,11 +505,6 @@ export default function MyPage() {
         fetchData("/users/me/reviews/snippet", { page: reviewPage, size: PAGE_SIZE }, setReviewData);
     }, [reviewPage]);
     useEffect(() => {
-        const MEDAL_MAP = {
-            金: MEDAL_GOLD,
-            銀: MEDAL_SILVER,
-            銅: MEDAL_BRONZE,
-        };
         const fetchAchievements = async () => {
             const id = localStorage.getItem("id");
             const token = localStorage.getItem("token");
@@ -526,7 +518,7 @@ export default function MyPage() {
                     id: item.id,
                     title: item.title || item.name,
                     grade: item.grade || item.rarity,
-                    medal: MEDAL_MAP[item.grade || item.rarity] || MEDAL_BRONZE,
+                    medal: MEDAL_INFO[item.grade || item.rarity]?.img ?? MEDAL_INFO.銅.img,
                     achieved: !!item.achieved,
                     progress: item.progress,
                 }));

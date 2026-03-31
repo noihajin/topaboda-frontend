@@ -22,6 +22,16 @@ const C = {
 const fJP = "'Noto Sans JP', sans-serif";
 const fKR = "'Noto Sans KR', sans-serif";
 
+/* ── 카테고리 색상 ── */
+const CAT = {
+    レビュー: { bg: "#dbeafe", color: "#1447e6" },
+    ヒント: { bg: "#ffedd4", color: "#ca3500" },
+    フリートーク: { bg: "#f3e8ff", color: "#8200db" },
+    質問: { bg: "#dcfce7", color: "#008236" },
+};
+
+
+
 export const cardStyles = {
     container: (isHovered) => ({
         borderRadius: 18,
@@ -56,17 +66,18 @@ export const cardStyles = {
         boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
         fontFamily: "'Roboto', sans-serif",
     },
-    tag: {
-        display: "inline-block",
-        fontSize: 11,
-        fontWeight: 800,
-        color: "#1447e6",
-        background: "#dbeafe",
-        padding: "3px 10px",
-        borderRadius: 6,
-        marginBottom: 10,
-        fontFamily: fJP,
-    },
+    tag: (cat) => ({
+    background: cat.bg,
+    color: cat.color,
+    display: "inline-block",
+    fontSize: 11,
+    fontWeight: 800,
+    padding: "3px 10px",
+    borderRadius: 6,
+    marginBottom: 10,
+    fontFamily: fJP,
+    whiteSpace: "nowrap",
+}),
 };
 
 const CardThumbnail = ({ src, title, rank }) => (
@@ -83,9 +94,9 @@ const CardThumbnail = ({ src, title, rank }) => (
     </div>
 );
 
-const CardContent = ({ post }) => (
+const CardContent = ({ post, cat }) => (
     <div style={{ padding: "16px 18px 18px" }}>
-        <span style={cardStyles.tag}>レビュー</span>
+        <span style={cardStyles.tag(cat)}>{post.category}</span>
         <p
             style={{
                 fontSize: 15,
@@ -124,11 +135,12 @@ const IconStat = ({ icon, count }) => (
 function PopularCard({ post, rank }) {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
+    const cat = CAT[post.category] || { bg: "#eee", color: "#555" };
 
     return (
         <div onClick={() => navigate(`/community/${post.id}`)} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} style={cardStyles.container(isHovered)}>
             <CardThumbnail src={post.thumbnailUrl} title={post.title} rank={rank} />
-            <CardContent post={post} />
+            <CardContent post={post} cat={cat} />
         </div>
     );
 }
