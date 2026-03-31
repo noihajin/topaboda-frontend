@@ -57,8 +57,9 @@ const OAuthCallback = () => {
                 };
             }
         } else {
+                 targetPath = "/login";
             if (status === "already_exists") {
-                targetPath = "/login";
+
                 contentConfig = {
                     icon: "🔍",
                     title: "このアカウントは既に登録済みです",
@@ -74,7 +75,7 @@ const OAuthCallback = () => {
             } else if (status === "user_not_found") {
                 contentConfig = {
                     icon: "✍️",
-                    title: "一致する情報が見고つかりませんでした。",
+                    title: "一致する情報が見つかりませんでした。",
                     btnMsg: "ログインページへ",
                     content: (
                         <>
