@@ -34,7 +34,7 @@ cd topaboda-frontend
 
 🛠️ 사용 기술 (Tech Stack)
 
-- React / Tailwind CSS**: 레이아웃 및 스타일링
+- React / Tailwind CSS: 레이아웃 및 스타일링
 - Framer Motion: 드래그, 줌, 레이아웃 전환 애니메이션
 - Lucide React / SVG: 커스텀 마커 및 인터랙티브 아이콘
 
